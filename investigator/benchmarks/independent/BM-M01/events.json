@@ -1,0 +1,56 @@
+[
+  {
+    "id": "M01-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-M01"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 12,
+      "description": "PowerShell with encoded arguments"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M01"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -nop -w hidden -EncodedCommand JwBzAHkAbgB0AGgAZQB0AGkAYwAgAGIAZQBuAGMAaABtAGEAcgBrACAAcABhAHkAbABvAGEAZAAnACAAfAAgAFcAcgBpAHQAZQAtAE8AdQB0AHAAdQB0AA==",
+          "processGuid": "{m01-ps}",
+          "parentImage": "C:\\Users\\Public\\AgentExecutor.exe",
+          "parentProcessGuid": "{m01-fake}",
+          "user": "CORP\\kiosk"
+        }
+      }
+    }
+  },
+  {
+    "id": "M01-2",
+    "timestamp": "2026-09-20T09:00:03Z",
+    "agent": {
+      "name": "BM-M01"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M01"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{m01-ps}",
+          "destinationIp": "91.198.174.192",
+          "destinationPort": "443"
+        }
+      }
+    }
+  }
+]

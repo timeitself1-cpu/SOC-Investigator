@@ -1,0 +1,83 @@
+[
+  {
+    "id": "A02-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-A02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-A02"
+        },
+        "eventdata": {
+          "image": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+          "commandLine": "\"C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE\" \"\\\\files01\\templates\\letterhead.dotm\"",
+          "processGuid": "{a02-wd}",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "parentProcessGuid": "{a02-exp}",
+          "user": "CORP\\maria"
+        }
+      }
+    }
+  },
+  {
+    "id": "A02-2",
+    "timestamp": "2026-09-20T09:00:10Z",
+    "agent": {
+      "name": "BM-A02"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 9,
+      "description": "Office application spawned PowerShell"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-A02"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -NoProfile -File \\\\files01\\templates\\refresh_fields.ps1",
+          "processGuid": "{a02-ps}",
+          "parentImage": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+          "parentProcessGuid": "{a02-wd}",
+          "user": "CORP\\maria"
+        }
+      }
+    }
+  },
+  {
+    "id": "A02-3",
+    "timestamp": "2026-09-20T09:00:11Z",
+    "agent": {
+      "name": "BM-A02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-A02"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{a02-ps}",
+          "destinationIp": "10.40.2.15",
+          "destinationPort": "445",
+          "destinationHostname": "files01.corp.example"
+        }
+      }
+    }
+  }
+]

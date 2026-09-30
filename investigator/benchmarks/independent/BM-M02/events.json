@@ -1,0 +1,174 @@
+[
+  {
+    "id": "M02-3",
+    "timestamp": "2026-09-20T09:01:00Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4625",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  },
+  {
+    "id": "M02-2",
+    "timestamp": "2026-09-20T09:00:40Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4625",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  },
+  {
+    "id": "M02-7",
+    "timestamp": "2026-09-20T09:02:30Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {
+      "id": "100950",
+      "level": 10,
+      "description": "Successful logon after failures"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4624",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  },
+  {
+    "id": "M02-1",
+    "timestamp": "2026-09-20T09:00:20Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4625",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  },
+  {
+    "id": "M02-5",
+    "timestamp": "2026-09-20T09:01:40Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4625",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  },
+  {
+    "id": "M02-6",
+    "timestamp": "2026-09-20T09:02:00Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4625",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  },
+  {
+    "id": "M02-4",
+    "timestamp": "2026-09-20T09:01:20Z",
+    "agent": {
+      "name": "BM-M02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4625",
+          "channel": "Security",
+          "computer": "BM-M02"
+        },
+        "eventdata": {
+          "targetUserName": "svc-sql",
+          "targetDomainName": "CORP",
+          "ipAddress": "185.100.87.41",
+          "logonType": "3"
+        }
+      }
+    }
+  }
+]

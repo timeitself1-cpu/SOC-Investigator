@@ -1,0 +1,104 @@
+[
+  {
+    "id": "M03-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-M03"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M03"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -NoProfile -File C:\\Users\\ravi\\Downloads\\setup_helper.ps1",
+          "processGuid": "{m03-ps}",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "parentProcessGuid": "{m03-exp}",
+          "user": "CORP\\ravi"
+        }
+      }
+    }
+  },
+  {
+    "id": "M03-4",
+    "timestamp": "2026-09-20T09:00:12Z",
+    "agent": {
+      "name": "BM-M03"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "13",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M03"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{m03-ps}",
+          "eventType": "SetValue",
+          "targetObject": "HKU\\S-1-5-21-7\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\SyncHelper",
+          "details": "C:\\Users\\ravi\\AppData\\Roaming\\SyncHelper\\synchelper.exe"
+        }
+      }
+    }
+  },
+  {
+    "id": "M03-3",
+    "timestamp": "2026-09-20T09:00:09Z",
+    "agent": {
+      "name": "BM-M03"
+    },
+    "rule": {
+      "id": "100950",
+      "level": 10,
+      "description": "Scheduled task created"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4698",
+          "channel": "Security",
+          "computer": "BM-M03"
+        },
+        "eventdata": {
+          "taskName": "\\SyncHelperLogon",
+          "subjectUserName": "ravi",
+          "subjectDomainName": "CORP",
+          "taskContent": "<Command>C:\\Users\\ravi\\AppData\\Roaming\\SyncHelper\\synchelper.exe</Command>"
+        }
+      }
+    }
+  },
+  {
+    "id": "M03-2",
+    "timestamp": "2026-09-20T09:00:05Z",
+    "agent": {
+      "name": "BM-M03"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "11",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M03"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{m03-ps}",
+          "targetFilename": "C:\\Users\\ravi\\AppData\\Roaming\\SyncHelper\\synchelper.exe"
+        }
+      }
+    }
+  }
+]

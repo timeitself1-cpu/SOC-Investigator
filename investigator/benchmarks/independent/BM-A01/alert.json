@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-A01",
+  "title": "LSASS process access",
+  "severity": "high",
+  "event_ref": "A01-2"
+}

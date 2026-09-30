@@ -1,0 +1,24 @@
+{
+  "case_id": "BM-M04",
+  "label": "malicious",
+  "rationale": "An unsigned-looking binary in ProgramData reads LSASS memory (0x1010 includes VM_READ) and writes a .dmp file seconds later.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "lateral_movement",
+    "data_exfiltration"
+  ],
+  "required_refs": [
+    "M04-2",
+    "M04-3"
+  ],
+  "dimensions": [
+    "credential_access"
+  ],
+  "expect_injection_flag": false
+}

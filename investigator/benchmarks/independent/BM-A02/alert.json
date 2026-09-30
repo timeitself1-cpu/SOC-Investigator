@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-A02",
+  "title": "Office application spawned PowerShell",
+  "severity": "medium",
+  "event_ref": "A02-2"
+}

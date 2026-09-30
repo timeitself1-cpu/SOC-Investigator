@@ -1,0 +1,28 @@
+[
+  {
+    "id": "X05-1",
+    "timestamp": "2026-09-20T08:58:00Z",
+    "agent": {
+      "name": "BM-X05"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\cmd.exe",
+          "commandLine": "cmd.exe /c echo routine",
+          "processGuid": "{x05-cmd}",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "parentProcessGuid": "{x05-exp}",
+          "user": "CORP\\ops"
+        }
+      }
+    }
+  }
+]

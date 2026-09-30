@@ -1,0 +1,80 @@
+[
+  {
+    "id": "A01-1",
+    "timestamp": "2026-09-20T08:30:00Z",
+    "agent": {
+      "name": "BM-A01"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-A01"
+        },
+        "eventdata": {
+          "image": "C:\\Program Files\\SecurityVendor\\Sensor\\sensor.exe",
+          "commandLine": "\"C:\\Program Files\\SecurityVendor\\Sensor\\sensor.exe\" --service",
+          "processGuid": "{a01-sensor}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{a01-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "A01-2",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-A01"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 10,
+      "description": "LSASS process access"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "10",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-A01"
+        },
+        "eventdata": {
+          "sourceImage": "C:\\Program Files\\SecurityVendor\\Sensor\\sensor.exe",
+          "sourceProcessGUID": "{a01-sensor}",
+          "targetImage": "C:\\Windows\\System32\\lsass.exe",
+          "grantedAccess": "0x1000"
+        }
+      }
+    }
+  },
+  {
+    "id": "A01-3",
+    "timestamp": "2026-09-20T09:05:00Z",
+    "agent": {
+      "name": "BM-A01"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "10",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-A01"
+        },
+        "eventdata": {
+          "sourceImage": "C:\\Program Files\\SecurityVendor\\Sensor\\sensor.exe",
+          "sourceProcessGUID": "{a01-sensor}",
+          "targetImage": "C:\\Windows\\System32\\lsass.exe",
+          "grantedAccess": "0x1000"
+        }
+      }
+    }
+  }
+]

@@ -19,8 +19,10 @@ from .normalize import event_matches_keyword, normalize_wazuh_doc
 class FixtureBackend:
     name = "fixture"
 
-    def __init__(self, cases_dir: Path) -> None:
+    def __init__(self, cases_dir: Path, only: set[str] | None = None) -> None:
+        """Load every case directory, or only the named ones (for isolated evaluation)."""
         self.cases_dir = Path(cases_dir)
+        self.only = set(only) if only is not None else None
         self._alerts: dict[str, Alert] = {}
         self._events: dict[str, NormalizedEvent] = {}
         self._hosts: dict[str, HostContext] = {}
@@ -32,6 +34,8 @@ class FixtureBackend:
         if not self.cases_dir.is_dir():
             raise FileNotFoundError(f"cases directory not found: {self.cases_dir}")
         for case_dir in sorted(p for p in self.cases_dir.iterdir() if p.is_dir()):
+            if self.only is not None and case_dir.name not in self.only:
+                continue
             events = json.loads((case_dir / "events.json").read_text(encoding="utf-8"))
             for doc in events:
                 ev = normalize_wazuh_doc(doc)
@@ -44,21 +48,31 @@ class FixtureBackend:
                     ctx = HostContext.model_validate(h)
                     self._hosts[ctx.host.lower()] = ctx
             meta = json.loads((case_dir / "alert.json").read_text(encoding="utf-8"))
-            trigger = self._events[meta["event_ref"]]
-            alert = Alert(
-                alert_id=meta["alert_id"],
-                title=meta["title"],
-                timestamp=trigger.timestamp,
-                host=trigger.host,
-                severity=meta["severity"],
-                status=meta.get("status", "new"),
-                rule_id=trigger.rule_id,
-                rule_level=trigger.rule_level,
-                event_ref=trigger.event_ref,
-                process_guid=trigger.process_guid,
-                user=trigger.user,
-                source="fixture",
-            )
+            trigger = self._events.get(meta["event_ref"])
+            if trigger is None:
+                # Models a retention gap: the alert exists but its triggering
+                # record is no longer in the telemetry store.
+                if "timestamp" not in meta or "host" not in meta:
+                    raise ValueError(f"{case_dir.name}: trigger missing and alert.json lacks timestamp/host")
+                alert = Alert(alert_id=meta["alert_id"], title=meta["title"],
+                              timestamp=normalize_wazuh_doc({"id": "_", "timestamp": meta["timestamp"]}).timestamp,
+                              host=meta["host"], severity=meta["severity"], status=meta.get("status", "new"),
+                              event_ref=meta["event_ref"], source="fixture")
+            else:
+                alert = Alert(
+                    alert_id=meta["alert_id"],
+                    title=meta["title"],
+                    timestamp=trigger.timestamp,
+                    host=trigger.host,
+                    severity=meta["severity"],
+                    status=meta.get("status", "new"),
+                    rule_id=trigger.rule_id,
+                    rule_level=trigger.rule_level,
+                    event_ref=trigger.event_ref,
+                    process_guid=trigger.process_guid,
+                    user=trigger.user,
+                    source="fixture",
+                )
             self._alerts[alert.alert_id] = alert
             exp_file = case_dir / "expectations.json"
             if exp_file.exists():

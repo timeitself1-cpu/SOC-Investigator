@@ -1,0 +1,26 @@
+{
+  "case_id": "BM-M02",
+  "label": "malicious",
+  "rationale": "Six failures in two minutes for one service account from one external address, then a success from the same address. Records are stored out of order.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "persistence"
+  ],
+  "required_refs": [
+    "M02-7",
+    "M02-1",
+    "M02-6"
+  ],
+  "dimensions": [
+    "reordered",
+    "authentication"
+  ],
+  "expect_injection_flag": false
+}

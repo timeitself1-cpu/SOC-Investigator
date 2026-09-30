@@ -1,0 +1,25 @@
+{
+  "case_id": "BM-B03",
+  "label": "benign",
+  "rationale": "Software installer (msiexec as SYSTEM) registering a vendor updater that lives in Program Files. A task was created (persistence mechanism in the literal sense) but the scenario is an ordinary install.",
+  "acceptable_verdicts": [
+    "benign",
+    "suspicious",
+    "insufficient_evidence"
+  ],
+  "forbidden_verdicts": [
+    "likely_malicious"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "command_and_control",
+    "payload_download"
+  ],
+  "required_refs": [
+    "B03-2"
+  ],
+  "dimensions": [
+    "admin_tool"
+  ],
+  "expect_injection_flag": false
+}

@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-B04",
+  "title": "Logon failure followed by success",
+  "severity": "low",
+  "event_ref": "B04-2"
+}

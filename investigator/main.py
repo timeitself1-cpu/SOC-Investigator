@@ -5,6 +5,8 @@
     python -m investigator investigate INC-001   # run one investigation, print report
     python -m investigator evaluate        # run all fixtures through the evaluator
     python -m investigator health          # check Ollama / backend wiring
+    python -m investigator diagnose        # read-only live checks (auth, TLS, indexes, mapping, model)
+    python -m investigator benchmark       # independent benchmark with separated metrics
 
 Flags: --llm mock|ollama  --backend fixture|wazuh  --max-steps N
 """
@@ -136,6 +138,84 @@ def cmd_health(args: argparse.Namespace) -> int:
     return 0 if healthy else 1
 
 
+def ollama_structured_probe(settings: Settings) -> dict:
+    """One real structured-output round trip against the configured Ollama model."""
+    import time as _time
+
+    from .agent import _parse
+    from .llm.ollama import OllamaModel
+    from .models import AgentDecision
+
+    model = OllamaModel(settings)
+    messages = [{"role": "system", "content": "Respond with a single JSON object only."},
+                {"role": "user", "content": 'Return exactly: {"action": "finish", "arguments": {}, '
+                                            '"purpose": "diagnostic"}'}]
+    t0 = _time.perf_counter()
+    try:
+        resp = model.complete(messages, schema=AgentDecision.model_json_schema())
+    except Exception as exc:  # noqa: BLE001
+        from .errors import safe_error
+        kind, msg = safe_error(exc)
+        return {"check": "structured output round trip", "ok": False, "kind": kind, "detail": msg}
+    parsed, err = _parse(resp.text, AgentDecision)
+    return {"check": "structured output round trip", "ok": parsed is not None,
+            "kind": None if parsed else "model_output",
+            "detail": (f"{(_time.perf_counter() - t0):.1f}s, prompt_tokens={resp.prompt_tokens}, "
+                       f"eval_tokens={resp.completion_tokens}, done_reason={(resp.meta or {}).get('done_reason')}"
+                       + ("" if parsed else f"; {err}"))}
+
+
+def cmd_diagnose(args: argparse.Namespace) -> int:
+    """Read-only checks of the configured model and backend, for lab bring-up."""
+    settings = _settings_from_args(args)
+    rows: list[dict] = []
+    if settings.llm == "ollama":
+        from .llm.ollama import OllamaModel
+
+        ok, msg = OllamaModel(settings).health()
+        rows.append({"check": f"ollama model {settings.ollama_model}", "ok": ok, "kind": None, "detail": msg})
+        if ok:
+            rows.append(ollama_structured_probe(settings))
+    if settings.backend == "wazuh":
+        from .backends.wazuh import WazuhBackend, WazuhConfigError
+
+        try:
+            backend = WazuhBackend(settings)
+        except WazuhConfigError as exc:
+            rows.append({"check": "wazuh configuration", "ok": False, "kind": "auth", "detail": str(exc)})
+        else:
+            rows.extend(backend.probe(host=args.host))
+            rows.extend({"check": "caveat", "ok": True, "kind": None, "detail": c}
+                        for c in backend.coverage_caveats())
+    else:
+        rows.append({"check": "fixture backend", "ok": True, "kind": None,
+                     "detail": f"{settings.cases_dir} (synthetic telemetry)"})
+    if args.json:
+        print(json.dumps(rows, indent=2))
+    else:
+        for r in rows:
+            mark = "OK  " if r["ok"] else "FAIL"
+            kind = f" [{r['kind']}]" if r.get("kind") else ""
+            print(f"{mark} {r['check']}{kind}: {r['detail']}")
+    return 0 if all(r["ok"] for r in rows if r["check"] != "caveat") else 1
+
+
+def cmd_benchmark(args: argparse.Namespace) -> int:
+    from .evaluation.benchmark import format_benchmark, run_benchmark
+
+    settings = _settings_from_args(args)
+    result = run_benchmark(settings, suite_dir=args.suite)
+    if args.json:
+        print(json.dumps(result, indent=2, default=str))
+    else:
+        print(format_benchmark(result))
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as fh:
+            json.dump(result, fh, indent=2, default=str)
+    # A benchmark measures; it only "fails" when the harness itself could not run.
+    return 1 if result["metrics"]["operational"]["harness_errors"] else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="investigator", description="Local-first SOC Investigation Agent")
     p.add_argument("--llm", choices=["mock", "ollama"])
@@ -163,6 +243,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("health", help="check ollama/backend wiring")
     sp.set_defaults(func=cmd_health)
+
+    sp = sub.add_parser("diagnose", help="read-only checks of the live model and backend (lab bring-up)")
+    sp.add_argument("--host", help="agent/host name to check for Sysmon telemetry")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(func=cmd_diagnose)
+
+    sp = sub.add_parser("benchmark", help="run the independent benchmark suite and report separated metrics")
+    sp.add_argument("--suite", help="benchmark suite directory (default: packaged independent suite)")
+    sp.add_argument("--json", action="store_true")
+    sp.add_argument("--out", help="also write the JSON result to this file")
+    sp.set_defaults(func=cmd_benchmark)
     return p
 
 

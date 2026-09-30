@@ -1,0 +1,25 @@
+{
+  "case_id": "BM-X02",
+  "label": "ambiguous",
+  "rationale": "A success happens BEFORE five failures from the same external address. Password guessing is plausible, but a success after the failures (compromise pattern) is absent.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "insufficient_evidence"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "account_compromise",
+    "credential_theft"
+  ],
+  "required_refs": [
+    "X02-6",
+    "X02-2"
+  ],
+  "dimensions": [
+    "reordered",
+    "authentication"
+  ],
+  "expect_injection_flag": false
+}

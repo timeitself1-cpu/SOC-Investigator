@@ -1,0 +1,56 @@
+[
+  {
+    "id": "B03-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-B03"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B03"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\schtasks.exe",
+          "commandLine": "schtasks /create /tn \"VendorAppUpdateMachine\" /tr \"\\\"C:\\Program Files (x86)\\VendorApp\\Update\\VendorUpdate.exe\\\" /c\" /sc daily /ru SYSTEM /f",
+          "processGuid": "{b03-st}",
+          "parentImage": "C:\\Windows\\System32\\msiexec.exe",
+          "parentProcessGuid": "{b03-msi}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "B03-2",
+    "timestamp": "2026-09-20T09:00:01Z",
+    "agent": {
+      "name": "BM-B03"
+    },
+    "rule": {
+      "id": "100950",
+      "level": 10,
+      "description": "Scheduled task created"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4698",
+          "channel": "Security",
+          "computer": "BM-B03"
+        },
+        "eventdata": {
+          "taskName": "\\VendorAppUpdateMachine",
+          "subjectUserName": "SYSTEM",
+          "subjectDomainName": "NT AUTHORITY",
+          "taskContent": "<Exec><Command>C:\\Program Files (x86)\\VendorApp\\Update\\VendorUpdate.exe</Command></Exec>"
+        }
+      }
+    }
+  }
+]

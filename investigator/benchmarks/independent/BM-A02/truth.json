@@ -1,0 +1,26 @@
+{
+  "case_id": "BM-A02",
+  "label": "ambiguous",
+  "rationale": "Word template runs a plain (non-encoded) script from an internal share and talks only to that file server. Could be template automation or abuse; the telemetry cannot decide.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "insufficient_evidence",
+    "benign"
+  ],
+  "forbidden_verdicts": [
+    "likely_malicious"
+  ],
+  "forbidden_claims": [
+    "obfuscation",
+    "credential_theft",
+    "command_and_control"
+  ],
+  "required_refs": [
+    "A02-2",
+    "A02-1"
+  ],
+  "dimensions": [
+    "office"
+  ],
+  "expect_injection_flag": false
+}

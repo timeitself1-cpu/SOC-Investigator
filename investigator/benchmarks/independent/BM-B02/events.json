@@ -1,0 +1,108 @@
+[
+  {
+    "id": "B02-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-B02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B02"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\cmd.exe",
+          "commandLine": "cmd.exe",
+          "processGuid": "{b02-cmd}",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "parentProcessGuid": "{b02-exp}",
+          "user": "CORP\\helpdesk.amy"
+        }
+      }
+    }
+  },
+  {
+    "id": "B02-2",
+    "timestamp": "2026-09-20T09:00:20Z",
+    "agent": {
+      "name": "BM-B02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B02"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\ipconfig.exe",
+          "commandLine": "ipconfig /all",
+          "processGuid": "{b02-ip}",
+          "parentImage": "C:\\Windows\\System32\\cmd.exe",
+          "parentProcessGuid": "{b02-cmd}",
+          "user": "CORP\\helpdesk.amy"
+        }
+      }
+    }
+  },
+  {
+    "id": "B02-3",
+    "timestamp": "2026-09-20T09:00:45Z",
+    "agent": {
+      "name": "BM-B02"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 8,
+      "description": "Discovery command"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B02"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\whoami.exe",
+          "commandLine": "whoami /groups",
+          "processGuid": "{b02-who}",
+          "parentImage": "C:\\Windows\\System32\\cmd.exe",
+          "parentProcessGuid": "{b02-cmd}",
+          "user": "CORP\\helpdesk.amy"
+        }
+      }
+    }
+  },
+  {
+    "id": "B02-4",
+    "timestamp": "2026-09-20T09:01:00Z",
+    "agent": {
+      "name": "BM-B02"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B02"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{b02-svc}",
+          "destinationIp": "10.40.0.53",
+          "destinationPort": "53"
+        }
+      }
+    }
+  }
+]

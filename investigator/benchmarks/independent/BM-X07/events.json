@@ -1,0 +1,1875 @@
+[
+  {
+    "id": "X07-N00",
+    "timestamp": "2026-09-20T08:51:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n0}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N01",
+    "timestamp": "2026-09-20T08:51:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n1}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N02",
+    "timestamp": "2026-09-20T08:51:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n2}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N03",
+    "timestamp": "2026-09-20T08:51:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n3}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N04",
+    "timestamp": "2026-09-20T08:52:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n4}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N05",
+    "timestamp": "2026-09-20T08:52:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n5}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N06",
+    "timestamp": "2026-09-20T08:52:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n6}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N07",
+    "timestamp": "2026-09-20T08:52:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n7}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N08",
+    "timestamp": "2026-09-20T08:53:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n8}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N09",
+    "timestamp": "2026-09-20T08:53:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n9}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N10",
+    "timestamp": "2026-09-20T08:53:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n10}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N11",
+    "timestamp": "2026-09-20T08:53:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n11}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N12",
+    "timestamp": "2026-09-20T08:54:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n12}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N13",
+    "timestamp": "2026-09-20T08:54:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n13}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N14",
+    "timestamp": "2026-09-20T08:54:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n14}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N15",
+    "timestamp": "2026-09-20T08:54:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n15}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N16",
+    "timestamp": "2026-09-20T08:55:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n16}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N17",
+    "timestamp": "2026-09-20T08:55:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n17}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N18",
+    "timestamp": "2026-09-20T08:55:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n18}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N19",
+    "timestamp": "2026-09-20T08:55:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n19}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N20",
+    "timestamp": "2026-09-20T08:56:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n20}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N21",
+    "timestamp": "2026-09-20T08:56:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n21}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N22",
+    "timestamp": "2026-09-20T08:56:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n22}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N23",
+    "timestamp": "2026-09-20T08:56:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n23}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N24",
+    "timestamp": "2026-09-20T08:57:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n24}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N25",
+    "timestamp": "2026-09-20T08:57:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n25}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N26",
+    "timestamp": "2026-09-20T08:57:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n26}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N27",
+    "timestamp": "2026-09-20T08:57:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n27}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N28",
+    "timestamp": "2026-09-20T08:58:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n28}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N29",
+    "timestamp": "2026-09-20T08:58:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n29}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N30",
+    "timestamp": "2026-09-20T08:58:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n30}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N31",
+    "timestamp": "2026-09-20T08:58:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n31}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N32",
+    "timestamp": "2026-09-20T08:59:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n32}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N33",
+    "timestamp": "2026-09-20T08:59:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n33}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N34",
+    "timestamp": "2026-09-20T08:59:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n34}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N35",
+    "timestamp": "2026-09-20T08:59:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n35}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N36",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n36}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N37",
+    "timestamp": "2026-09-20T09:00:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n37}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N38",
+    "timestamp": "2026-09-20T09:00:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n38}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N39",
+    "timestamp": "2026-09-20T09:00:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n39}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N40",
+    "timestamp": "2026-09-20T09:01:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n40}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N41",
+    "timestamp": "2026-09-20T09:01:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n41}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N42",
+    "timestamp": "2026-09-20T09:01:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n42}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N43",
+    "timestamp": "2026-09-20T09:01:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n43}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N44",
+    "timestamp": "2026-09-20T09:02:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n44}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N45",
+    "timestamp": "2026-09-20T09:02:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n45}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N46",
+    "timestamp": "2026-09-20T09:02:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n46}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N47",
+    "timestamp": "2026-09-20T09:02:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n47}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N48",
+    "timestamp": "2026-09-20T09:03:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n48}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N49",
+    "timestamp": "2026-09-20T09:03:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n49}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N50",
+    "timestamp": "2026-09-20T09:03:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n50}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N51",
+    "timestamp": "2026-09-20T09:03:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n51}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N52",
+    "timestamp": "2026-09-20T09:04:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n52}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N53",
+    "timestamp": "2026-09-20T09:04:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n53}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N54",
+    "timestamp": "2026-09-20T09:04:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n54}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N55",
+    "timestamp": "2026-09-20T09:04:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n55}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N56",
+    "timestamp": "2026-09-20T09:05:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n56}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N57",
+    "timestamp": "2026-09-20T09:05:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n57}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N58",
+    "timestamp": "2026-09-20T09:05:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n58}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N59",
+    "timestamp": "2026-09-20T09:05:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n59}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N60",
+    "timestamp": "2026-09-20T09:06:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n60}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N61",
+    "timestamp": "2026-09-20T09:06:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n61}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N62",
+    "timestamp": "2026-09-20T09:06:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n62}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N63",
+    "timestamp": "2026-09-20T09:06:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n63}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N64",
+    "timestamp": "2026-09-20T09:07:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n64}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N65",
+    "timestamp": "2026-09-20T09:07:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n65}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N66",
+    "timestamp": "2026-09-20T09:07:30Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n66}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N67",
+    "timestamp": "2026-09-20T09:07:45Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n67}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N68",
+    "timestamp": "2026-09-20T09:08:00Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n68}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-N69",
+    "timestamp": "2026-09-20T09:08:15Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "commandLine": "svchost.exe -k netsvcs",
+          "processGuid": "{x07-n69}",
+          "parentImage": "C:\\Windows\\System32\\services.exe",
+          "parentProcessGuid": "{x07-svc}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-1",
+    "timestamp": "2026-09-20T09:00:05Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4698",
+          "channel": "Security",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "taskName": "\\SvcMon",
+          "subjectUserName": "omar",
+          "subjectDomainName": "CORP",
+          "taskContent": "<Command>C:\\Users\\omar\\AppData\\Local\\Temp\\svcmon.exe</Command>"
+        }
+      }
+    }
+  },
+  {
+    "id": "X07-2",
+    "timestamp": "2026-09-20T09:00:08Z",
+    "agent": {
+      "name": "BM-X07"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 10,
+      "description": "Registry Run key value set"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "13",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X07"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\reg.exe",
+          "processGuid": "{x07-reg}",
+          "eventType": "SetValue",
+          "targetObject": "HKU\\S-1-5-21-9\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\SvcMon",
+          "details": "C:\\Users\\omar\\AppData\\Local\\Temp\\svcmon.exe"
+        }
+      }
+    }
+  }
+]

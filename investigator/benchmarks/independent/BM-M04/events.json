@@ -1,0 +1,79 @@
+[
+  {
+    "id": "M04-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-M04"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M04"
+        },
+        "eventdata": {
+          "image": "C:\\ProgramData\\synth\\collector.exe",
+          "commandLine": "\"C:\\ProgramData\\synth\\collector.exe\"",
+          "processGuid": "{m04-c}",
+          "parentImage": "C:\\Windows\\System32\\cmd.exe",
+          "parentProcessGuid": "{m04-cmd}",
+          "user": "CORP\\admin.tmp"
+        }
+      }
+    }
+  },
+  {
+    "id": "M04-2",
+    "timestamp": "2026-09-20T09:00:04Z",
+    "agent": {
+      "name": "BM-M04"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 12,
+      "description": "LSASS memory read"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "10",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M04"
+        },
+        "eventdata": {
+          "sourceImage": "C:\\ProgramData\\synth\\collector.exe",
+          "sourceProcessGUID": "{m04-c}",
+          "targetImage": "C:\\Windows\\System32\\lsass.exe",
+          "grantedAccess": "0x1010"
+        }
+      }
+    }
+  },
+  {
+    "id": "M04-3",
+    "timestamp": "2026-09-20T09:00:09Z",
+    "agent": {
+      "name": "BM-M04"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "11",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M04"
+        },
+        "eventdata": {
+          "image": "C:\\ProgramData\\synth\\collector.exe",
+          "processGuid": "{m04-c}",
+          "targetFilename": "C:\\ProgramData\\synth\\collector.dmp"
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "case_id": "BM-M03",
+  "label": "malicious",
+  "rationale": "A script from Downloads drops a binary into AppData and registers it twice (logon task and Run key) within seconds. Records are stored out of order.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "lateral_movement"
+  ],
+  "required_refs": [
+    "M03-3",
+    "M03-4"
+  ],
+  "dimensions": [
+    "reordered"
+  ],
+  "expect_injection_flag": false
+}

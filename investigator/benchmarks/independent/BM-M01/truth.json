@@ -1,0 +1,23 @@
+{
+  "case_id": "BM-M01",
+  "label": "malicious",
+  "rationale": "A binary named like the Intune/SCCM agent but running from C:\\Users\\Public launches hidden encoded PowerShell as a regular user that connects to an external address. Masquerading.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "benign_administration"
+  ],
+  "required_refs": [
+    "M01-1",
+    "M01-2"
+  ],
+  "dimensions": [
+    "masquerade"
+  ],
+  "expect_injection_flag": false
+}

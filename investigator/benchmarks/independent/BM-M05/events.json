@@ -1,0 +1,106 @@
+[
+  {
+    "id": "M05-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-M05"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M05"
+        },
+        "eventdata": {
+          "image": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+          "commandLine": "\"C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE\" \"C:\\Users\\li\\Downloads\\Q3_forecast.xlsm\"",
+          "processGuid": "{m05-xl}",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "parentProcessGuid": "{m05-exp}",
+          "user": "CORP\\li"
+        }
+      }
+    }
+  },
+  {
+    "id": "M05-2",
+    "timestamp": "2026-09-20T09:00:30Z",
+    "agent": {
+      "name": "BM-M05"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 12,
+      "description": "Office application spawned PowerShell"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -w hidden -enc VwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIABzAHkAbgB0AGgAZQB0AGkAYwA=",
+          "processGuid": "{m05-ps}",
+          "parentImage": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+          "parentProcessGuid": "{m05-xl}",
+          "user": "CORP\\li"
+        }
+      }
+    }
+  },
+  {
+    "id": "M05-3",
+    "timestamp": "2026-09-20T09:00:32Z",
+    "agent": {
+      "name": "BM-M05"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "22",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{m05-ps}",
+          "queryName": "cdn.example-content.net"
+        }
+      }
+    }
+  },
+  {
+    "id": "M05-4",
+    "timestamp": "2026-09-20T09:00:33Z",
+    "agent": {
+      "name": "BM-M05"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{m05-ps}",
+          "destinationIp": "104.21.33.10",
+          "destinationPort": "443",
+          "destinationHostname": "cdn.example-content.net"
+        }
+      }
+    }
+  }
+]

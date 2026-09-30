@@ -1,0 +1,7 @@
+[
+  {
+    "host": "BM-B01",
+    "role": "Managed workstation",
+    "criticality": "medium"
+  }
+]

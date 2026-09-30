@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-X02",
+  "title": "Multiple logon failures",
+  "severity": "medium",
+  "event_ref": "X02-6"
+}

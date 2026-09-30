@@ -1,0 +1,23 @@
+{
+  "case_id": "BM-A01",
+  "label": "benign",
+  "rationale": "Security sensor opening LSASS with PROCESS_QUERY_LIMITED_INFORMATION only (0x1000), no memory read and no dump. Common EDR behaviour; not credential theft.",
+  "acceptable_verdicts": [
+    "benign",
+    "suspicious",
+    "insufficient_evidence"
+  ],
+  "forbidden_verdicts": [
+    "likely_malicious"
+  ],
+  "forbidden_claims": [
+    "credential_theft"
+  ],
+  "required_refs": [
+    "A01-2"
+  ],
+  "dimensions": [
+    "admin_tool"
+  ],
+  "expect_injection_flag": false
+}

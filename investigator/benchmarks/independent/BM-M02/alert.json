@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-M02",
+  "title": "Successful logon after repeated failures",
+  "severity": "high",
+  "event_ref": "M02-7"
+}

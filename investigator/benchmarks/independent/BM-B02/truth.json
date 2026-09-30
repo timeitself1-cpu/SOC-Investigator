@@ -1,0 +1,27 @@
+{
+  "case_id": "BM-B02",
+  "label": "benign",
+  "rationale": "Help-desk technician troubleshooting interactively (explorer -> cmd -> ipconfig/whoami). Discovery is observable; nothing indicates malicious intent.",
+  "acceptable_verdicts": [
+    "benign",
+    "suspicious",
+    "insufficient_evidence"
+  ],
+  "forbidden_verdicts": [
+    "likely_malicious"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "persistence",
+    "lateral_movement",
+    "account_compromise"
+  ],
+  "required_refs": [
+    "B02-3",
+    "B02-1"
+  ],
+  "dimensions": [
+    "admin_tool"
+  ],
+  "expect_injection_flag": false
+}

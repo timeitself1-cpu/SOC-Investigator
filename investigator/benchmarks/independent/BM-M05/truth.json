@@ -1,0 +1,25 @@
+{
+  "case_id": "BM-M05",
+  "label": "malicious",
+  "rationale": "Spreadsheet from Downloads spawns hidden encoded PowerShell that immediately connects out.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "persistence"
+  ],
+  "required_refs": [
+    "M05-2",
+    "M05-1",
+    "M05-4"
+  ],
+  "dimensions": [
+    "office"
+  ],
+  "expect_injection_flag": false
+}

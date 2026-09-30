@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-B02",
+  "title": "Discovery commands executed",
+  "severity": "medium",
+  "event_ref": "B02-3"
+}

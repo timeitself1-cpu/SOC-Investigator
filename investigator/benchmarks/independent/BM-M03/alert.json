@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-M03",
+  "title": "Scheduled task created",
+  "severity": "high",
+  "event_ref": "M03-3"
+}
