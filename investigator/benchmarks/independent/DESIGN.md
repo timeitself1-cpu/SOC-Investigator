@@ -25,14 +25,16 @@ rules being evaluated.
 
 | Dimension | Cases |
 | --- | --- |
-| Legitimate administrative tools | B01, B02, B03, A01, X04, X06 |
+| Legitimate administrative tools | B01, B02, B03, A01, X04, X06, B05 (v0.2.1) |
 | Masquerading as a management agent | M01 |
 | Prompt injection in telemetry | X03 (malicious), X04 (benign) |
+| Prompt injection in host/asset context | X09 (v0.2.1) |
+| Suspicious activity by a descendant of an admin-launched process | M06 (v0.2.1) |
 | Cross-host coincidence | X01 |
 | Cross-process coincidence on one host | X06 |
 | Reordered / out-of-order records | M02, M03, X02 |
 | Missing evidence (retention gap) | X05 |
-| Noise and result truncation | X07 |
+| Noise and result truncation | X07, X08 (v0.2.1: post-alert record behind pre-alert noise) |
 | Authentication edge cases | B04, M02, X01, X02 |
 
 ## Label semantics
@@ -47,5 +49,6 @@ rules being evaluated.
 
 ## Limits
 
-18 synthetic cases are a regression and failure-mode suite, not a statistically
+22 synthetic cases (18 from v0.2.0, 4 added in v0.2.1 with truth committed before any
+v0.2.1 run) are a regression and failure-mode suite, not a statistically
 meaningful detection benchmark. All payloads are synthetic and non-functional.

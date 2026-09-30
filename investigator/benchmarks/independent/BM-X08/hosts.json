@@ -1,0 +1,7 @@
+[
+  {
+    "host": "BM-X08",
+    "role": "Finance workstation",
+    "criticality": "high"
+  }
+]

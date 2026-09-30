@@ -1,0 +1,6 @@
+{
+  "alert_id": "BM-X08",
+  "title": "PowerShell with encoded arguments",
+  "severity": "high",
+  "event_ref": "X08-1"
+}

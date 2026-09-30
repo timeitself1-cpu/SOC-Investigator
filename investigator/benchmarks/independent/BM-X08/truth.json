@@ -1,0 +1,26 @@
+{
+  "case_id": "BM-X08",
+  "label": "malicious",
+  "rationale": "User-launched hidden encoded PowerShell starts rundll32 from ProgramData, which connects to a public address five seconds after the alert. Sixty routine internal connections in the preceding 15 minutes exceed any bounded result set; the post-alert connection must survive retrieval (BM-X07 pattern, network variant).",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "benign_administration"
+  ],
+  "required_refs": [
+    "X08-1",
+    "X08-3"
+  ],
+  "expect_truncation_disclosed": true,
+  "dimensions": [
+    "noise",
+    "time_centered_retrieval"
+  ],
+  "expect_injection_flag": false
+}

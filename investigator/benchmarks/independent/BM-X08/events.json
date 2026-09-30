@@ -1,0 +1,1582 @@
+[
+  {
+    "id": "X08-N00",
+    "timestamp": "2026-09-20T08:46:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.10",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N01",
+    "timestamp": "2026-09-20T08:46:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.11",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N02",
+    "timestamp": "2026-09-20T08:46:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.12",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N03",
+    "timestamp": "2026-09-20T08:46:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.13",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N04",
+    "timestamp": "2026-09-20T08:46:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.14",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N05",
+    "timestamp": "2026-09-20T08:47:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.15",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N06",
+    "timestamp": "2026-09-20T08:47:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.16",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N07",
+    "timestamp": "2026-09-20T08:47:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.17",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N08",
+    "timestamp": "2026-09-20T08:47:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.18",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N09",
+    "timestamp": "2026-09-20T08:47:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.19",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N10",
+    "timestamp": "2026-09-20T08:48:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.20",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N11",
+    "timestamp": "2026-09-20T08:48:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.21",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N12",
+    "timestamp": "2026-09-20T08:48:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.22",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N13",
+    "timestamp": "2026-09-20T08:48:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.23",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N14",
+    "timestamp": "2026-09-20T08:48:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.24",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N15",
+    "timestamp": "2026-09-20T08:49:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.25",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N16",
+    "timestamp": "2026-09-20T08:49:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.26",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N17",
+    "timestamp": "2026-09-20T08:49:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.27",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N18",
+    "timestamp": "2026-09-20T08:49:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.28",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N19",
+    "timestamp": "2026-09-20T08:49:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.29",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N20",
+    "timestamp": "2026-09-20T08:50:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.30",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N21",
+    "timestamp": "2026-09-20T08:50:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.31",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N22",
+    "timestamp": "2026-09-20T08:50:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.32",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N23",
+    "timestamp": "2026-09-20T08:50:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.33",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N24",
+    "timestamp": "2026-09-20T08:50:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.34",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N25",
+    "timestamp": "2026-09-20T08:51:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.35",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N26",
+    "timestamp": "2026-09-20T08:51:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.36",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N27",
+    "timestamp": "2026-09-20T08:51:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.37",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N28",
+    "timestamp": "2026-09-20T08:51:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.38",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N29",
+    "timestamp": "2026-09-20T08:51:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.39",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N30",
+    "timestamp": "2026-09-20T08:52:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.40",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N31",
+    "timestamp": "2026-09-20T08:52:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.41",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N32",
+    "timestamp": "2026-09-20T08:52:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.42",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N33",
+    "timestamp": "2026-09-20T08:52:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.43",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N34",
+    "timestamp": "2026-09-20T08:52:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.44",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N35",
+    "timestamp": "2026-09-20T08:53:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.45",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N36",
+    "timestamp": "2026-09-20T08:53:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.46",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N37",
+    "timestamp": "2026-09-20T08:53:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.47",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N38",
+    "timestamp": "2026-09-20T08:53:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.48",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N39",
+    "timestamp": "2026-09-20T08:53:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.49",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N40",
+    "timestamp": "2026-09-20T08:54:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.50",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N41",
+    "timestamp": "2026-09-20T08:54:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.51",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N42",
+    "timestamp": "2026-09-20T08:54:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.52",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N43",
+    "timestamp": "2026-09-20T08:54:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.53",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N44",
+    "timestamp": "2026-09-20T08:54:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.54",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N45",
+    "timestamp": "2026-09-20T08:55:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.55",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N46",
+    "timestamp": "2026-09-20T08:55:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.56",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N47",
+    "timestamp": "2026-09-20T08:55:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.57",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N48",
+    "timestamp": "2026-09-20T08:55:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.58",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N49",
+    "timestamp": "2026-09-20T08:55:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.59",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N50",
+    "timestamp": "2026-09-20T08:56:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.60",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N51",
+    "timestamp": "2026-09-20T08:56:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.61",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N52",
+    "timestamp": "2026-09-20T08:56:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.62",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N53",
+    "timestamp": "2026-09-20T08:56:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.63",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N54",
+    "timestamp": "2026-09-20T08:56:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.64",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N55",
+    "timestamp": "2026-09-20T08:57:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.65",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N56",
+    "timestamp": "2026-09-20T08:57:12Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.0.66",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N57",
+    "timestamp": "2026-09-20T08:57:24Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.1.67",
+          "destinationPort": "443",
+          "destinationHostname": "wsus0.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N58",
+    "timestamp": "2026-09-20T08:57:36Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.2.68",
+          "destinationPort": "443",
+          "destinationHostname": "wsus1.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-N59",
+    "timestamp": "2026-09-20T08:57:48Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\svchost.exe",
+          "processGuid": "{x08-svc}",
+          "destinationIp": "10.20.3.69",
+          "destinationPort": "443",
+          "destinationHostname": "wsus2.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 12,
+      "description": "PowerShell with encoded arguments"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -nop -w hidden -EncodedCommand UwB0AGEAcgB0AC0AUAByAG8AYwBlAHMAcwAgAHIAdQBuAGQAbABsADMAMgAuAGUAeABlACAALQBBAHIAZwB1AG0AZQBuAHQATABpAHMAdAAgAEMAOgBcAFAAcgBvAGcAcgBhAG0ARABhAHQAYQBcAHUAcABkAC4AZABsAGwALABSAHUAbgA=",
+          "processGuid": "{x08-ps}",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "parentProcessGuid": "{x08-exp}",
+          "user": "CORP\\lena"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-2",
+    "timestamp": "2026-09-20T09:00:03Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\rundll32.exe",
+          "commandLine": "rundll32.exe C:\\ProgramData\\upd.dll,Run",
+          "processGuid": "{x08-rd}",
+          "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "parentProcessGuid": "{x08-ps}",
+          "user": "CORP\\lena"
+        }
+      }
+    }
+  },
+  {
+    "id": "X08-3",
+    "timestamp": "2026-09-20T09:00:05Z",
+    "agent": {
+      "name": "BM-X08"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-X08"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\rundll32.exe",
+          "processGuid": "{x08-rd}",
+          "destinationIp": "93.184.216.34",
+          "destinationPort": "443"
+        }
+      }
+    }
+  }
+]

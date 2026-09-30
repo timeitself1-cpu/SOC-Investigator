@@ -1,0 +1,80 @@
+[
+  {
+    "id": "B05-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-B05"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 12,
+      "description": "PowerShell with encoded arguments"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand RwBlAHQALQBJAHQAZQBtAFAAcgBvAHAAZQByAHQAeQAgAEgASwBMAE0AOgBcAFMAbwBmAHQAdwBhAHIAZQBcAEMAbwBuAHQAbwBzAG8AXABBAGcAZQBuAHQAIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAFYAZQByAHMAaQBvAG4AIAB8ACAAQwBvAG4AdgBlAHIAdABUAG8ALQBKAHMAbwBuAA==",
+          "processGuid": "{b05-ps}",
+          "parentImage": "C:\\Program Files (x86)\\Microsoft Intune Management Extension\\AgentExecutor.exe",
+          "parentProcessGuid": "{b05-ime}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "B05-2",
+    "timestamp": "2026-09-20T09:00:01Z",
+    "agent": {
+      "name": "BM-B05"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "22",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{b05-ps}",
+          "queryName": "intune.corp.example"
+        }
+      }
+    }
+  },
+  {
+    "id": "B05-3",
+    "timestamp": "2026-09-20T09:00:02Z",
+    "agent": {
+      "name": "BM-B05"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-B05"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{b05-ps}",
+          "destinationIp": "10.40.2.15",
+          "destinationPort": "443",
+          "destinationHostname": "intune.corp.example"
+        }
+      }
+    }
+  }
+]

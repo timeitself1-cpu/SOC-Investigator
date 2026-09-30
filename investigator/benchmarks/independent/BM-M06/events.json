@@ -1,0 +1,108 @@
+[
+  {
+    "id": "M06-1",
+    "timestamp": "2026-09-20T09:00:00Z",
+    "agent": {
+      "name": "BM-M06"
+    },
+    "rule": {
+      "id": "100900",
+      "level": 12,
+      "description": "PowerShell with encoded arguments"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M06"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -NonInteractive -EncodedCommand UwB0AGEAcgB0AC0AUAByAG8AYwBlAHMAcwAgAGMAbQBkAC4AZQB4AGUAIAAtAEEAcgBnAHUAbQBlAG4AdABMAGkAcwB0ACAALwBjACwAcwB0AGEAcgB0ACwAcgB1AG4AZABsAGwAMwAyAC4AZQB4AGUALABDADoAXABQAHIAbwBnAHIAYQBtAEQAYQB0AGEAXABtAC4AZABsAGwALABHAG8A",
+          "processGuid": "{m06-ps}",
+          "parentImage": "C:\\Program Files\\Microsoft Configuration Manager\\bin\\x64\\AgentExecutor.exe",
+          "parentProcessGuid": "{m06-agent}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "M06-2",
+    "timestamp": "2026-09-20T09:00:02Z",
+    "agent": {
+      "name": "BM-M06"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M06"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\cmd.exe",
+          "commandLine": "cmd.exe /c start rundll32.exe C:\\ProgramData\\m.dll,Go",
+          "processGuid": "{m06-cmd}",
+          "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "parentProcessGuid": "{m06-ps}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "M06-3",
+    "timestamp": "2026-09-20T09:00:03Z",
+    "agent": {
+      "name": "BM-M06"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M06"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\rundll32.exe",
+          "commandLine": "rundll32.exe C:\\ProgramData\\m.dll,Go",
+          "processGuid": "{m06-rd}",
+          "parentImage": "C:\\Windows\\System32\\cmd.exe",
+          "parentProcessGuid": "{m06-cmd}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "M06-4",
+    "timestamp": "2026-09-20T09:00:06Z",
+    "agent": {
+      "name": "BM-M06"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "BM-M06"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\rundll32.exe",
+          "processGuid": "{m06-rd}",
+          "destinationIp": "93.184.216.34",
+          "destinationPort": "443"
+        }
+      }
+    }
+  }
+]

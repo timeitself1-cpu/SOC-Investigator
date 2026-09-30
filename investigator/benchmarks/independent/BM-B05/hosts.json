@@ -1,0 +1,8 @@
+[
+  {
+    "host": "BM-B05",
+    "role": "Managed workstation",
+    "criticality": "medium",
+    "os": "Windows 11 23H2"
+  }
+]

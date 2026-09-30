@@ -1,0 +1,24 @@
+{
+  "case_id": "BM-M06",
+  "label": "malicious",
+  "rationale": "The alerted PowerShell is launched by the genuine Configuration Manager agent path, but its grandchild (cmd -> rundll32 from ProgramData) connects to a public address. A compromised or abused management channel; benign closure must be blocked by the descendant activity.",
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "forbidden_verdicts": [
+    "benign"
+  ],
+  "forbidden_claims": [
+    "credential_theft"
+  ],
+  "required_refs": [
+    "M06-1",
+    "M06-4"
+  ],
+  "dimensions": [
+    "admin_tool",
+    "descendant_activity"
+  ],
+  "expect_injection_flag": false
+}
