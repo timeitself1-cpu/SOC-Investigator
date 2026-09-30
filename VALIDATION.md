@@ -1,4 +1,35 @@
-# Validation — v0.3.0 (standalone Windows investigator, 2026-09-30)
+# Validation — v0.3.1 (reasoning-contract repair, 2026-09-30)
+
+Same environment as v0.3.0 below: Linux x86-64, CPython 3.12.3 pinned venv, Node 22,
+Chromium; Qwen2.5 tokenizer from npm `@lenml/tokenizer-qwen2_5`. **No Ollama, no
+Windows host.** Raw outputs: [`docs/validation/v0.3.1/`](docs/validation/v0.3.1/).
+Every row except 13 and 14 is reproduced by `docs/validation/v0.3.1/run_validation.sh`.
+Summary: [V0.3.1_RELEASE_NOTES.md](V0.3.1_RELEASE_NOTES.md).
+
+| # | Command | Result | Output file |
+| --- | --- | --- | --- |
+| 1 | `python -m pytest -q` ×5 | 356 passed, 4 skipped, 19 deselected — every run | `pytest.txt`, `pytest_5x.txt` |
+| 2 | `pytest tests/test_browser_ui.py -m ""` (Chromium) | 2 passed | `pytest_browser.txt` |
+| 3 | `node --test tests/test_activity_dom.cjs` | 6 passed | `node_dom_tests.txt` |
+| 4 | `pytest -m integration` (unconfigured) | 19 skipped | `pytest_integration_unconfigured.txt` |
+| 5 | `python -m investigator --llm mock benchmark` | benign FP 0, TP 9/9; contract: 0 invalid args, 0 duplicates, 0 loop stops, 6 revisions | `benchmark_mock.txt/.json` |
+| 6 | `… benchmark --adversary benign-after-investigation / benign-immediately` | benign FP **0** / **0** | `benchmark_benign-*.txt/.json` |
+| 7 | `python -m investigator --llm mock acceptance` | ALL CRITERIA PASSED | `acceptance_mock.txt` |
+| 8 | `python -m investigator --llm mock evaluate` | 5/5 | `evaluate_demo.txt` |
+| 9 | `python docs/validation/v0.2.1/final_gate.py . <tokenizer.json>` | 9/9 (A–G) | `final_gate_v021_on_v031.txt` |
+| 10 | `python docs/validation/v0.3/replay_e2e.py` (SYNTHETIC XML) | verdicts and statuses identical to v0.3; only tool order changed (baseline tree first) | `replay_synthetic_e2e.txt` |
+| 11 | `probe_tokens.py` (floods) and `probe_contract_tokens.py` (all prompts incl. revision, 16384 and 8192) | no overflow; max 9,956 / 8,829 tokens at 16384, 2,758 at 8192 | `tokens_16384_floods.txt`, `tokens_contract.txt` |
+| 12 | mutation sets v0.2.1 / v0.3 / v0.3.1 | 11/11, 10/10, 11/11 killed (C4 and C10 survived the first v0.3.1 run; tests added) | `mutation_*.txt` |
+| 13 | `scripted_replay.py` (observed qwen behaviour, scripted) | ignore-feedback model contained (0/7, no false benign); feedback-following model 7/7 | `scripted_replay.txt` |
+| 14 | visibility defect impact, v0.3 vs v0.3.1 at 8192 | v0.3: BM-B01, BM-B05 benign with tree records unseen; v0.3.1: none; adversary benign FP 0 in both | `visibility_defect_impact.txt`, `visibility_defect_counts.txt` |
+
+**NOT VERIFIED:** v0.3.1 with a real model. `run_ollama_eval.sh` / `.ps1` have not been
+run; see `ollama_before_after.md`. Live Windows reader and RW-01…RW-05, Windows channel
+permissions and Wazuh are also not verified.
+
+---
+
+# Historical: validation — v0.3.0 (standalone Windows investigator, 2026-09-30)
 
 Executed on Linux x86-64, CPython 3.12.3 (`.venv`: pinned `requirements-validated.txt`,
 `pip install -e '.[dev]'`, `playwright`, `tokenizers`), Node v22.22.2, Chromium 1194.

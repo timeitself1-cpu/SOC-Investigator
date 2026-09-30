@@ -1,6 +1,6 @@
 [project]
 name = "soc-investigator"
-version = "0.3.0"
+version = "0.3.1"
 description = "Local-first AI security investigation agent for Windows: security signals to evidence-grounded investigations."
 readme = "README.md"
 requires-python = ">=3.12"

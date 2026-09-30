@@ -41,11 +41,12 @@ from .models import (
     LLMExchange,
     ProcessNode,
     ReportDraft,
+    RevisionRecord,
     ToolCall,
     utcnow,
 )
 from .report import ReportInputs, validate_report
-from .tools import ToolContext, ToolResult, dispatch, tool_catalog
+from .tools import ARG_DOCS, ARG_GLOSSARY_NOTE, ToolContext, ToolResult, dispatch, tool_catalog
 
 ActivityHook = Callable[[ActivityEvent], None]
 
@@ -75,12 +76,15 @@ Respond with JSON:
 or, when you have enough evidence:
 {"action": "finish", "arguments": {}, "purpose": "<short reason>"}
 
-Only use tools from the "available_tools" list. Use evidence IDs only from the "evidence" list.
+Before choosing:
+- Read "last_step_result": what your previous request returned, or why it was skipped or rejected.
+- Read "answered_requests": requests already executed (some by the harness itself). Repeating one is skipped; three unproductive requests in a row end evidence gathering.
+- "collection_checklist" shows what a complete investigation of this alert needs; "suggested_next_steps" are hints for this alert type.
+Only use tools from "available_tools" and only the arguments each tool lists, with values inside the listed allowed values and ranges (see each tool's "example"). Use evidence IDs only from the "evidence" list.
 If "evidence_omitted" is non-zero, some retrieved evidence is summarized or hidden to fit the context budget.
 """
 
-REPORT_INSTRUCTIONS = """Write the final investigation report as JSON:
-{
+_REPORT_SHAPE = """{
   "verdict": "benign" | "suspicious" | "likely_malicious" | "insufficient_evidence",
   "confidence": 0.0-1.0,
   "summary": "<concise analyst summary>",
@@ -90,10 +94,27 @@ REPORT_INSTRUCTIONS = """Write the final investigation report as JSON:
   ],
   "recommended_actions": [{"action": "...", "rationale": "...", "priority": "low|medium|high"}],
   "limitations": ["..."]
-}
+}"""
 
-Rules: every finding needs >=1 evidence_id from the evidence list. Tag each finding with claims from "claim_vocabulary"; untagged findings are reduced to observations. Recommendations are advisory only; none will be executed. Do not fabricate evidence IDs or ATT&CK techniques. Consider "collection_gaps": missing or failed collection means unknowns, not absence of activity.
-"""
+_CLAIM_RULES_TEXT = """How to tag findings (the harness checks every claim and technique deterministically):
+- A claim states observed BEHAVIOR only. Never assert intent (why it happened) or outcome (for example that credentials were actually stolen or an account was actually taken over): the harness cannot verify them. Put your interpretation of intent in the summary as an assessment.
+- Use claims from "claim_contract.eligible": their prerequisites are met by the listed evidence; cite those evidence IDs. You decide whether the interpretation applies.
+- Claims under "claim_contract.not_supported_by_retrieved_evidence" or "never_supported_here" will be rejected.
+- "benign_administration" means ONLY that the alerted process was launched by a recognized endpoint-management agent (Intune / Configuration Manager). It does NOT mean an administrator or service account was used.
+- ATT&CK techniques: use "attack_contract.eligible" with the listed evidence.
+Verdict guidance (your assessment; the harness may lower it, never raise it):
+- suspicious: behavior that warrants analyst review is supported.
+- likely_malicious: several correlated malicious behaviors are supported.
+- benign: only activity launched by a recognized management agent, with complete collection.
+- insufficient_evidence: the evidence does not support a determination.
+Untagged findings are reduced to observations. Recommendations are advisory only; none will be executed. Missing or failed collection ("collection_gaps") means unknowns, not absence of activity."""
+
+REPORT_INSTRUCTIONS = "Write the final investigation report as JSON:\n" + _REPORT_SHAPE + "\n\n" + _CLAIM_RULES_TEXT + "\n"
+
+REVISION_INSTRUCTIONS = ("The harness validated your report draft. \"validation_of_your_draft\" lists what was "
+                         "rejected and why (application-generated). Write a revised final report as JSON with the "
+                         "same shape:\n" + _REPORT_SHAPE + "\n\n" + _CLAIM_RULES_TEXT +
+                         "\nThis is the only revision. The same checks apply to it.\n")
 
 # Keys shown to the model, in priority order (later keys are dropped first under pressure).
 _PROMPT_ATTRS = ("image", "parent_image", "command_line", "decoded_command", "user", "dest_ip",
@@ -153,6 +174,8 @@ class InvestigationAgent:
                 emit("warning", seed_call.error or "Triggering event unavailable")
         else:
             trace.errors.append("seed: alert has no triggering event reference")
+        if self.settings.baseline_collection and not is_cancelled():
+            process_tree = self._baseline(ctx, trace, emit) or process_tree
 
         step = 0
         stop_reason: str | None = None
@@ -234,52 +257,118 @@ class InvestigationAgent:
                                     limitations=["The investigation was cancelled; no assessment was accepted."])
                 final_exchange = None
 
-        visibility_gaps: list[str] = []   # make the investigation incomplete
-        visibility_notes: list[str] = []  # disclosed known unknowns only
-        visibility_issues: list[str] | None = None
-        if final_exchange is not None:
-            visibility_issues = []
-            hidden = final_exchange.priority_evidence_hidden
+        host_signals = self._host_signal_check(alert) if not cancelled else None
+
+        def assess(d: ReportDraft, exchange: LLMExchange | None, is_cancelled_run: bool) -> InvestigationReport:
+            gaps, notes, issues = self._visibility(exchange, trace)
+            return validate_report(
+                d, store, alert, trace, process_tree, self.model.name, self.backend.name, started_at, utcnow(),
+                inputs=ReportInputs(host_contexts=list(ctx.host_contexts.values()),
+                                    backend_caveats=self._backend_caveats(),
+                                    visibility_gaps=gaps, visibility_notes=notes, cancelled=is_cancelled_run,
+                                    model_visibility_issues=issues, host_signal_check=host_signals,
+                                    min_network_window_minutes=min(15, self.settings.max_window_minutes)))
+
+        report = assess(draft, final_exchange, cancelled)
+        reasons = self._revision_reasons(report) if (final_exchange is not None and not cancelled) else []
+        if reasons and self.settings.validation_revision and not is_cancelled():
+            report = self._revise(ctx, trace, step, emit, is_cancelled, draft, report, reasons, assess)
+        note = "valid" if report.validation.valid else f"{len(report.validation.issues)} validation note(s)"
+        emit("done", f"Investigation {report.status}: {report.verdict} (confidence {report.confidence:.2f}); {note}")
+        return report
+
+    # -- visibility / revision ------------------------------------------------
+    @staticmethod
+    def _visibility(exchange: LLMExchange | None, trace: InvestigationTrace
+                    ) -> tuple[list[str], list[str], list[str] | None]:
+        """(gaps that make the run incomplete, disclosed notes, model-visibility issues)."""
+        gaps: list[str] = []
+        notes: list[str] = []
+        issues: list[str] | None = None
+        if exchange is not None:
+            issues = []
+            hidden = exchange.priority_evidence_hidden
             if hidden:
                 # The trigger, the alerted process tree or a suspicious record did
                 # not reach the model in full: the assessment cannot be trusted.
                 gap = (f"{hidden} priority evidence item(s) (trigger, alerted process tree or suspicious "
-                       "records) were summarized or omitted in the final-report prompt; the assessment did not "
+                       "records) were summarized or omitted in the assessment prompt; the assessment did not "
                        "see them in full.")
-                visibility_gaps.append(gap)
-                visibility_issues.append(gap)
-            routine_omitted = final_exchange.evidence_omitted
-            routine_summarized = final_exchange.evidence_summarized
-            if routine_omitted or routine_summarized:
+                gaps.append(gap)
+                issues.append(gap)
+            if exchange.evidence_omitted or exchange.evidence_summarized:
                 # Routine records outside the alerted tree: the model did not read
                 # them in full, but the application's verdict gates checked all
                 # retrieved evidence. Disclosed, not a coverage failure.
-                visibility_notes.append(
-                    f"The final-report prompt omitted {routine_omitted} and summarized {routine_summarized} "
-                    "retrieved record(s) outside the alerted process tree to fit the context budget "
-                    "(routine records not shown to the model in full; application checks covered them).")
+                notes.append(
+                    f"The assessment prompt omitted {exchange.evidence_omitted} and summarized "
+                    f"{exchange.evidence_summarized} retrieved record(s) outside the alerted process tree to fit the "
+                    "context budget (routine records not shown to the model in full; application checks covered them).")
         overflowed = [x for x in trace.llm_exchanges if x.context_overflow_suspected]
         if overflowed:
             gap = (f"{len(overflowed)} model prompt(s) may have exceeded the context window; the model may not "
                    "have seen all instructions or evidence it was sent.")
-            visibility_gaps.append(gap)
-            if visibility_issues is not None:
-                visibility_issues.append(gap)
-        host_signals = self._host_signal_check(alert) if not cancelled else None
-        completed_at = utcnow()
-        report = validate_report(
-            draft, store, alert, trace, process_tree, self.model.name, self.backend.name, started_at, completed_at,
-            inputs=ReportInputs(host_contexts=list(ctx.host_contexts.values()),
-                                backend_caveats=self._backend_caveats(),
-                                visibility_gaps=visibility_gaps, visibility_notes=visibility_notes,
-                                cancelled=cancelled,
-                                model_visibility_issues=visibility_issues,
-                                host_signal_check=host_signals,
-                                min_network_window_minutes=min(15, self.settings.max_window_minutes)),
-        )
-        note = "valid" if report.validation.valid else f"{len(report.validation.issues)} validation note(s)"
-        emit("done", f"Investigation {report.status}: {report.verdict} (confidence {report.confidence:.2f}); {note}")
-        return report
+            gaps.append(gap)
+            if issues is not None:
+                issues.append(gap)
+        return gaps, notes, issues
+
+    @staticmethod
+    def _revision_reasons(report: InvestigationReport) -> list[str]:
+        """Validation losses that a revision could address (claims, techniques,
+        findings, references). Collection gaps and verdict gates are not revisable."""
+        vr = report.validation
+        lost = (vr.rejected_claims or vr.dropped_attack_mappings or vr.dropped_findings or vr.invalid_evidence_refs
+                or any(not f.claims for f in report.findings))
+        if not lost:
+            return []
+        return [i for i in vr.issues if i.startswith(("Finding", "Dropped ATT&CK", "Verdict downgraded",
+                                                       "Benign verdict withheld", "Likely-malicious"))]
+
+    def _revise(self, ctx, trace, step, emit, is_cancelled, draft: ReportDraft, first: InvestigationReport,
+                reasons: list[str], assess) -> InvestigationReport:
+        """One bounded validation-feedback revision. Only application-generated text is
+        sent back (rejection reasons, cited IDs, eligibility); the same gates apply."""
+        emit("model", "Revising the assessment after validation feedback (one revision)")
+        vr = first.validation
+        findings = []
+        for df, f in zip(draft.findings, first.findings):
+            findings.append({"title": df.title[:80], "cited_evidence_ids": df.evidence_ids[:30],
+                             "claims_proposed": [str(c) for c in df.claims], "claims_accepted": list(f.claims),
+                             "claims_rejected": f.rejected_claims,
+                             "techniques_proposed": df.attack_techniques})
+        feedback = {"your_verdict": draft.verdict, "verdict_after_checks": first.verdict,
+                    "issues": reasons[:20], "findings": findings,
+                    "techniques_dropped": vr.dropped_attack_mappings,
+                    "invalid_evidence_refs": vr.invalid_evidence_refs[:20]}
+        messages, meta = self._messages(ctx, trace, step, "revision", REVISION_INSTRUCTIONS, emit,
+                                        extra={"validation_of_your_draft": feedback})
+        record = RevisionRecord(performed=False, reasons=reasons, first_draft_verdict=draft.verdict,
+                                first_validated_verdict=first.verdict,
+                                first_accepted_claims=[c for f in first.findings for c in f.claims],
+                                first_rejected_claims=[c for f in first.findings for c in f.rejected_claims],
+                                first_validation=vr)
+        revised, exchange = (None, None)
+        if messages is not None:
+            revised, exchange = self._call_with_repair(messages, ReportDraft, step, "revision", trace, emit, meta,
+                                                       is_cancelled)
+        if is_cancelled():
+            trace.errors.append(f"{CANCELLED} investigation cancelled during the revision; the drafts were discarded")
+            cancelled_draft = ReportDraft(verdict="insufficient_evidence", confidence=0.0,
+                                          summary="Investigation cancelled while the assessment was being revised.",
+                                          limitations=["The investigation was cancelled; no assessment was accepted."])
+            return assess(cancelled_draft, None, True)
+        if revised is None:
+            first.revision = record.model_copy(update={
+                "note": "The model did not return a valid revision; the first validated draft is the assessment."})
+            return first
+        final = assess(revised, exchange, False)
+        final_claims = [c for f in final.findings for c in f.claims]
+        final.revision = record.model_copy(update={
+            "performed": True, "revised_draft_verdict": revised.verdict, "final_accepted_claims": final_claims,
+            "changed": final.verdict != first.verdict or sorted(final_claims) != sorted(record.first_accepted_claims),
+            "note": "The report below is the validated revision; the first draft is in the audit trace."})
+        return final
 
     def _host_signal_check(self, alert: Alert) -> tuple[str, list[str]]:
         """Other deterministic signals on the alerted host within the investigation
@@ -299,12 +388,149 @@ class InvestigationAgent:
             return "unavailable", notes
         return "clear", []
 
+    def _decide_contract(self, ctx: ToolContext, trace: InvestigationTrace, level: int = 0) -> dict[str, Any]:
+        """Step feedback, executed requests, collection checklist and suggestions.
+        Application-generated; no telemetry text is used as an instruction.
+        Under context pressure (level >= 2) the prose parts are shortened; the
+        argument contract (allowed values, ranges, rules, examples) is kept."""
+        from .report import evaluate_requirements
+        store = ctx.store
+        calls = trace.tool_calls
+        model_calls = [c for c in calls if c.initiator == "model"]
+        last: dict[str, Any]
+        if not model_calls:
+            done = [f"{c.tool} ({c.outcome})" for c in calls if c.initiator == "system"]
+            last = {"note": "No request from you yet. Already collected by the harness: " + ", ".join(done) + "."}
+        else:
+            c = model_calls[-1]
+            new_ids = [e for e in c.evidence_ids if (ev := store.get(e)) is not None and ev.retrieved_by == c.call_id]
+            last = {"call_id": c.call_id, "tool": c.tool, "arguments": c.arguments, "status": c.status,
+                    "outcome": c.outcome, "result_count": c.result_count, "new_evidence_ids": new_ids[:30]}
+            if c.status == "duplicate":
+                last["message"] = (f"Skipped: identical to {c.duplicate_of}, which was already answered "
+                                   f"(evidence {', '.join(c.evidence_ids[:15]) or 'none'}). Do not repeat it; choose a "
+                                   "different tool or different arguments, or finish.")
+            elif c.status == "rejected":
+                last["message"] = (f"Rejected before execution: {c.error}. Use only the arguments and allowed values "
+                                   "listed for the tool, or choose another tool.")
+            elif c.status == "error":
+                last["message"] = (f"Failed ({c.error_kind}): {c.error} The data it would have returned is unknown; "
+                                   "do not treat it as empty.")
+            elif c.result_count == 0:
+                last["message"] = "Returned no events for this scope."
+            if c.gaps:
+                last["gaps"] = c.gaps[:3]
+        answered = [{"call_id": c.call_id, "by": c.initiator, "tool": c.tool, "arguments": c.arguments,
+                     "outcome": c.outcome, "result_count": c.result_count}
+                    for c in calls if c.status == "ok"][-(20 if level < 2 else 8 if level < 4 else 5):]
+        reqs = evaluate_requirements(trace, store, ctx.alert, ReportInputs(
+            host_contexts=list(ctx.host_contexts.values()), model_visibility_issues=[],
+            min_network_window_minutes=min(15, self.settings.max_window_minutes)))
+        checklist = {}
+        for q in reqs:
+            if q.name in ("model_visibility",):
+                continue
+            if q.name == "host_signals":
+                checklist[q.name] = {"status": "checked_by_harness_at_the_end",
+                                     "detail": "other signals on the host are checked by the application"}
+                continue
+            if q.satisfied:
+                status = "met"
+            elif "no process identity" in q.reason or "was not retrieved" in q.reason:
+                status = "cannot_be_established"
+            elif q.call_ids:
+                status = "attempted_not_met"
+            else:
+                status = "not_yet_collected"
+            checklist[q.name] = {"status": status, "detail": q.reason}
+        trig = next((e for e in (store.get(t) for t in store.trigger_ids()) if e is not None), None)
+        kind = _SUGGESTION_FOR.get(trig.category if trig else "", "")
+        done_tools = {(c.tool, json.dumps(c.arguments, sort_keys=True)) for c in calls if c.status == "ok"}
+        suggestions = []
+        for tool, args, why in _SUGGESTIONS.get(kind, []):
+            args = {k: (trig.evidence_id if v == "EV-0001" and trig else v) for k, v in args.items()}
+            if (tool, json.dumps(args, sort_keys=True)) in done_tools:
+                continue
+            if tool in ("get_process_tree", "get_host_context") and any(t == tool for t, _ in done_tools):
+                continue
+            if tool == "get_powershell_activity" and not (trig and "powershell" in trig.indicators):
+                continue
+            suggestions.append({"tool": tool, "arguments": args, "why": why})
+        catalog = tool_catalog(self.settings)
+        out: dict[str, Any] = {"available_tools": catalog, "argument_rules": ARG_GLOSSARY_NOTE,
+                               "last_step_result": last, "answered_requests": answered,
+                               "collection_checklist": checklist, "suggested_next_steps": suggestions}
+        if level < 2:
+            out["argument_glossary"] = ARG_DOCS
+        else:
+            out["available_tools"] = [{k: v for k, v in t.items() if k != "description"} for t in catalog]
+            for item in checklist.values():
+                item["detail"] = item["detail"][:120]
+        return out
+
+    @staticmethod
+    def _report_contract(ctx: ToolContext, level: int = 0) -> dict[str, Any]:
+        """Claim and ATT&CK contract for the assessment: definitions of claims whose
+        prerequisites the retrieved evidence meets (with citable IDs), the rest by
+        prerequisite only. Computed with the validator's own predicates."""
+        items = ctx.store.all()
+        eligible = attack.claim_eligibility(items)
+        definitions = {d["claim"]: d for d in attack.claim_contract()}
+        keys = (("claim", "label", "means", "does_not_mean", "requires") if level < 2
+                else ("claim", "label", "does_not_mean", "requires"))
+        shown = [{**{k: definitions[c][k] for k in keys}, "cite_evidence_ids": ids[:12]} for c, ids in eligible.items()]
+        if "benign_administration" not in eligible:
+            shown_warning = {k: v for k, v in definitions["benign_administration"].items()
+                             if k in ("claim", "label", "means", "does_not_mean")}
+        else:
+            shown_warning = None
+        contract: dict[str, Any] = {
+            "note": "Claims state observed behavior only, not intent or outcome.",
+            "eligible": shown,
+            "not_supported_by_retrieved_evidence": (
+                [{"claim": c, "requires": definitions[c]["requires"]} for c in definitions if c not in eligible]
+                if level < 3 else [c for c in definitions if c not in eligible]),
+            "never_supported_here": list(attack.UNAVAILABLE_CLAIMS),
+        }
+        if shown_warning:
+            contract["benign_administration_is_not_eligible"] = shown_warning
+        techniques = attack.technique_eligibility(items)
+        names = {t["technique"]: t for t in attack.technique_contract()}
+        return {"claim_contract": contract,
+                "attack_contract": {"eligible": [{**names[t], "cite_evidence_ids": ids[:12]}
+                                                 for t, ids in techniques.items()],
+                                    "not_supported_by_retrieved_evidence": sorted(set(names) - set(techniques))}}
+
     def _backend_caveats(self) -> list[str]:
         caveats = getattr(self.backend, "coverage_caveats", None)
         try:
             return list(caveats()) if callable(caveats) else []
         except Exception:  # noqa: BLE001 - caveats are advisory
             return ["Backend coverage caveats could not be determined."]
+
+    # -- application-owned baseline (v0.3.1) --------------------------------
+    def _baseline(self, ctx: ToolContext, trace: InvestigationTrace, emit) -> list[ProcessNode] | None:
+        """Collect host context and, when the trigger has a process identity, its
+        process tree, before the model's first step. Recorded as system-initiated
+        calls through the same dispatcher (same validation, outcomes and
+        requirements as a model call); a failure is a visible failed collection."""
+        plan: list[tuple[str, dict[str, Any]]] = [("get_host_context", {})]
+        trig = [ctx.store.get(t) for t in ctx.store.trigger_ids()]
+        trig = [t for t in trig if t is not None and t.process_guid]
+        if trig:
+            plan.append(("get_process_tree", {"evidence_id": trig[0].evidence_id}))
+        tree: list[ProcessNode] | None = None
+        for tool, args in plan:
+            call, result = dispatch(ctx, 0, tool, args, initiator="system")
+            trace.tool_calls.append(call)
+            if call.status == "ok":
+                emit("tool", f"{call.summary} (collected by the application before the model's first step)")
+                if result and result.extra.get("process_tree"):
+                    tree = [ProcessNode.model_validate(n) for n in result.extra["process_tree"]]
+            else:
+                trace.errors.append(f"collection: baseline {tool} {call.status} ({call.error_kind})")
+                emit("warning", f"Baseline {tool} did not complete: {call.error}")
+        return tree
 
     # -- seed ------------------------------------------------------------
     def _seed_trigger(self, ctx: ToolContext, alert: Alert) -> tuple[ToolCall, ToolResult]:
@@ -360,10 +586,10 @@ class InvestigationAgent:
                                limitations=["Report generation failed validation after repair attempts."]), exchange
         return obj, exchange
 
-    def _messages(self, ctx, trace, step, phase, instructions, emit):
+    def _messages(self, ctx, trace, step, phase, instructions, emit, extra: dict[str, Any] | None = None):
         budget = self.prompt_budget_chars()
         fixed = len(SYSTEM_PROMPT) + len(instructions) + 40
-        state, meta = self._build_state(ctx, trace, step, phase, max(0, budget - fixed))
+        state, meta = self._build_state(ctx, trace, step, phase, max(0, budget - fixed), extra)
         if state is None:
             trace.errors.append(f"decide: prompt budget ({budget} chars) too small for the minimal "
                                 f"{phase} state; increase SOCI_OLLAMA_NUM_CTX")
@@ -492,7 +718,8 @@ class InvestigationAgent:
         return text or ""
 
     def _build_state(self, ctx: ToolContext, trace: InvestigationTrace, step: int, phase: str,
-                     budget_chars: int | None = None) -> tuple[str | None, dict[str, Any]]:
+                     budget_chars: int | None = None, extra: dict[str, Any] | None = None
+                     ) -> tuple[str | None, dict[str, Any]]:
         """Serialize the investigation state, compacting until it fits the budget.
 
         Levels: 0 full; 1 shorten attribute values; 2 also shorten the tool
@@ -515,10 +742,13 @@ class InvestigationAgent:
         while True:
             counter = [0]
             text = self._render_state(ctx, trace, step, phase, ranked[:keep], triggers, level, len(ranked) - keep,
-                                      counter)
+                                      counter, extra)
             if len(text) <= budget_chars:
                 summarized = max(0, keep - _SUMMARY_AFTER) if level >= 3 else 0
-                full_view = set(e.evidence_id for e in ranked[:_SUMMARY_AFTER if level >= 3 else keep])
+                # Shown in full: the kept records, of which only the first
+                # _SUMMARY_AFTER at level >= 3 (the rest are one-line summaries).
+                # Omitted records (beyond ``keep``) are never in full view.
+                full_view = set(e.evidence_id for e in ranked[:min(keep, _SUMMARY_AFTER) if level >= 3 else keep])
                 return text, {"level": level, "evidence_shown": keep, "evidence_omitted": len(ranked) - keep,
                               "blobs": counter[0], "summarized": summarized,
                               "priority_hidden": len(priority - full_view)}
@@ -536,7 +766,8 @@ class InvestigationAgent:
                               "priority_hidden": len(priority)}
 
     def _render_state(self, ctx, trace, step, phase, shown: list[Evidence], triggers: set[str], level: int,
-                      omitted: int, blob_counter: list[int] | None = None) -> str:
+                      omitted: int, blob_counter: list[int] | None = None,
+                      extra: dict[str, Any] | None = None) -> str:
         blob_counter = blob_counter if blob_counter is not None else [0]
         attr_limit = None if level == 0 else 240
         compact_from = len(shown) if level < 3 else min(len(shown), _SUMMARY_AFTER)
@@ -581,9 +812,6 @@ class InvestigationAgent:
                                     "host": ctx.alert.host, "severity": ctx.alert.severity,
                                     "timestamp": ctx.alert.timestamp.isoformat(),
                                     "rule_description": ctx.alert.title}, blob_counter),
-            "available_tools": tool_catalog(),
-            "claim_vocabulary": sorted(attack.CLAIM_RULES),
-            "attack_catalog": sorted(attack.CATALOG),
             "host_context": hosts,
             "evidence": evidence,
             "evidence_count": len(ctx.store),
@@ -594,6 +822,12 @@ class InvestigationAgent:
             "step": step,
             "steps_left": self.settings.max_steps - step,
         }
+        if phase == "decide":
+            state.update(self._decide_contract(ctx, trace, level))
+        else:
+            state.update(self._report_contract(ctx, level))
+        if extra:
+            state.update(extra)
         # Prevent telemetry from terminating the visible data delimiters. This
         # preserves JSON values; it is a framing safeguard, not an injection proof.
         return json.dumps(state, default=str).replace("<", "\\u003c").replace(">", "\\u003e")
@@ -614,6 +848,25 @@ def _clip_keep_markers(value: str, limit: int) -> str:
             out.append(part if len(part) <= budget else part[:budget] + "…")
             budget -= len(part)
     return "".join(out)
+
+
+# --- model-facing contract sections (v0.3.1) ---------------------------------
+
+_SUGGESTIONS: dict[str, list[tuple[str, dict[str, Any], str]]] = {
+    "authentication": [("get_logon_activity", {"center_evidence_id": "EV-0001"}, "failures/successes around the alert"),
+                       ("get_host_context", {}, "asset role and criticality"),
+                       ("get_network_activity", {}, "network activity on the host")],
+    "process": [("get_process_tree", {"evidence_id": "EV-0001"}, "ancestry and all descendants"),
+                ("get_network_activity", {"scope": "process_tree"}, "connections of the alerted process tree"),
+                ("get_process_details", {"evidence_id": "EV-0001"}, "everything the process did"),
+                ("get_powershell_activity", {"evidence_id": "EV-0001"}, "script blocks, if PowerShell")],
+    "detection": [("get_defender_activity", {}, "detection and remediation history"),
+                  ("get_host_context", {}, "asset role and criticality"),
+                  ("get_related_events", {"evidence_id": "EV-0001"}, "activity around the detection")],
+}
+_SUGGESTION_FOR = {"authentication": "authentication", "privilege": "authentication", "process": "process",
+                   "process_access": "process", "file": "process", "registry": "process", "script": "process",
+                   "network": "process", "dns": "process", "detection": "detection"}
 
 
 # Indicators that make a record worth showing the model in full even outside the

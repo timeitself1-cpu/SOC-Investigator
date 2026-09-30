@@ -28,7 +28,7 @@ class MockInvestigatorModel:
         text = next((m["content"] for m in reversed(messages) if "<STATE_JSON>" in m.get("content", "")),
                     messages[-1]["content"] if messages else "")
         state = self._parse_state(text)
-        if state.get("phase") == "final_report":
+        if state.get("phase") in ("final_report", "revision"):
             out = self._build_report(state)
         else:
             out = self._decide(state)

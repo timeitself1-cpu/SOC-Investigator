@@ -1,0 +1,16 @@
+== v0.3 (254772b, unfixed)
+8192 2048 BM-B01 benign with 1 omitted, priority_hidden reported 0
+8192 2048 BM-B05 benign with 2 omitted, priority_hidden reported 0
+== v0.3.1 (fixed)
+
+== independent benchmark with the benign-proposing adversaries at num_ctx 8192
+-- v0.3 (254772b, unfixed)
+num_ctx 8192 num_predict 2048 adversary benign-after-investigation: benign_false_positive=0
+num_ctx 8192 num_predict 2048 adversary benign-immediately: benign_false_positive=0
+num_ctx 8192 num_predict 1024 adversary benign-after-investigation: benign_false_positive=0
+num_ctx 8192 num_predict 1024 adversary benign-immediately: benign_false_positive=0
+-- v0.3.1 (fixed)
+num_ctx 8192 num_predict 2048 adversary benign-after-investigation: benign_false_positive=0
+num_ctx 8192 num_predict 2048 adversary benign-immediately: benign_false_positive=0
+num_ctx 8192 num_predict 1024 adversary benign-after-investigation: benign_false_positive=0
+num_ctx 8192 num_predict 1024 adversary benign-immediately: benign_false_positive=0

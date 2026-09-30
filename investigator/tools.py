@@ -650,6 +650,25 @@ class ToolSpec(BaseModel):
     description: str
     args_model: type[_Args]
     fn: ToolFn
+    requires: str = ""                       # argument rules not expressible per field
+    example: dict[str, Any] = {}             # one valid call (validated by tests)
+
+
+# Short, shared argument descriptions for the model-facing catalog (v0.3.1).
+ARG_DOCS: dict[str, str] = {
+    "host": "host name; default: the alerted host",
+    "category": "event category",
+    "event_id": "Windows/Sysmon event id",
+    "process_guid": "process GUID exactly as shown in evidence",
+    "evidence_id": "an EV-000N id from the evidence list",
+    "center_evidence_id": "center the time window on this EV id (default: the alert time)",
+    "keyword": "case-insensitive text to match in event fields",
+    "window_minutes": "minutes before AND after the anchor time",
+    "limit": "maximum events returned",
+    "scope": "'host' = every connection on the host; 'process_tree' = the alerted process (or the given "
+             "process) and all its reconstructed descendants",
+    "user": "account name, DOMAIN\\name or name",
+}
 
 
 TOOLS: dict[str, ToolSpec] = {
@@ -660,7 +679,9 @@ TOOLS: dict[str, ToolSpec] = {
                     "Defaults to the evidence host or alert host; provide host to pivot to another host."),
     "get_process_tree": ToolSpec(
         name="get_process_tree", args_model=GetProcessTreeArgs, fn=tool_get_process_tree,
-        description="Reconstruct process ancestry and direct children for a process_guid or evidence_id."),
+        description="Reconstruct process ancestry and ALL descendants (children, grandchildren, ...) for a "
+                    "process_guid or evidence_id.",
+        requires="exactly one of process_guid or evidence_id", example={"evidence_id": "EV-0001"}),
     "get_process_details": ToolSpec(
         name="get_process_details", args_model=GetProcessDetailsArgs, fn=tool_get_process_details,
         description="Return all events tied to one process (creation, network, file, registry, access)."),
@@ -688,16 +709,68 @@ TOOLS: dict[str, ToolSpec] = {
         description="List Microsoft Defender detections and remediation events near the alert."),
 }
 
+_EXAMPLES: dict[str, tuple[str, dict[str, Any]]] = {
+    "search_events": ("", {"category": "process", "window_minutes": 15}),
+    "get_process_details": ("exactly one of process_guid or evidence_id", {"evidence_id": "EV-0001"}),
+    "get_network_activity": ("scope='process_tree' uses the alerted process unless evidence_id or process_guid is "
+                             "given; run get_process_tree first so descendants are included", {"scope": "process_tree"}),
+    "get_related_events": ("evidence_id is required", {"evidence_id": "EV-0001", "window_minutes": 15}),
+    "get_host_context": ("", {}),
+    "get_logon_activity": ("", {"center_evidence_id": "EV-0001"}),
+    "get_powershell_activity": ("", {"evidence_id": "EV-0001"}),
+    "get_defender_activity": ("", {}),
+}
+for _name, (_req, _ex) in _EXAMPLES.items():
+    TOOLS[_name] = TOOLS[_name].model_copy(update={"requires": _req, "example": _ex})
+
 ALLOWED_TOOLS = frozenset(TOOLS)
 
 
-def tool_catalog() -> list[dict[str, Any]]:
+def _arg_contract(name: str, prop: dict[str, Any], required: bool, settings: Settings | None) -> str:
+    """One argument as a compact line: type, allowed values, bounds, default."""
+    variants = [v for v in prop.get("anyOf", [prop]) if v.get("type") != "null"]
+    base = variants[0] if variants else {}
+    enum = base.get("enum") or ([base["const"]] if "const" in base else None)
+    lo, hi = base.get("minimum"), base.get("maximum")
+    default = prop.get("default")
+    if settings is not None and name == "window_minutes":
+        hi, default = settings.max_window_minutes, settings.max_window_minutes
+    if settings is not None and name == "limit":
+        hi, default = settings.max_results_per_tool, settings.max_results_per_tool
+    if enum:
+        text = "one of " + "|".join(str(v) for v in enum)
+    elif base.get("type") == "integer":
+        text = f"integer {lo if lo is not None else ''}-{hi if hi is not None else ''}".replace(" -", " ")
+    else:
+        text = base.get("type", "string")
+    if required:
+        text += " (REQUIRED)"
+    elif default is not None:
+        text += f" (default {default})"
+    else:
+        text += " (optional)"
+    return text
+
+
+ARG_GLOSSARY_NOTE = ("Arguments not listed for a tool are rejected. Values outside the listed allowed values or "
+                     "ranges are rejected; omit an optional argument to use its default.")
+
+
+def tool_catalog(settings: Settings | None = None) -> list[dict[str, Any]]:
+    """The model-facing tool contract, generated from the argument schemas so it
+    cannot drift from validation: every argument's type, allowed values, default and
+    bounds, the rules between arguments, and one valid example call. Shared argument
+    meanings are in ``ARG_DOCS`` (shown once as ``argument_glossary``)."""
     out = []
     for spec in TOOLS.values():
         schema = spec.args_model.model_json_schema()
-        props = schema.get("properties", {})
-        out.append({"name": spec.name, "description": spec.description,
-                    "arguments": {k: v.get("type", "any") for k, v in props.items()}})
+        required = set(schema.get("required", []))
+        args = {k: _arg_contract(k, v, k in required, settings) for k, v in schema.get("properties", {}).items()}
+        entry: dict[str, Any] = {"name": spec.name, "description": spec.description, "arguments": args,
+                                 "example": spec.example}
+        if spec.requires:
+            entry["rules"] = spec.requires
+        out.append(entry)
     return out
 
 

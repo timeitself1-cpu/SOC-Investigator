@@ -8,6 +8,7 @@
     python -m investigator diagnose        # read-only live checks (auth, TLS, indexes, mapping, model)
     python -m investigator benchmark       # independent benchmark with separated metrics
     python -m investigator sources         # telemetry sources on this computer (windows backends)
+    python -m investigator --llm ollama acceptance --repeats 3 --out DIR   # v0.3.1 real-model acceptance
 
 Flags: --llm mock|ollama  --backend fixture|windows|windows-replay|wazuh  --replay-dir DIR  --max-steps N
 """
@@ -250,11 +251,22 @@ def cmd_sources(args: argparse.Namespace) -> int:
     return 0 if all(s.state == "active" for s in statuses) else 2
 
 
+def cmd_acceptance(args: argparse.Namespace) -> int:
+    """v0.3.1 behavior-based acceptance on the demo fixtures (run with --llm ollama)."""
+    from .evaluation.acceptance import format_acceptance, run_acceptance
+
+    settings = _settings_from_args(args)
+    result = run_acceptance(settings, args.alerts or ["INC-001", "INC-002", "INC-003", "INC-004", "INC-005"],
+                            repeats=args.repeats, out_dir=args.out)
+    print(json.dumps(result, indent=2, default=str) if args.json else format_acceptance(result))
+    return 0 if result["all_passed"] else 3
+
+
 def cmd_benchmark(args: argparse.Namespace) -> int:
     from .evaluation.benchmark import format_benchmark, run_benchmark
 
     settings = _settings_from_args(args)
-    result = run_benchmark(settings, suite_dir=args.suite, adversary=args.adversary)
+    result = run_benchmark(settings, suite_dir=args.suite, adversary=args.adversary, repeats=args.repeats)
     if args.json:
         print(json.dumps(result, indent=2, default=str))
     else:
@@ -316,7 +328,16 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--out", help="also write the JSON result to this file")
     sp.add_argument("--adversary", choices=["benign-after-investigation", "benign-immediately"],
                     help="replace the model with an evaluation-only benign proposer to test the verdict gates")
+    sp.add_argument("--repeats", type=int, default=1, help="run every case N times (real models vary)")
     sp.set_defaults(func=cmd_benchmark)
+
+    sp = sub.add_parser("acceptance", help="v0.3.1 behavior-based acceptance on the demo fixtures "
+                                           "(use --llm ollama)")
+    sp.add_argument("--alerts", nargs="*", help="alert ids (default: INC-001..INC-005)")
+    sp.add_argument("--repeats", type=int, default=1)
+    sp.add_argument("--out", help="directory for per-run JSON/Markdown reports and acceptance.json")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(func=cmd_acceptance)
     return p
 
 

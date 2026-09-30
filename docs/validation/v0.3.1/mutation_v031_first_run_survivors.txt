@@ -1,0 +1,16 @@
+First run of mutate_v031.sh (before the two tests were added). Copied verbatim from
+the session output; C1-C3 and C5-C9 were killed exactly as in mutation_v031.txt.
+
+C4 revision not triggered by rejected claims
+    dedicated [tests/test_reasoning_contract.py::test_feedback_following_model_reaches_the_supported_behavior] => 2 passed in 0.30s
+    full suite => 352 passed, 4 skipped, 19 deselected, 1 warning in 18.14s
+C10 rejected claims hidden from the revision feedback
+    dedicated [tests/test_reasoning_contract.py::test_revision_feedback_contains_only_application_text] => 1 passed in 0.31s
+    full suite => 352 passed, 4 skipped, 19 deselected, 1 warning in 18.88s
+
+Both SURVIVED. Cause:
+- C4: a finding whose only claim is rejected ends with no claims, which also triggers the
+  revision, so the scripted models never exercised "rejected claim next to an accepted one".
+  Added test_a_rejected_claim_next_to_an_accepted_one_still_triggers_the_revision.
+- C10: the feedback test checked the issue text, not the per-finding claims_rejected field.
+  Added that assertion to test_revision_feedback_contains_only_application_text.

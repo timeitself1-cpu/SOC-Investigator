@@ -1,0 +1,10 @@
+== num_ctx 16384  num_predict 2048  prompt budget 14336
+   decide        max tokens= 8,829 chars= 25,018 chars/token=2.83  prompt+num_predict=10,877 / 16,384 ok  [BM-X08 (mock)]
+   final_report  max tokens= 8,789 chars= 25,048 chars/token=2.85  prompt+num_predict=10,837 / 16,384 ok  [BM-X08 (mock)]
+   revision      max tokens= 4,657 chars= 14,714 chars/token=3.16  prompt+num_predict= 6,705 / 16,384 ok  [INC-004 (observed-qwen)]
+   run statuses: {('mock', 'completed'): 26, ('observed-qwen', 'completed'): 24, ('feedback-follower', 'completed'): 26, ('observed-qwen', 'incomplete'): 2, ('mock', 'incomplete'): 1, ('observed-qwen', 'failed'): 1, ('feedback-follower', 'failed'): 1}
+== num_ctx 8192  num_predict 2048  prompt budget 6144
+   decide        max tokens= 2,716 chars=  8,809 chars/token=3.24  prompt+num_predict= 4,764 / 8,192 ok  [BM-X07 (mock)]
+   final_report  max tokens= 2,758 chars=  8,941 chars/token=3.24  prompt+num_predict= 4,806 / 8,192 ok  [INC-004 (observed-qwen)]
+   revision      max tokens= 2,737 chars=  9,497 chars/token=3.47  prompt+num_predict= 4,785 / 8,192 ok  [INC-004 (observed-qwen)]
+   run statuses: {('mock', 'incomplete'): 14, ('observed-qwen', 'completed'): 22, ('feedback-follower', 'failed'): 2, ('observed-qwen', 'incomplete'): 4, ('feedback-follower', 'incomplete'): 17, ('mock', 'completed'): 13, ('feedback-follower', 'completed'): 8, ('observed-qwen', 'failed'): 1}

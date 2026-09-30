@@ -31,9 +31,13 @@ priority evidence). Missing or unreadable telemetry is reported as a coverage ga
 never treated as "nothing found". These checks do **not** semantically verify
 model-written prose; verdicts remain assessments requiring analyst review.
 
-Status: v0.3.0. The Windows event log backend is **implemented and unit-tested against
-recorded event XML, but has not yet been run on a real Windows machine** — see
-[V0.3_RELEASE_NOTES.md](V0.3_RELEASE_NOTES.md) and the real-world validation procedure in
+Status: v0.3.1. It repairs the reasoning contract given to the local model: claim
+definitions, eligibility, argument schemas, step feedback, baseline collection and one
+bounded revision. Its effect on a real model is **not yet verified**; see
+[V0.3.1_RELEASE_NOTES.md](V0.3.1_RELEASE_NOTES.md). The Windows event log backend is
+**implemented and unit-tested against recorded event XML, but has not yet been run on a
+real Windows machine**. See [V0.3_RELEASE_NOTES.md](V0.3_RELEASE_NOTES.md) and the
+real-world validation procedure in
 [`docs/validation/v0.3/`](docs/validation/v0.3/). History: [CHANGELOG.md](CHANGELOG.md),
 [VALIDATION.md](VALIDATION.md), [REVIEW_FOLLOWUP.md](REVIEW_FOLLOWUP.md), [REVIEW.md](REVIEW.md).
 
@@ -172,6 +176,38 @@ what you pulled. Temperature defaults to `0.0` for determinism.
 
 > The **mock** model is always available as a fallback and is what the tests use,
 > so you can evaluate the full product even before pulling a model.
+
+### Running with a local model: what the model is given (v0.3.1)
+
+A 7B model cannot be relied on to guess the rules, so the application states them.
+
+* **Before the first step**, the application itself collects host context and the
+  alerted process tree (`SOCI_BASELINE_COLLECTION=true`).
+* **Every step** shows:
+  * the result of the model's last request, including why a request was rejected or
+    skipped as a duplicate;
+  * the requests already answered;
+  * a checklist of the collection requirements for a benign closure;
+  * suggested next steps;
+  * each tool's allowed argument values, ranges and a valid example.
+* **The assessment prompt** lists the claims and ATT&CK techniques the retrieved
+  evidence supports, with the evidence IDs to cite. Claims describe observed
+  **behavior** only. `credential_theft` means LSASS credential-dumping behavior, not
+  proven theft. Intent and outcome are never asserted.
+* **If validation rejects part of the draft**, the model gets one revision with the
+  rejection reasons (`SOCI_VALIDATION_REVISION=true`). The revision passes through the
+  same gates and cannot unlock `benign`.
+
+Measure a model against the behavior-based acceptance criteria. A `suspicious`
+verdict with the supported behavior is a pass; `likely_malicious` is never required.
+
+```bash
+SOCI_LLM=ollama python -m investigator acceptance --repeats 3 --out acceptance-out
+SOCI_LLM=ollama python -m investigator benchmark --repeats 3
+```
+
+Use `SOCI_OLLAMA_NUM_CTX=16384` (the default). At 8192 the prompt often cannot hold the
+alerted process tree in full, and such runs end `incomplete` rather than `benign`.
 
 ---
 

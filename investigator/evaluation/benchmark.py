@@ -119,6 +119,27 @@ def _policy_outcomes(rows: list[dict[str, Any]], verdict_of) -> dict[str, Any]:
     }
 
 
+def _contract_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Reasoning-contract behaviour across runs (v0.3.1)."""
+    from collections import Counter
+    diags = [r["diagnostics"] for r in rows if "diagnostics" in r]
+    proposed, rejected = Counter(), Counter()
+    for d in diags:
+        proposed.update(d["claims_proposed"])
+        rejected.update(d["claims_rejected_first_draft"])
+    return {
+        "runs": len(diags),
+        "claims_proposed": dict(proposed), "claims_rejected_first_draft": dict(rejected),
+        "invalid_argument_rejections": sum(d["invalid_argument_rejections"] for d in diags),
+        "duplicate_requests": sum(d["duplicate_requests"] for d in diags),
+        "loop_stops": sum(d["loop_stop"] for d in diags),
+        "revisions_performed": sum(d["revision_performed"] for d in diags),
+        "revisions_changed_outcome": sum(d["revision_changed"] for d in diags),
+        "max_prompt_tokens_server": max((d["prompt_tokens_server_max"] for d in diags), default=0),
+        "max_prompt_tokens_estimated": max((d["prompt_tokens_estimated_max"] for d in diags), default=0),
+    }
+
+
 def aggregate(rows: list[dict[str, Any]], harness_errors: list[dict[str, str]]) -> dict[str, Any]:
     mal = [r for r in rows if r["label"] == "malicious"]
     ben = [r for r in rows if r["label"] == "benign"]
@@ -159,6 +180,7 @@ def aggregate(rows: list[dict[str, Any]], harness_errors: list[dict[str, str]]) 
             "benign_withheld_by_gates": sum(r.get("benign_withheld", False) for r in rows),
         },
         "baseline_always_suspicious": _policy_outcomes(rows, lambda r: "suspicious"),
+        "contract": _contract_metrics(rows),
         "detection": {
             "escalation_threshold": {"TP": tp, "FN": fn, "FP": fp, "TN": tn,
                                      "false_negative_rate": _rate(fn, len(mal)),
@@ -193,7 +215,7 @@ def aggregate(rows: list[dict[str, Any]], harness_errors: list[dict[str, str]]) 
 
 
 def run_benchmark(settings: Settings, suite_dir: str | Path | None = None,
-                  adversary: str | None = None) -> dict[str, Any]:
+                  adversary: str | None = None, repeats: int = 1) -> dict[str, Any]:
     """Run the suite. ``adversary`` replaces the model with an evaluation-only
     benign proposer (see llm.mock.ADVERSARIES) to measure the verdict gates."""
     suite = Path(suite_dir) if suite_dir else DEFAULT_SUITE
@@ -203,18 +225,24 @@ def run_benchmark(settings: Settings, suite_dir: str | Path | None = None,
         agent.model = ADVERSARIES[adversary]()
     rows: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
-    for case_dir in _case_dirs(suite):
-        truth = json.loads((case_dir / "truth.json").read_text(encoding="utf-8"))
-        try:
-            backend = FixtureBackend(suite, only={case_dir.name})
-            alert = backend.list_alerts()[0]
-            isolated = InvestigationAgent(backend, agent.model, settings)
-            t0 = time.perf_counter()
-            report = isolated.investigate(alert)
-            rows.append(score_case(report, truth, (time.perf_counter() - t0) * 1000))
-        except Exception as exc:  # noqa: BLE001 - harness errors are a measured outcome
-            errors.append({"case_id": truth.get("case_id", case_dir.name), "error": type(exc).__name__,
-                           "trace": traceback.format_exc(limit=3)})
+    from .acceptance import run_diagnostics
+    for rep in range(1, max(1, repeats) + 1):
+        for case_dir in _case_dirs(suite):
+            truth = json.loads((case_dir / "truth.json").read_text(encoding="utf-8"))
+            try:
+                backend = FixtureBackend(suite, only={case_dir.name})
+                alert = backend.list_alerts()[0]
+                isolated = InvestigationAgent(backend, agent.model, settings)
+                t0 = time.perf_counter()
+                report = isolated.investigate(alert)
+                ms = (time.perf_counter() - t0) * 1000
+                row = score_case(report, truth, ms)
+                row["repeat"] = rep
+                row["diagnostics"] = run_diagnostics(report, ms)
+                rows.append(row)
+            except Exception as exc:  # noqa: BLE001 - harness errors are a measured outcome
+                errors.append({"case_id": truth.get("case_id", case_dir.name), "error": type(exc).__name__,
+                               "trace": traceback.format_exc(limit=3)})
     return {"suite": str(suite), "model": agent.model.name, "adversary": adversary,
             "metrics": aggregate(rows, errors), "cases": rows, "harness_errors": errors}
 
@@ -273,6 +301,14 @@ def format_benchmark(result: dict[str, Any]) -> str:
         f"{o['model_errors']}  repairs {o['repair_attempts']}  harness errors {o['harness_errors']}  "
         f"mean runtime {o['mean_runtime_ms']} ms",
         f"Legacy headline (v0.2.0 'fully correct'; see baseline above): {m['correct_cases']}/{n}",
+        "",
+        "Reasoning contract (v0.3.1):",
+        f"  runs {m['contract']['runs']}  invalid-argument rejections {m['contract']['invalid_argument_rejections']}  "
+        f"duplicate requests {m['contract']['duplicate_requests']}  loop stops {m['contract']['loop_stops']}  "
+        f"revisions {m['contract']['revisions_performed']} (changed {m['contract']['revisions_changed_outcome']})",
+        f"  claims rejected in first drafts: {m['contract']['claims_rejected_first_draft'] or 'none'}",
+        f"  max prompt tokens server/estimated: {m['contract']['max_prompt_tokens_server']}/"
+        f"{m['contract']['max_prompt_tokens_estimated']}",
     ]
     if m["safety_checks"]["failed"]:
         lines.append(f"Safety checks failed: {m['safety_checks']['failed']}")

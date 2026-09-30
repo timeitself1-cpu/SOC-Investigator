@@ -212,3 +212,149 @@ def claim_supported(claim: str, evidence: list[Evidence]) -> tuple[bool, str]:
         return False, f"unknown claim {claim!r}"
     pred, need = rule
     return (True, "") if pred(_unique(evidence)) else (False, f"claim '{claim}' requires {need}")
+
+
+# --- the model-facing claim contract (v0.3.1) ----------------------------------
+#
+# One source of truth next to CLAIM_RULES: the prompt shows these definitions and
+# the validator applies CLAIM_RULES, so they cannot drift. Every claim asserts
+# observed BEHAVIOR only. Intent (why) is never verified by the application, and
+# outcome (e.g. credentials actually stolen, an account actually taken over) is not
+# observable from this telemetry. Wire values are kept for report compatibility;
+# the label states the behavior when the value's wording suggests more.
+
+@dataclass(frozen=True)
+class ClaimDefinition:
+    label: str
+    means: str
+    does_not_mean: str
+    typical_evidence: str
+
+
+CLAIM_DEFINITIONS: dict[str, ClaimDefinition] = {
+    "execution": ClaimDefinition(
+        "Process execution", "A cited process-creation record shows the process ran.",
+        "That the process was malicious.", "process events"),
+    "obfuscation": ClaimDefinition(
+        "Encoded PowerShell command", "A cited PowerShell process was started with an -EncodedCommand argument.",
+        "That the decoded content is malicious; administrators also encode commands.",
+        "process events with the encoded_command indicator"),
+    "office_child_process": ClaimDefinition(
+        "Office application started a process", "A cited process-creation record has an Office parent "
+        "(Word, Excel, PowerPoint, Outlook, Access, Publisher).",
+        "That a malicious document was opened or that the user intended it.",
+        "process events with the office_parent indicator"),
+    "network_connection": ClaimDefinition(
+        "Network connection", "A cited network-connection record exists.",
+        "Command-and-control, data transfer or exfiltration; DNS queries alone do not qualify.",
+        "network events"),
+    "credential_theft": ClaimDefinition(
+        "LSASS credential-dumping BEHAVIOR", "A process opened LSASS with memory-read access and the same process "
+        "wrote a dump file within 15 minutes (credential-access / dumping behavior).",
+        "That credentials were actually stolen, exfiltrated or used; that outcome is not observable here.",
+        "a process_access event targeting lsass.exe plus a .dmp file event from the same process"),
+    "persistence": ClaimDefinition(
+        "Persistence mechanism created", "A Run/RunOnce registry value was set or a scheduled task was created.",
+        "That the persisted program is malicious.", "registry run_key or scheduled_task events"),
+    "brute_force": ClaimDefinition(
+        "Repeated failed logons (authentication attack pattern)",
+        "At least 3 failed logons for the same host, account and source within 15 minutes.",
+        "That the account was compromised or that any logon succeeded.", "authentication failure events"),
+    "account_compromise": ClaimDefinition(
+        "Successful logon after repeated failures (POSSIBLE compromise pattern)",
+        "A successful logon followed at least 3 failures for the same host, account and source within 15 minutes.",
+        "Confirmed account compromise or attacker control; the owner may have mistyped the password.",
+        "authentication failure events plus the later success"),
+    "discovery": ClaimDefinition(
+        "Discovery command", "A recognized discovery command ran (whoami, systeminfo, ipconfig, net user/group).",
+        "That the reconnaissance was hostile.", "process events with the discovery_command indicator"),
+    "benign_administration": ClaimDefinition(
+        "Launched by a recognized endpoint-management agent",
+        "The alerted process's parent is Intune Management Extension or Configuration Manager running from its "
+        "install directory.",
+        "That an administrator or service account was used; that the activity looks routine; that no malicious "
+        "intent was observed. Do NOT use it for accounts named admin/administrator/svc-*.",
+        "a process event with the management_agent_parent indicator"),
+    "security_product_detection": ClaimDefinition(
+        "Microsoft Defender detection", "Microsoft Defender recorded a detection (1116/1117).",
+        "That the threat executed or that remediation failed.", "detection events"),
+    "suspicious_script": ClaimDefinition(
+        "Suspicious PowerShell script content", "A logged script block contains download-cradle, in-memory loading, "
+        "obfuscation or security-tampering patterns.",
+        "That the script succeeded or was malicious in intent.",
+        "script events with the suspicious_script_content indicator"),
+}
+UNAVAILABLE_CLAIMS = tuple(c for c, (pred, _) in CLAIM_RULES.items() if pred is _unavailable)
+assert set(CLAIM_DEFINITIONS) | set(UNAVAILABLE_CLAIMS) == set(CLAIM_RULES), "claim contract out of sync"
+
+
+def _claim_relevant(claim: str, e: Evidence) -> bool:
+    """Records that can carry a claim's prerequisite (used to cite a compact subset)."""
+    ind = set(e.indicators)
+    return {
+        "execution": e.category == "process",
+        "obfuscation": "encoded_command" in ind,
+        "office_child_process": "office_parent" in ind,
+        "network_connection": e.category == "network",
+        "credential_theft": "lsass_target" in ind or "memory_dump_file" in ind,
+        "persistence": bool(ind & {"run_key", "scheduled_task"}),
+        "brute_force": e.category == "authentication",
+        "account_compromise": e.category == "authentication",
+        "discovery": "discovery_command" in ind,
+        "benign_administration": "management_agent_parent" in ind,
+        "security_product_detection": "defender_detection" in ind,
+        "suspicious_script": "suspicious_script_content" in ind,
+    }.get(claim, False)
+
+
+_TECHNIQUE_CLAIM = {"T1059.001": "execution", "T1027": "obfuscation", "T1003.001": "credential_theft",
+                    "T1053.005": "persistence", "T1547.001": "persistence", "T1110": "brute_force",
+                    "T1078": "account_compromise", "T1021.001": "brute_force", "T1033": "discovery",
+                    "T1087": "discovery"}
+
+
+def _supporting_subset(pred: Pred, evs: list[Evidence], relevant) -> list[Evidence]:
+    """A compact subset of ``evs`` that still satisfies ``pred`` (so citing exactly
+    these IDs passes validation). Falls back to everything when no subset does."""
+    cand = [e for e in evs if relevant(e)]
+    for subset in (cand[:12], cand):
+        if subset and pred(subset):
+            return subset
+    return evs
+
+
+def claim_eligibility(evidence: list[Evidence]) -> dict[str, list[str]]:
+    """Claims whose structured prerequisites are met by ``evidence`` -> evidence IDs
+    that satisfy them. Uses exactly the validator's predicates: a finding that cites
+    these IDs and tags the claim is accepted. Says nothing about intent or outcome."""
+    evs = _unique(evidence)
+    out: dict[str, list[str]] = {}
+    for claim, (pred, _) in CLAIM_RULES.items():
+        if pred is _unavailable or not pred(evs):
+            continue
+        out[claim] = [e.evidence_id for e in _supporting_subset(pred, evs, lambda e, c=claim: _claim_relevant(c, e))]
+    return out
+
+
+def technique_eligibility(evidence: list[Evidence]) -> dict[str, list[str]]:
+    evs = _unique(evidence)
+    out: dict[str, list[str]] = {}
+    for tid, tech in CATALOG.items():
+        if tech.support is _unavailable or not tech.support(evs):
+            continue
+        claim = _TECHNIQUE_CLAIM.get(tid)
+        relevant = (lambda e, c=claim: _claim_relevant(c, e)) if claim else (lambda e: True)
+        out[tid] = [e.evidence_id for e in _supporting_subset(tech.support, evs, relevant)]
+    return out
+
+
+def claim_contract() -> list[dict[str, str]]:
+    """Definitions shown to the model (behavior only; prerequisites from CLAIM_RULES)."""
+    return [{"claim": c, "label": d.label, "means": d.means, "does_not_mean": d.does_not_mean,
+             "requires": CLAIM_RULES[c][1], "typical_evidence": d.typical_evidence}
+            for c, d in CLAIM_DEFINITIONS.items()]
+
+
+def technique_contract() -> list[dict[str, str]]:
+    return [{"technique": t.technique_id, "name": t.name, "requires": t.requirement}
+            for t in CATALOG.values() if t.support is not _unavailable]

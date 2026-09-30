@@ -1,0 +1,35 @@
+== demo: host DESKTOP-RW01
+   source Sysmon               active         
+   source Windows Security     active         
+   source PowerShell           active         
+   source Microsoft Defender   active         
+-- SIG-e5f7da4e24e1 medium   Repeated failed logons: 5+ failures for DESKTOP-RW01\rw_nonexistent within 10 min
+   mock analyst     verdict=suspicious            status=completed  evidence=43  invalid_refs=0 unmet=['process_tree', 'network_activity', 'host_signals']
+                    tools: event:complete, host_context:complete, search_events:complete, network_activity:truncated, logon_activity:complete, related_events:complete
+   benign proposer  verdict=insufficient_evidence status=completed  evidence=43  invalid_refs=0 unmet=['process_tree', 'network_activity', 'host_signals']
+-- SIG-767b89e5fdef medium   Suspicious PowerShell (encoded command)
+   mock analyst     verdict=suspicious            status=completed  evidence=41  invalid_refs=0 unmet=['host_signals']
+                    tools: event:complete, host_context:complete, process_tree:partial, search_events:truncated, process_details:complete, network_activity:truncated, network_activity:empty, powershell_activity:complete, related_events:truncated
+   benign proposer  verdict=insufficient_evidence status=completed  evidence=41  invalid_refs=0 unmet=['host_signals']
+-- SIG-9aa3b547b1b4 high     Suspicious PowerShell (encoded command, hidden window)
+   mock analyst     verdict=suspicious            status=completed  evidence=40  invalid_refs=0 unmet=['host_signals']
+                    tools: event:complete, host_context:complete, process_tree:partial, search_events:truncated, process_details:complete, network_activity:truncated, network_activity:complete, powershell_activity:complete, related_events:truncated
+   benign proposer  verdict=insufficient_evidence status=completed  evidence=40  invalid_refs=0 unmet=['host_signals']
+-- SIG-04bf70e07024 medium   Suspicious PowerShell (hidden window)
+   mock analyst     verdict=benign                status=completed  evidence=32  invalid_refs=0 unmet=[]
+                    tools: event:complete, host_context:complete, process_tree:partial, search_events:complete, process_details:complete, network_activity:truncated, network_activity:empty, powershell_activity:complete, related_events:complete
+   benign proposer  verdict=benign                status=completed  evidence=32  invalid_refs=0 unmet=[]
+-- SIG-d35b70dbd5a2 critical Microsoft Defender detection: Virus:DOS/EICAR_Test_File
+   mock analyst     verdict=suspicious            status=completed  evidence=31  invalid_refs=0 unmet=['process_tree', 'network_activity']
+                    tools: event:complete, host_context:complete, search_events:complete, network_activity:truncated, defender_activity:complete, related_events:complete
+   benign proposer  verdict=insufficient_evidence status=completed  evidence=31  invalid_refs=0 unmet=['process_tree', 'network_activity']
+== demo-no-sysmon: host DESKTOP-RW05
+   source Sysmon               not_installed  The Microsoft-Windows-Sysmon/Operational event log does not exist on this computer.
+   source Windows Security     active         
+   source PowerShell           active         
+   source Microsoft Defender   active         
+   note: Sysmon is not installed: its signals are unavailable.
+-- SIG-f1cf386d526c high     Suspicious PowerShell (encoded command, hidden window)
+   mock analyst     verdict=suspicious            status=incomplete evidence=5   invalid_refs=0 unmet=['process_tree', 'network_activity', 'host_signals']
+                    tools: event:complete, host_context:complete, search_events:partial, network_activity:failed, powershell_activity:complete, related_events:partial
+   benign proposer  verdict=insufficient_evidence status=incomplete evidence=5   invalid_refs=0 unmet=['process_tree', 'network_activity', 'host_signals']

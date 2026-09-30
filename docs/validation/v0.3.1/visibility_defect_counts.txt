@@ -1,0 +1,18 @@
+Mock status/verdict counts over the 27 fixture + independent-benchmark alerts.
+Copied verbatim from the session output of a comparison script (scratch st.py);
+"v0.3 + fix" is commit 254772b with only the one-line full_view fix applied.
+
+v0.3 + fix:
+16384 2048 {'completed': 26, 'incomplete': 1} priority-hidden runs 0 {'likely_malicious': 9, 'benign': 3, 'insufficient_evidence': 8, 'suspicious': 7}
+8192 2048 {'incomplete': 16, 'completed': 11} priority-hidden runs 15 {'suspicious': 9, 'insufficient_evidence': 15, 'likely_malicious': 3}
+8192 1024 {'completed': 25, 'incomplete': 2} priority-hidden runs 1 {'likely_malicious': 9, 'benign': 3, 'insufficient_evidence': 8, 'suspicious': 7}
+v0.3.1:
+16384 2048 {'completed': 26, 'incomplete': 1} priority-hidden runs 0 {'likely_malicious': 9, 'benign': 3, 'insufficient_evidence': 8, 'suspicious': 7}
+8192 2048 {'incomplete': 14, 'completed': 13} priority-hidden runs 13 {'suspicious': 8, 'insufficient_evidence': 15, 'likely_malicious': 4}
+8192 1024 {'completed': 22, 'incomplete': 5} priority-hidden runs 4 {'likely_malicious': 9, 'benign': 3, 'insufficient_evidence': 8, 'suspicious': 7}
+
+Reading: at 16384 (the default) nothing changes. At 8192 with num_predict 2048 the
+prompt budget cannot hold the alerted tree for most cases, in v0.3 and v0.3.1 alike;
+before the fix this went undetected whenever fewer than 12 records were retrieved
+(see visibility_defect_impact.txt). At 8192/1024 the v0.3.1 contract text costs
+3 more cases their full tree view than v0.3 + fix.

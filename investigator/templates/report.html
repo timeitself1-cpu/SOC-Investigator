@@ -149,6 +149,32 @@
 </div>
 {% endif %}
 
+{% set v = r.validation %}
+{% if v.draft_verdict %}
+<div class="card" id="draft">
+  <h2>Model draft vs. accepted</h2>
+  <ul class="small">
+    <li>Draft verdict <span class="badge v-{{ v.draft_verdict }}">{{ v.draft_verdict }}</span> → accepted
+      <span class="badge v-{{ r.verdict }}">{{ r.verdict }}</span></li>
+    <li>Claims proposed: {{ v.proposed_claims|join(", ") or "none" }} · accepted:
+      {{ r.findings|map(attribute="claims")|sum(start=[])|unique|join(", ") or "none" }}</li>
+    <li>ATT&amp;CK proposed: {{ v.proposed_attack_techniques|join(", ") or "none" }} · accepted:
+      {{ r.attack_techniques|map(attribute="technique_id")|join(", ") or "none" }}</li>
+    <li class="muted">Claims describe observed behavior only; intent and outcome are not verified.</li>
+  </ul>
+  {% if r.revision %}
+  <h3 class="small">Validation-feedback revision</h3>
+  <ul class="small">
+    <li>Performed: {{ "yes" if r.revision.performed else "no" }} · changed the assessment: {{ "yes" if r.revision.changed else "no" }}</li>
+    <li>First draft: {{ r.revision.first_draft_verdict }} → validated {{ r.revision.first_validated_verdict }};
+      accepted {{ r.revision.first_accepted_claims|join(", ") or "none" }}; rejected {{ r.revision.first_rejected_claims|join(", ") or "none" }}</li>
+    {% if r.revision.performed %}<li>Revised draft: {{ r.revision.revised_draft_verdict }}; accepted {{ r.revision.final_accepted_claims|join(", ") or "none" }}</li>{% endif %}
+    {% if r.revision.note %}<li class="muted">{{ r.revision.note }}</li>{% endif %}
+  </ul>
+  {% endif %}
+</div>
+{% endif %}
+
 {% if not r.validation.valid or r.validation.issues %}
 <div class="card">
   <h2>Validation notes</h2>

@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: hostile activity is inserted as literal text, with a fixed class allowlist
+ok 1 - hostile activity is inserted as literal text, with a fixed class allowlist
+  ---
+  duration_ms: 6.688514
+  type: 'test'
+  ...
+# Subtest: incomplete assessment and persistence failure remain visible
+ok 2 - incomplete assessment and persistence failure remain visible
+  ---
+  duration_ms: 2.027423
+  type: 'test'
+  ...
+# Subtest: expired run ends polling and displays a recoverable error
+ok 3 - expired run ends polling and displays a recoverable error
+  ---
+  duration_ms: 1.414985
+  type: 'test'
+  ...
+# Subtest: cancelled run shows completion note and hides the cancel control
+ok 4 - cancelled run shows completion note and hides the cancel control
+  ---
+  duration_ms: 2.539725
+  type: 'test'
+  ...
+# Subtest: interrupted run (server restarted mid-run) is shown as a recoverable failure
+ok 5 - interrupted run (server restarted mid-run) is shown as a recoverable failure
+  ---
+  duration_ms: 1.396611
+  type: 'test'
+  ...
+# Subtest: incomplete assessment points the analyst at collection coverage
+ok 6 - incomplete assessment points the analyst at collection coverage
+  ---
+  duration_ms: 1.368771
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 115.508437

@@ -1,5 +1,62 @@
 # Changelog
 
+## 0.3.1 — Reasoning-contract repair (2026-09-30)
+
+Driven by two live `qwen2.5:7b-instruct` runs on v0.3
+(`docs/validation/v0.3/live_ollama_runs/`). The gates held, but the model:
+
+* tagged every finding `benign_administration`;
+* invented an argument value;
+* looped on answered requests;
+* never collected host context or network.
+
+This release repairs the model contract. **No gate, requirement, evidence rule or
+security control was loosened.** Evidence: `docs/validation/v0.3.1/`. Release notes:
+[V0.3.1_RELEASE_NOTES.md](V0.3.1_RELEASE_NOTES.md). **Real-model effect NOT VERIFIED**
+(no Ollama in the development environment).
+
+### Added
+- Behavior-only claim definitions (`attack.CLAIM_DEFINITIONS`): label, meaning, what it
+  does not mean, typical evidence. Intent and outcome are never asserted.
+  `credential_theft` = LSASS credential-dumping behavior; `account_compromise` =
+  possible compromise pattern. Wire values unchanged (decision recorded in the release
+  notes).
+- `claim_eligibility` / `technique_eligibility`, computed with the validator's own
+  predicates. The assessment prompt carries a `claim_contract` and `attack_contract`:
+  eligible items with citable IDs, unsupported items, items never supported here, and
+  an explicit `benign_administration` warning.
+- A tool argument contract generated from the Pydantic schemas: allowed values,
+  ranges, defaults, prerequisites, a valid example per tool, and an argument glossary.
+- Decide-step feedback: `last_step_result`, `answered_requests`,
+  `collection_checklist` and `suggested_next_steps`. It is compacted under context
+  pressure.
+- Baseline collection. Host context and the trigger's process tree are collected by
+  the application before the model's first step (`baseline_collection`, default on).
+  Failures are visible failed collections.
+- One bounded validation-feedback revision (`validation_revision`, default on). It uses
+  application-generated feedback only and passes through the same gates. Recorded in
+  `InvestigationReport.revision`.
+- `ValidationResult.draft_verdict`, `proposed_claims` and `proposed_attack_techniques`.
+  Exports gain "Model draft vs. accepted" and "Validation-feedback revision" sections.
+- CLI `acceptance [--alerts] [--repeats] [--out] [--json]`, which applies the amended
+  behavior-based criteria. `benchmark --repeats`. Per-run reasoning-contract
+  diagnostics.
+- `tests/test_reasoning_contract.py` (26 tests), including scripted replays of the
+  observed qwen behaviour. Mutation set `docs/validation/v0.3.1/mutate_v031.sh` (C1–C11).
+
+### Fixed
+- **`model_visibility` counted omitted records as seen** at compaction level ≥3 when
+  fewer than 12 records were retrieved (present since 0.3.0). At num_ctx 8192, INC-005
+  closed benign with its child process and network connection unseen. The "shown in
+  full" set is now capped at the records actually kept.
+- Markdown exports rendered apostrophes as `&#x27;`.
+- `get_logon_activity`, `get_powershell_activity` and `get_defender_activity` were
+  missing from the coverage categories.
+
+### Changed
+- Tests whose premise is "the model never collected X" now run with
+  `baseline_collection=False`. A baseline-aware variant was added.
+
 ## 0.3.0 — Standalone Windows investigator (2026-09-30)
 
 Product direction: a local-first AI security investigation agent **for Windows**. The

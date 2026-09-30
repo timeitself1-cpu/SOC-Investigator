@@ -122,17 +122,28 @@ def test_G_fixture_benign_case_and_mock_analyst_still_close_as_benign():
 # --- A / F1: benign must be earned by collection -------------------------------
 
 def test_A_immediate_benign_without_investigation_is_rejected():
-    r = investigate([admin_trigger()], plan=[])
+    # Requirement semantics without the v0.3.1 application baseline:
+    r = investigate([admin_trigger()], plan=[], baseline_collection=False)
     assert r.verdict == "insufficient_evidence" and r.validation.verdict_adjusted_from == "benign"
     unmet = {q.name for q in r.coverage.requirements if not q.satisfied}
     assert unmet == {"process_tree", "network_activity", "host_context"}
     assert any("required collection not met (network activity)" in i for i in r.validation.issues)
 
 
+def test_A_with_baseline_immediate_benign_is_still_rejected():
+    """v0.3.1 baseline collects host context and the process tree; network activity
+    is still the model's job, so an immediate benign still fails."""
+    r = investigate([admin_trigger()], plan=[])
+    assert r.verdict == "insufficient_evidence"
+    assert {q.name for q in r.coverage.requirements if not q.satisfied} == {"network_activity"}
+    assert [(c.tool, c.initiator) for c in r.trace.tool_calls][:3] == \
+        [("get_event", "system"), ("get_host_context", "system"), ("get_process_tree", "system")]
+
+
 @pytest.mark.parametrize("missing", ["get_process_tree", "get_network_activity", "get_host_context"])
 def test_each_collection_requirement_is_individually_necessary(missing):
     plan = [p for p in FULL_PLAN if p["tool"] != missing]
-    r = investigate([admin_trigger()], plan=plan)
+    r = investigate([admin_trigger()], plan=plan, baseline_collection=False)
     assert r.verdict == "insufficient_evidence"
     name = {"get_process_tree": "process_tree", "get_network_activity": "network_activity",
             "get_host_context": "host_context"}[missing]
@@ -404,6 +415,23 @@ def test_D_priority_evidence_that_cannot_reach_the_model_marks_incomplete_and_bl
     assert not req(r, "model_visibility").satisfied
 
 
+def test_D_omitted_tree_records_are_hidden_even_when_fewer_than_the_summary_threshold():
+    """Regression found during v0.3.1 validation: at compaction level 4 with fewer
+    retrieved records than the summary threshold, records dropped from the prompt
+    were counted as 'shown in full'. INC-005 at num_ctx 8192 omitted the trigger's
+    child process and its network connection and still closed as benign."""
+    from investigator.backends.fixture import FixtureBackend
+    from investigator.config import PACKAGED_CASES
+    be = FixtureBackend(PACKAGED_CASES)
+    r = InvestigationAgent(be, MockInvestigatorModel(), settings(ollama_num_ctx=8192)).investigate(
+        be.get_alert("INC-005"))
+    final = [x for x in r.trace.llm_exchanges if x.purpose in ("final_report", "revision")][-1]
+    assert final.evidence_omitted > 0, "premise: the tree does not fit an 8k prompt"
+    assert final.priority_evidence_hidden == final.evidence_omitted  # both omitted records are in the tree
+    assert not req(r, "model_visibility").satisfied
+    assert r.verdict != "benign" and r.status == "incomplete"
+
+
 def test_routine_noise_that_does_not_fit_is_disclosed_but_does_not_block_benign():
     """v0.3: records outside the alerted tree without suspicious indicators may be
     summarized/omitted (disclosed); application gates still check them all."""
@@ -422,9 +450,9 @@ def test_D_evidence_shown_only_as_summaries_blocks_benign_without_omission(monke
     agent = InvestigationAgent(be, Scripted(FULL_PLAN, BENIGN), settings())
     real = agent._build_state
 
-    def summarized(ctx, trace, step, phase, budget_chars=None):
-        text, meta = real(ctx, trace, step, phase, budget_chars)
-        if phase == "final_report":
+    def summarized(ctx, trace, step, phase, budget_chars=None, extra=None):
+        text, meta = real(ctx, trace, step, phase, budget_chars, extra)
+        if phase in ("final_report", "revision"):
             meta = {**meta, "level": 3, "summarized": 2, "evidence_omitted": 0, "priority_hidden": 2}
         return text, meta
 

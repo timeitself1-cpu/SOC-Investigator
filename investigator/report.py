@@ -292,6 +292,9 @@ def validate_report(
     technique_finding_ids: dict[str, set[str]] = {}
     technique_evidence: dict[str, set[str]] = {}
 
+    vr.draft_verdict = draft.verdict
+    vr.proposed_claims = list(dict.fromkeys(str(c) for df in draft.findings for c in df.claims))
+    vr.proposed_attack_techniques = list(dict.fromkeys(t for df in draft.findings for t in df.attack_techniques))
     for idx, df in enumerate(draft.findings, 1):
         vr.draft_evidence_refs += len(df.evidence_ids)
         real_ids = list(dict.fromkeys(eid for eid in df.evidence_ids if eid in valid_ids))
@@ -445,6 +448,9 @@ _TOOL_CATEGORIES = {
     "get_related_events": ["all"],
     "get_host_context": ["asset context"],
     "get_event": ["trigger"],
+    "get_logon_activity": ["authentication", "privilege"],
+    "get_powershell_activity": ["script"],
+    "get_defender_activity": ["detection"],
 }
 
 
@@ -627,7 +633,9 @@ def report_to_json(report: InvestigationReport) -> str:
 
 def _markdown_text(value: str) -> str:
     """Render telemetry/model strings as inert text, never active Markdown or HTML."""
-    text = html.escape(str(value), quote=True)
+    # Escape only &, <, > as entities (quote=False): quote entities such as &#x27;
+    # would be broken by the backslash-escaping of '#' below.
+    text = html.escape(str(value), quote=False)
     text = re.sub(r"([\\`*_{}\[\]()#+\-.!|=~<>])", r"\\\1", text)
     # Collapse line structure so prose cannot form headings, rules or code blocks.
     return re.sub(r"\s*\n\s*", " / ", text).strip()
@@ -760,6 +768,34 @@ def report_to_markdown(report: InvestigationReport) -> str:
         L.append("")
         for lim in r.limitations:
             L.append(f"- {md(lim)}")
+        L.append("")
+    v = r.validation
+    if v.draft_verdict is not None:
+        L.append("## Model draft vs. accepted")
+        L.append("")
+        accepted_claims = sorted({c for f in r.findings for c in f.claims})
+        accepted_tech = sorted(m.technique_id for m in r.attack_techniques)
+        L.append(f"- Draft verdict: `{v.draft_verdict}` → accepted verdict: `{r.verdict}`")
+        L.append(f"- Claims proposed: {md(', '.join(v.proposed_claims) or 'none')} · accepted: "
+                 f"{md(', '.join(accepted_claims) or 'none')}")
+        L.append(f"- ATT&CK proposed: {md(', '.join(v.proposed_attack_techniques) or 'none')} · accepted: "
+                 f"{md(', '.join(accepted_tech) or 'none')}")
+        L.append("- Claims describe observed behavior only; intent and outcome are not verified.")
+        L.append("")
+    if r.revision is not None:
+        rv = r.revision
+        L.append("## Validation-feedback revision")
+        L.append("")
+        L.append(f"- Performed: {'yes' if rv.performed else 'no'} · changed the assessment: "
+                 f"{'yes' if rv.changed else 'no'}")
+        L.append(f"- First draft: verdict `{rv.first_draft_verdict}` → validated `{rv.first_validated_verdict}`; "
+                 f"accepted claims {md(', '.join(rv.first_accepted_claims) or 'none')}; rejected "
+                 f"{md(', '.join(rv.first_rejected_claims) or 'none')}")
+        if rv.performed:
+            L.append(f"- Revised draft: verdict `{rv.revised_draft_verdict}`; accepted claims "
+                     f"{md(', '.join(rv.final_accepted_claims) or 'none')}")
+        if rv.note:
+            L.append(f"- {md(rv.note)}")
         L.append("")
     if not r.validation.valid or r.validation.issues:
         L.append("## Validation Notes")

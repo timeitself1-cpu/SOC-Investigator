@@ -271,7 +271,7 @@ class ToolCall(Strict):
 
 class LLMExchange(Strict):
     step: int
-    purpose: Literal["decide", "final_report", "repair"]
+    purpose: Literal["decide", "final_report", "repair", "revision"]
     attempt: int
     model: str
     messages: list[dict[str, str]]
@@ -330,6 +330,29 @@ class ValidationResult(Strict):
     rejected_claims: int = 0
     dropped_attack_mappings: list[str] = Field(default_factory=list)
     verdict_adjusted_from: Verdict | None = None
+    # What the model proposed, shown next to what validation accepted (v0.3.1).
+    draft_verdict: Verdict | None = None
+    proposed_claims: list[str] = Field(default_factory=list)
+    proposed_attack_techniques: list[str] = Field(default_factory=list)
+
+
+class RevisionRecord(Strict):
+    """The single validation-feedback revision round (v0.3.1).
+
+    The first draft's validation is kept here; its model exchange stays in the
+    audit trace. The report's findings/verdict are the validated revision."""
+
+    performed: bool
+    reasons: list[str] = Field(default_factory=list)
+    first_draft_verdict: Verdict | None = None
+    first_validated_verdict: Verdict | None = None
+    first_accepted_claims: list[str] = Field(default_factory=list)
+    first_rejected_claims: list[str] = Field(default_factory=list)
+    first_validation: ValidationResult | None = None
+    revised_draft_verdict: Verdict | None = None
+    final_accepted_claims: list[str] = Field(default_factory=list)
+    changed: bool = False
+    note: str = ""
 
 
 class CoverageItem(Strict):
@@ -442,6 +465,7 @@ class InvestigationReport(Strict):
     host_context: list[HostContext] = Field(default_factory=list)  # untrusted asset metadata
     model_output_repairs: int = 0
     status_reasons: list[str] = Field(default_factory=list)
+    revision: RevisionRecord | None = None
 
 
 # ---------------------------------------------------------------------------

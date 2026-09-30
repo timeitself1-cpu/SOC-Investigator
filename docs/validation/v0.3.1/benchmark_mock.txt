@@ -1,0 +1,59 @@
+Benchmark: /home/user/SOC-Investigator/investigator/benchmarks/independent  model=mock-analyst
+Cases: 22 (malicious 9, benign 7, ambiguous 6)
+
+Agent vs trivial baseline (always answers 'suspicious'):
+  metric                                                 agent  baseline   delta
+  acceptable verdicts (legacy 'fully correct' basis)        22        21      +1
+  benign TP (benign cases closed as benign)                  2         0      +2
+  benign FP (non-benign cases closed as benign)              0         0      +0
+  malicious/suspicious TP (escalated)                        9         9      +0
+  malicious/suspicious FN (not escalated)                    0         0      +0
+  benign cases escalated (FP at escalation)                  1         7      -6
+  insufficient_evidence outcomes                             8         0      +8
+  !! Acceptable-verdict score is +1 case(s) versus the always-'suspicious' baseline;
+  !! that score does not show discrimination. Judge by benign TP/FP, escalation FP and FN.
+
+Integrity:
+  required-evidence recall 1.0  (cited 0.913)
+  unsupported claims rejected 1  retained forbidden claims 0
+  evidence refs: invalid 0  validity 1.0
+  coverage requirements met 0.773  reports with all requirements met 5/22
+  context-overflow reports 0  incomplete reports 1  benign withheld by gates 3
+
+Detection (escalation = suspicious|likely_malicious):
+  TP 9  FN 0  FP 1  TN 6   FNR 0.0  FPR 0.143
+Detection (strict = likely_malicious only):
+  TP 5  FN 4  FP 0   FNR 0.444  FPR 0.0
+  benign cleared: 0.286  forbidden verdicts: 0  ambiguous over-confident: 0
+Claims: retained forbidden 0  proposed-then-rejected 1  invalid evidence refs 0
+Operational: failed 0  incomplete 1  model errors 0  repairs 0  harness errors 0  mean runtime 42.2 ms
+Legacy headline (v0.2.0 'fully correct'; see baseline above): 22/22
+
+Reasoning contract (v0.3.1):
+  runs 22  invalid-argument rejections 0  duplicate requests 0  loop stops 0  revisions 6 (changed 0)
+  claims rejected in first drafts: {'account_compromise': 1}
+  max prompt tokens server/estimated: 5933/12539
+
+case     label      verdict                status      ok  outcome  recall  req  notes
+BM-A01   benign     insufficient_evidence  completed   Y   TN       1.00    4/5  
+BM-A02   ambiguous  suspicious             completed   Y   -        1.00    4/5  
+BM-B01   benign     benign                 completed   Y   TN       1.00    5/5  
+BM-B02   benign     insufficient_evidence  completed   Y   TN       1.00    5/5  
+BM-B03   benign     suspicious             completed   Y   FP       1.00    3/5  
+BM-B04   benign     insufficient_evidence  completed   Y   TN       1.00    3/5  
+BM-B05   benign     benign                 completed   Y   TN       1.00    5/5  
+BM-M01   malicious  suspicious             completed   Y   TP       1.00    4/5  
+BM-M02   malicious  likely_malicious       completed   Y   TP       1.00    3/5  
+BM-M03   malicious  likely_malicious       completed   Y   TP       1.00    3/5  
+BM-M04   malicious  likely_malicious       completed   Y   TP       1.00    4/5  
+BM-M05   malicious  likely_malicious       completed   Y   TP       1.00    4/5  
+BM-M06   malicious  suspicious             completed   Y   TP       1.00    5/5  
+BM-X01   ambiguous  insufficient_evidence  completed   Y   -        1.00    3/5  
+BM-X02   ambiguous  suspicious             completed   Y   -        1.00    3/5  
+BM-X03   malicious  suspicious             completed   Y   TP       1.00    4/5  
+BM-X04   benign     insufficient_evidence  completed   Y   TN       1.00    4/5  benign withheld
+BM-X05   ambiguous  insufficient_evidence  incomplete  Y   -        -       3/5  
+BM-X06   ambiguous  insufficient_evidence  completed   Y   -        1.00    4/5  benign withheld
+BM-X07   malicious  likely_malicious       completed   Y   TP       1.00    3/5  
+BM-X08   malicious  suspicious             completed   Y   TP       1.00    5/5  
+BM-X09   ambiguous  insufficient_evidence  completed   Y   -        1.00    4/5  benign withheld

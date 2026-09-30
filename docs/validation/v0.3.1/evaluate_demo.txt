@@ -1,0 +1,8 @@
+
+Evaluation: 5/5 passed  (pass_rate=1.0, mean_recall=1.0, invalid_refs=0, forbidden_claims=0)
+
+  PASS  INC-001   verdict=likely_malicious     recall=1.0 tools=8 findings=2
+  PASS  INC-002   verdict=likely_malicious     recall=1.0 tools=7 findings=1
+  PASS  INC-003   verdict=likely_malicious     recall=1.0 tools=8 findings=1
+  PASS  INC-004   verdict=likely_malicious     recall=1.0 tools=6 findings=2
+  PASS  INC-005   verdict=benign               recall=1.0 tools=8 findings=3

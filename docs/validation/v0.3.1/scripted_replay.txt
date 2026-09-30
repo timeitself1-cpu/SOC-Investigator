@@ -1,0 +1,26 @@
+== ObservedQwen
+  INC-001: verdict=insufficient_evidence status=completed draft=suspicious proposed=['benign_administration'] accepted=[] rejected_first={'benign_administration': 1} invalid_args=0 dups=0 loop_stop=False revision=True/same unmet=['network_activity']
+  INC-002: verdict=insufficient_evidence status=incomplete draft=suspicious proposed=['benign_administration'] accepted=[] rejected_first={'benign_administration': 1} invalid_args=1 dups=4 loop_stop=True revision=True/same unmet=['network_activity']
+  INC-003: verdict=insufficient_evidence status=completed draft=suspicious proposed=['benign_administration'] accepted=[] rejected_first={'benign_administration': 1} invalid_args=0 dups=0 loop_stop=False revision=True/same unmet=['process_tree', 'network_activity']
+  INC-004: verdict=insufficient_evidence status=incomplete draft=suspicious proposed=['benign_administration'] accepted=[] rejected_first={'benign_administration': 1} invalid_args=0 dups=3 loop_stop=True revision=True/same unmet=['process_tree', 'network_activity']
+  INC-005: verdict=suspicious status=completed draft=suspicious proposed=['benign_administration'] accepted=['benign_administration'] rejected_first={} invalid_args=0 dups=0 loop_stop=False revision=False/same unmet=['network_activity']
+  FAIL [INC-004] INC-004: escalated with the authentication attack pattern accepted (no loop stop)
+  FAIL [INC-002] INC-002: escalated with LSASS credential-dumping behavior accepted (no enum rejection, no loop stop)
+  FAIL [INC-001] benign_administration not accepted or left uncorrected on non-management evidence
+  FAIL [INC-002] benign_administration not accepted or left uncorrected on non-management evidence
+  FAIL [INC-003] benign_administration not accepted or left uncorrected on non-management evidence
+  FAIL [INC-004] benign_administration not accepted or left uncorrected on non-management evidence
+  FAIL [INC-005] INC-005: remains benign with all requirements met
+== FeedbackFollower
+  INC-001: verdict=suspicious status=completed draft=suspicious proposed=['benign_administration'] accepted=['network_connection', 'obfuscation', 'office_child_process'] rejected_first={'benign_administration': 1} invalid_args=0 dups=0 loop_stop=False revision=True/changed unmet=[]
+  INC-002: verdict=suspicious status=completed draft=suspicious proposed=['benign_administration'] accepted=['credential_theft'] rejected_first={'benign_administration': 1} invalid_args=0 dups=1 loop_stop=False revision=True/changed unmet=[]
+  INC-003: verdict=suspicious status=completed draft=suspicious proposed=['benign_administration'] accepted=['persistence'] rejected_first={'benign_administration': 1} invalid_args=0 dups=0 loop_stop=False revision=True/changed unmet=['process_tree', 'network_activity']
+  INC-004: verdict=suspicious status=completed draft=suspicious proposed=['benign_administration'] accepted=['account_compromise', 'brute_force'] rejected_first={'benign_administration': 1} invalid_args=0 dups=1 loop_stop=False revision=True/changed unmet=['process_tree']
+  INC-005: verdict=benign status=completed draft=benign proposed=['benign_administration'] accepted=['benign_administration'] rejected_first={} invalid_args=0 dups=0 loop_stop=False revision=False/same unmet=[]
+  PASS [INC-004] INC-004: escalated with the authentication attack pattern accepted (no loop stop)
+  PASS [INC-002] INC-002: escalated with LSASS credential-dumping behavior accepted (no enum rejection, no loop stop)
+  PASS [INC-001] benign_administration not accepted or left uncorrected on non-management evidence
+  PASS [INC-002] benign_administration not accepted or left uncorrected on non-management evidence
+  PASS [INC-003] benign_administration not accepted or left uncorrected on non-management evidence
+  PASS [INC-004] benign_administration not accepted or left uncorrected on non-management evidence
+  PASS [INC-005] INC-005: remains benign with all requirements met

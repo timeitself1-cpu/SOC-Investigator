@@ -86,6 +86,13 @@ class Settings(BaseModel):
     # any clipping is recorded with the original length and SHA-256.
     audit_max_chars: int = Field(default=200_000, ge=1_000, le=5_000_000)
 
+    # Reasoning contract (v0.3.1)
+    # The application collects host context and the trigger's process tree before
+    # the model's first step (system-initiated, audited like the trigger seed).
+    baseline_collection: bool = True
+    # One bounded revision round when validation rejected claims/techniques/findings.
+    validation_revision: bool = True
+
     # Ollama
     ollama_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "qwen2.5:7b-instruct"

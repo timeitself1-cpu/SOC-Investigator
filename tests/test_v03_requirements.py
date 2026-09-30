@@ -37,7 +37,8 @@ def test_tree_scoped_network_satisfies_requirement_when_it_covers_the_whole_tree
 def test_tree_network_taken_before_the_tree_was_expanded_does_not_count():
     plan = [call("get_network_activity", scope="process_tree"), call("get_process_tree", evidence_id="EV-0001"),
             call("get_host_context")]
-    r = investigate(_tree_with_internal_child(), plan=plan)
+    # Without the v0.3.1 baseline (which reconstructs the tree before the model's first step):
+    r = investigate(_tree_with_internal_child(), plan=plan, baseline_collection=False)
     assert not req(r, "network_activity").satisfied and r.verdict == "insufficient_evidence"
 
 

@@ -109,8 +109,10 @@ def test_identical_requests_are_not_rerun_and_stop_the_loop(backend):
     finally:
         backend.get_host_context = original
     assert len(calls) == 1  # backend queried once; repeats answered from the audit record
-    statuses = [c.status for c in report.trace.tool_calls if c.initiator == "model"]
-    assert statuses == ["ok", "duplicate", "duplicate", "duplicate"]
+    # v0.3.1: the application already collected host context (baseline), so even
+    # the model's first request is a duplicate; three in a row stop gathering.
+    assert [(c.initiator, c.status) for c in report.trace.tool_calls if c.tool == "get_host_context"] == \
+        [("system", "ok"), ("model", "duplicate"), ("model", "duplicate"), ("model", "duplicate")]
     assert report.status == "incomplete"
     assert any("consecutive duplicate" in e for e in report.trace.errors)
     assert report.coverage.duplicates == 3

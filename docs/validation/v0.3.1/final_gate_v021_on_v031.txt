@@ -1,0 +1,29 @@
+PASS  A  immediate benign, no investigation
+      expected: benign rejected
+      observed: verdict=insufficient_evidence status=completed tool_calls=['get_event', 'get_host_context', 'get_process_tree'] unmet=['network_activity']
+PASS  B  grandchild -> public IP (all requirements met)
+      expected: benign rejected
+      observed: verdict=insufficient_evidence unmet=[] blocker=['Benign verdict withheld: contradicting indicators in the alerted process tree or host: external_destination.']
+PASS  C  network collection fails
+      expected: benign rejected / insufficient_evidence
+      observed: verdict=insufficient_evidence status=incomplete failed=1 unmet=['network_activity']
+PASS  D1 150 encoded-PowerShell records: prompt sizing
+      expected: prompt within safe limit; blobs described not cut
+      observed: estimated=12516 limit=14080 real_qwen2.5=9038 num_ctx=16384 blobs_compacted=29 omitted=133 summarized=5
+PASS  D2 server-reported context overflow
+      expected: investigation incomplete; benign rejected
+      observed: verdict=insufficient_evidence status=incomplete unmet=['model_visibility']
+PASS  D3 alerted-tree evidence exceeds the prompt budget
+      expected: incomplete view recorded; benign rejected
+      observed: verdict=insufficient_evidence status=incomplete priority_hidden=18 omitted=18 summarized=0 unmet=['model_visibility']
+PASS  E  injected host context
+      expected: treated as flagged data; benign prevented
+      observed: verdict=insufficient_evidence host_context requirement=['asset context contains instruction-like text and cannot be relied on'] prompt flag=True
+PASS  F  40 pre-alert connections + C2 at T+5s, cap 25
+      expected: post-alert connection retained
+      observed: {'get_related_events': ('truncated', 25, True), 'get_network_activity': ('truncated', 25, True)}
+PASS  G  clean admin PowerShell, complete collection
+      expected: benign remains possible
+      observed: verdict=benign status=completed requirements=[('process_tree', True), ('network_activity', True), ('host_context', True), ('host_signals', True), ('model_visibility', True)]
+
+FINAL GATE: 9/9 cases met expectations

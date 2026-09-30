@@ -1,0 +1,25 @@
+Acceptance (v0.3.1, behavior-based) — model=mock-analyst repeats=1
+
+PASS  [INC-004] INC-004: escalated with the authentication attack pattern accepted (no loop stop)  (1/1)
+        likely_malicious; accepted ['account_compromise', 'brute_force']; loop_stop=False
+PASS  [INC-002] INC-002: escalated with LSASS credential-dumping behavior accepted (no enum rejection, no loop stop)  (1/1)
+        likely_malicious; accepted ['credential_theft']; invalid_args=0; loop_stop=False
+PASS  [INC-001] benign_administration not accepted or left uncorrected on non-management evidence  (1/1)
+        proposed ['office_child_process', 'execution', 'obfuscation', 'network_connection']; accepted ['execution', 'network_connection', 'obfuscation', 'office_child_process']
+PASS  [INC-002] benign_administration not accepted or left uncorrected on non-management evidence  (1/1)
+        proposed ['credential_theft']; accepted ['credential_theft']
+PASS  [INC-003] benign_administration not accepted or left uncorrected on non-management evidence  (1/1)
+        proposed ['persistence']; accepted ['persistence']
+PASS  [INC-004] benign_administration not accepted or left uncorrected on non-management evidence  (1/1)
+        proposed ['brute_force', 'account_compromise']; accepted ['account_compromise', 'brute_force']
+PASS  [INC-005] INC-005: remains benign with all requirements met  (1/1)
+        benign; unmet []
+
+Per-run diagnostics:
+  INC-001 r1: likely_malicious      draft=likely_malicious proposed=['office_child_process', 'execution', 'obfuscation', 'network_connection'] accepted=['execution', 'network_connection', 'obfuscation', 'office_child_process'] invalid_args=0 dups=0 loop_stop=False revision=False/same tokens(server/est)=3478/7628 62.3 ms
+  INC-002 r1: likely_malicious      draft=likely_malicious proposed=['credential_theft'] accepted=['credential_theft'] invalid_args=0 dups=0 loop_stop=False revision=False/same tokens(server/est)=3153/6979 27.3 ms
+  INC-003 r1: likely_malicious      draft=likely_malicious proposed=['persistence'] accepted=['persistence'] invalid_args=0 dups=0 loop_stop=False revision=False/same tokens(server/est)=3211/7094 36.0 ms
+  INC-004 r1: likely_malicious      draft=likely_malicious proposed=['brute_force', 'account_compromise'] accepted=['account_compromise', 'brute_force'] invalid_args=0 dups=0 loop_stop=False revision=False/same tokens(server/est)=3547/7768 27.8 ms
+  INC-005 r1: benign                draft=benign proposed=['execution', 'obfuscation', 'benign_administration', 'network_connection'] accepted=['benign_administration', 'execution', 'network_connection', 'obfuscation'] invalid_args=0 dups=0 loop_stop=False revision=False/same tokens(server/est)=3215/7102 33.8 ms
+
+ALL CRITERIA PASSED

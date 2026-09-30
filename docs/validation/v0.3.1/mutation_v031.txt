@@ -1,0 +1,33 @@
+C1 claim eligibility diverges from the validator (unsupported claims listed eligible)
+    dedicated [tests/test_reasoning_contract.py::test_eligibility_equals_validator_acceptance_on_random_evidence_sets] => 1 failed in 0.32s
+    full suite => 7 failed, 347 passed, 4 skipped, 19 deselected, 1 warning in 18.71s
+C2 revised draft's verdict trusted without the gates
+    dedicated [tests/test_reasoning_contract.py::test_revision_cannot_obtain_benign] => 4 failed in 0.54s
+    full suite => 11 failed, 343 passed, 4 skipped, 19 deselected, 1 warning in 19.59s
+C3 revision ignores the disable setting
+    dedicated [tests/test_reasoning_contract.py::test_exactly_one_revision_and_it_can_be_disabled] => 1 failed in 0.41s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.12s
+C4 revision not triggered by rejected claims
+    dedicated [tests/test_reasoning_contract.py::test_a_rejected_claim_next_to_an_accepted_one_still_triggers_the_revision] => 1 failed in 0.31s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.22s
+C5 cancellation during the revision ignored
+    dedicated [tests/test_reasoning_contract.py::test_cancellation_during_revision_ends_cancelled] => 1 failed in 0.31s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 16.90s
+C6 baseline failure hidden (not a failed collection)
+    dedicated [tests/test_reasoning_contract.py::test_baseline_failure_is_a_visible_failed_collection] => 1 failed in 0.31s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.70s
+C7 allowed values removed from the argument contract
+    dedicated [tests/test_reasoning_contract.py::test_tool_catalog_exposes_allowed_values_bounds_rules_and_valid_examples] => 1 failed in 0.28s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.52s
+C8 duplicate-request feedback removed
+    dedicated [tests/test_reasoning_contract.py::test_decide_state_has_feedback_answered_requests_checklist_and_suggestions] => 1 failed in 0.31s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.28s
+C9 benign_administration warning removed from the report contract
+    dedicated [tests/test_reasoning_contract.py::test_report_prompt_carries_the_contract_and_the_benign_admin_warning] => 1 failed in 0.29s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.13s
+C10 rejected claims hidden from the revision feedback
+    dedicated [tests/test_reasoning_contract.py::test_revision_feedback_contains_only_application_text] => 1 failed in 0.27s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.33s
+C11 (defect found in v0.3.1 validation) records omitted at level 4 counted as shown in full
+    dedicated [tests/test_integrity_v021.py::test_D_omitted_tree_records_are_hidden_even_when_fewer_than_the_summary_threshold] => 1 failed in 0.49s
+    full suite => 1 failed, 353 passed, 4 skipped, 19 deselected, 1 warning in 17.20s
