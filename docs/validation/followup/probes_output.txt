@@ -1,0 +1,22 @@
+### probe_benign.py
+P1 model finishes immediately (no tree, no network query) and drafts benign
+  -> verdict=benign conf=0.80 status=completed valid=True evidence=1 indicators=['encoded_command', 'management_agent_parent', 'powershell']
+  unknowns=['Network/DNS activity was not queried.', 'Process ancestry of the alerted process was not reconstructed.', 'Asset/role context for the host was not retrieved.']
+  issues=[]
+P2 model reconstructs the tree and queries host network; grandchild beacons to a public IP
+  -> verdict=benign conf=0.80 status=completed valid=True evidence=3 indicators=['encoded_command', 'external_destination', 'management_agent_parent', 'powershell']
+  unknowns=['Process-creation record for the parent of powershell.exe (C:\\Program Files\\Microsoft Configuration Manager\\bin\\x64\\AgentExecutor.exe) is not in the queried telemetry window; earlier ancestry is unknown.', 'No asset/role context is available for WS-9.']
+  issues=[]
+P3 mock analyst on the same telemetry -> suspicious 0.65 completed calls: ['get_event', 'get_host_context', 'search_events', 'get_process_tree', 'get_process_details', 'get_network_activity', 'get_related_events'] evidence: 4 grandchild beacon retrieved: True
+### probe_gate.py
+benign draft + failed network query -> insufficient_evidence incomplete 1 failed
+'..' path -> unexpected_path
+### probe_hostctx.py
+injection text in host context -> benign completed valid True | gap recorded: True | any evidence flagged: False
+### probe_window.py
+get_related_events ±15min, 40 earlier noise events: truncated retrieved 25 | latest retrieved: 10:54:00 | trigger at 11:00:00 | post-trigger C2 connection retrieved: False
+wazuh sort: "sort": [{"timestamp": {"order": "asc"}}],
+   
+### probe_cancel.py
+cancel accepted during final-report call: True
+-> run status: completed | report status: completed | verdict: likely_malicious | cancel_requested: True

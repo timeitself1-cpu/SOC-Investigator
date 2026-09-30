@@ -1,3 +1,5 @@
+> **Follow-up verification: [REVIEW_FOLLOWUP.md](REVIEW_FOLLOWUP.md)** re-checks R1–R18 below and adds findings F1–F11.
+
 # Independent review and improvement plan — v0.2.0 (2026-09-30)
 
 Source of truth: `soc_investigator_improved.zip` (the "improved" package). It was

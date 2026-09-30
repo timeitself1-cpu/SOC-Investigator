@@ -1,0 +1,9 @@
+R3 repro filler ('x'*900)                    decide       chars= 38,202 tokens=12,286 chars/token=3.11 level=4 omitted= 73  prompt+num_predict=14,334 / num_ctx 16,384 ok
+R3 repro filler ('x'*900)                    final_report chars= 37,979 tokens=12,183 chars/token=3.12 level=4 omitted= 75  prompt+num_predict=14,231 / num_ctx 16,384 ok
+base64 -EncodedCommand (random bytes)        decide       chars= 38,094 tokens=22,163 chars/token=1.72 level=4 omitted=126  prompt+num_predict=24,211 / num_ctx 16,384 OVERFLOW
+base64 -EncodedCommand (random bytes)        final_report chars= 38,195 tokens=22,154 chars/token=1.72 level=4 omitted=127  prompt+num_predict=24,202 / num_ctx 16,384 OVERFLOW
+base64 -EncodedCommand (UTF-16LE script)     decide       chars= 38,187 tokens=15,193 chars/token=2.51 level=4 omitted= 86  prompt+num_predict=17,241 / num_ctx 16,384 OVERFLOW
+base64 -EncodedCommand (UTF-16LE script)     final_report chars= 37,926 tokens=15,048 chars/token=2.52 level=4 omitted= 88  prompt+num_predict=17,096 / num_ctx 16,384 OVERFLOW
+hex blob command lines                       decide       chars= 38,202 tokens=18,482 chars/token=2.07 level=4 omitted= 73  prompt+num_predict=20,530 / num_ctx 16,384 OVERFLOW
+hex blob command lines                       final_report chars= 37,979 tokens=18,296 chars/token=2.08 level=4 omitted= 75  prompt+num_predict=20,344 / num_ctx 16,384 OVERFLOW
+largest real fixture/benchmark prompt: 7535 tokens; BM-X07 final_report chars=21,487 ratio=2.85

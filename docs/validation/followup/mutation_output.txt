@@ -1,0 +1,22 @@
+R1  drop '..' traversal check => 226 passed, 15 deselected, 1 warning in 7.35s
+R1  accept any install dir (name only) => 1 failed, 37 passed, 15 deselected, 1 warning in 2.33s
+R1  masquerade not a tree contradiction => 226 passed, 15 deselected, 1 warning in 7.59s
+R1b admin context anywhere on host => 1 failed, 37 passed, 15 deselected, 1 warning in 2.22s
+R1  benign ignores injection flag => 1 failed, 160 passed, 15 deselected, 1 warning in 5.68s
+R2  no compaction (budget ignored) => 1 failed, 162 passed, 15 deselected, 1 warning in 5.70s
+R2  omitted evidence not disclosed => 1 failed, 163 passed, 15 deselected, 1 warning in 5.42s
+R3  audit clips at 6000 again => 1 failed, 164 passed, 15 deselected, 1 warning in 6.71s
+R4  host context dropped from prompt => 1 failed, 161 passed, 15 deselected, 1 warning in 5.48s
+R5  missing parent => truncated again => 1 failed, 15 deselected, 1 warning in 1.12s
+R6  shards.total==0 not an error => 1 failed, 166 passed, 15 deselected, 1 warning in 5.80s
+R7  no token refresh on 401 => 1 failed, 168 passed, 15 deselected, 1 warning in 6.11s
+R8  raw exception text in tool error => 1 failed, 170 passed, 15 deselected, 1 warning in 6.61s
+R9  malformed alert breaks queue => 1 failed, 169 passed, 15 deselected, 1 warning in 5.88s
+R10 duplicate detection off => 1 failed, 4 passed, 15 deselected, 1 warning in 1.11s
+R10 unproductive-stop off => 1 failed, 4 passed, 15 deselected, 1 warning in 1.21s
+R11 trigger marker from telemetry => 1 failed, 98 passed, 15 deselected, 1 warning in 3.34s
+R12 markdown '=' not escaped => 226 passed, 15 deselected, 1 warning in 7.18s
+R16 done_reason=length accepted => 1 failed, 134 passed, 15 deselected, 1 warning in 4.65s
+R17 rejected => incomplete again => 1 failed, 136 passed, 15 deselected, 1 warning in 4.94s
+R18 publish before journal => 1 failed, 139 passed, 15 deselected, 1 warning in 5.12s
+Gate benign allowed when incomplete => 226 passed, 15 deselected, 1 warning in 7.04s
