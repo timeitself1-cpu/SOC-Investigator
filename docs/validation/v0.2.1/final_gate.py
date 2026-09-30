@@ -85,17 +85,14 @@ r = t.investigate([t.admin_trigger(), t.conn("N", 2, "{p1}", t.PS, ip="10.40.1.2
 record("D2 server-reported context overflow", "investigation incomplete; benign rejected",
        r.status == "incomplete" and r.verdict != "benign",
        f"verdict={r.verdict} status={r.status} unmet={unmet(r)}")
-#   D3: more evidence than fits - some records cannot reach the model.
-docs = [t.admin_trigger()] + [t.proc(f"N{i}", i, f"{{n{i}}}", "{explorer}", r"C:\Windows\System32\svchost.exe",
-                                     r"C:\Windows\explorer.exe", cmd="svchost.exe -k netsvcs " + "q" * 900)
-                              for i in range(1, 40)]
-r = t.investigate(docs, plan=t.FULL_PLAN + [t.call("search_events", category="process")],
-                  ollama_num_ctx=8192, ollama_num_predict=1024)
+#   D3: the alerted process tree does not fit the prompt in full (v0.3 semantics:
+#       priority evidence = trigger, alerted tree, suspicious records).
+r = t.investigate(t._big_tree(20), ollama_num_ctx=8192, ollama_num_predict=1024)
 final = [x for x in r.trace.llm_exchanges if x.purpose == "final_report"][-1]
-record("D3 evidence exceeds the prompt budget", "incomplete view recorded; benign rejected",
-       r.verdict != "benign" and "model_visibility" in unmet(r),
-       f"verdict={r.verdict} status={r.status} omitted={final.evidence_omitted} "
-       f"summarized={final.evidence_summarized} unmet={unmet(r)}")
+record("D3 alerted-tree evidence exceeds the prompt budget", "incomplete view recorded; benign rejected",
+       r.verdict != "benign" and r.status == "incomplete" and "model_visibility" in unmet(r),
+       f"verdict={r.verdict} status={r.status} priority_hidden={final.priority_evidence_hidden} "
+       f"omitted={final.evidence_omitted} summarized={final.evidence_summarized} unmet={unmet(r)}")
 
 # E. Host context carries instruction-like text (exact REVIEW_FOLLOWUP F4 bypass).
 seen = []

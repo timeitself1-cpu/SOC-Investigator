@@ -203,6 +203,13 @@ class WazuhBackend:
                 {"term": {"data.win.eventdata.parentProcessGuid": q.parent_process_guid}},
                 {"term": {"data.win.eventdata.parentProcessGUID": q.parent_process_guid}},
             ], "minimum_should_match": 1}})
+        if q.user:
+            name = q.user.rsplit("\\", 1)[-1]
+            filters.append({"bool": {"should": [
+                {"term": {"data.win.eventdata.targetUserName": name}},
+                {"term": {"data.win.eventdata.subjectUserName": name}},
+                {"term": {"data.win.eventdata.user": q.user}},
+            ], "minimum_should_match": 1}})
         must: list[dict[str, Any]] = []
         if q.keyword:
             must.append({"match_phrase": {"full_log": q.keyword}})

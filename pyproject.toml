@@ -11,6 +11,7 @@ dependencies = [
     "pydantic>=2.6",
     "httpx>=0.26",
     "jinja2>=3.1",
+    "pywin32>=306; sys_platform == 'win32'",
 ]
 
 [project.optional-dependencies]
@@ -28,7 +29,8 @@ packages = ["investigator", "investigator.llm", "investigator.backends", "invest
 
 [tool.setuptools.package-data]
 investigator = ["templates/*.html", "static/*.css", "static/*.js", "cases/*/*.json", "cases/*.md",
-                "benchmarks/*/*/*.json", "benchmarks/*/*.md"]
+                "benchmarks/*/*/*.json", "benchmarks/*/*.md",
+                "windows_samples/*/*.xml", "windows_samples/*/*.json", "windows_samples/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

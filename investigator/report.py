@@ -56,9 +56,11 @@ GROUNDING_LIMITATION = (
 )
 
 # Indicators that contradict a benign conclusion for the alerted process tree.
-_TREE_CONTRADICTIONS = {"office_parent", "external_destination", "user_writable_path", "masquerade_suspect"}
+_TREE_CONTRADICTIONS = {"office_parent", "external_destination", "user_writable_path", "masquerade_suspect",
+                        "suspicious_script_content"}
 # Indicators that contradict a benign conclusion anywhere on the alerted host.
-_HOST_CONTRADICTIONS = {"lsass_target", "memory_dump_file", "run_key", "scheduled_task", "masquerade_suspect"}
+_HOST_CONTRADICTIONS = {"lsass_target", "memory_dump_file", "run_key", "scheduled_task", "masquerade_suspect",
+                        "defender_detection"}
 
 CLAIM_VERIFICATION: dict[str, str] = {
     "execution": "Confirm the process launch in endpoint history and whether it was expected for this user/host.",
@@ -71,6 +73,8 @@ CLAIM_VERIFICATION: dict[str, str] = {
     "account_compromise": "Confirm with the account owner; review activity performed by the session after the successful logon.",
     "discovery": "Determine who ran the discovery commands and whether they match an administrative task.",
     "benign_administration": "Confirm with the endpoint-management owner that this job ran, and verify the parent binary's signature and path.",
+    "security_product_detection": "Review the Defender detection details (threat, path, action, remediation status) in Windows Security and confirm the file's origin.",
+    "suspicious_script": "Read the full script block in the PowerShell Operational log and determine what it downloaded, loaded or changed.",
 }
 
 
@@ -79,10 +83,14 @@ class ReportInputs:
     host_contexts: list[HostContext] = field(default_factory=list)
     backend_caveats: list[str] = field(default_factory=list)
     visibility_gaps: list[str] = field(default_factory=list)
+    visibility_notes: list[str] = field(default_factory=list)  # disclosed, not incompleteness
     cancelled: bool = False
     # Reasons the final assessment prompt did not show the model every retrieved
     # record in full (omitted, summarized, suspected overflow). Empty = full view.
     model_visibility_issues: list[str] | None = None
+    # Deterministic host-level signal check around the alert:
+    # ("clear" | "signals" | "unavailable", details). None = not performed.
+    host_signal_check: tuple[str, list[str]] | None = None
     # Network activity must cover at least this many minutes on each side of the
     # alert for benign closure (clamped to the configured window).
     min_network_window_minutes: int = 15
@@ -194,19 +202,32 @@ def evaluate_requirements(trace: InvestigationTrace, store: EvidenceStore, alert
     need = timedelta(minutes=inputs.min_network_window_minutes)
     net_calls = [c for c in ok if c.tool == "get_network_activity"
                  and str(c.target.get("host", "")).casefold() == alert.host.casefold()]
+    # Either every connection on the host, or every connection of every process
+    # in the alerted tree (checked against the tree as it stands at report time,
+    # so a tree expanded after the network query does not count as covered).
+    tree_guids = {g for h, g in process_tree_keys(store.all(), triggers) if h == alert.host.casefold()}
     good = []
     for c in net_calls:
         start, end = _parse_ts(c.target.get("start")), _parse_ts(c.target.get("end"))
-        if (c.outcome in ("complete", "empty") and not c.target.get("process_guid") and start and end
+        if not (c.outcome in ("complete", "empty") and start and end
                 and start <= anchor - need and end >= anchor + need):
+            continue
+        if c.target.get("scope") == "process_tree":
+            covered = {str(g).casefold() for g in c.target.get("process_guids", [])}
+            if trig and trig.process_guid and str(c.target.get("tree_root", "")).casefold() == \
+                    trig.process_guid.casefold() and tree_guids and tree_guids <= covered:
+                good.append(c)
+        elif not c.target.get("process_guid"):
             good.append(c)
     if good:
-        reason = "host-wide network/DNS activity around the alert was retrieved completely"
+        reason = ("network/DNS activity of the whole alerted process tree was retrieved completely"
+                  if good[0].target.get("scope") == "process_tree"
+                  else "host-wide network/DNS activity around the alert was retrieved completely")
     elif any(c.outcome == "truncated" for c in net_calls):
         reason = "network activity results were capped; connections may be missing"
     elif net_calls:
-        reason = (f"network activity was only queried for a single process or for less than "
-                  f"±{inputs.min_network_window_minutes} minutes around the alert")
+        reason = (f"network activity was not retrieved for the host or for every process in the alerted tree "
+                  f"over ±{inputs.min_network_window_minutes} minutes around the alert")
     else:
         reason = "host network activity was never successfully queried"
     reqs.append(CollectionRequirement(name="network_activity", satisfied=bool(good), reason=reason,
@@ -227,7 +248,21 @@ def evaluate_requirements(trace: InvestigationTrace, store: EvidenceStore, alert
     reqs.append(CollectionRequirement(name="host_context", satisfied=bool(good), reason=reason,
                                       call_ids=[c.call_id for c in (good or hc_calls)]))
 
-    # 4. The assessment was made with every retrieved record in view.
+    # 4. No other security signal on the alerted host around the alert, checked
+    #    deterministically over the host's telemetry (not via capped model queries).
+    check = inputs.host_signal_check
+    if check is None:
+        reqs.append(CollectionRequirement(name="host_signals", satisfied=False,
+                                          reason="the host-level signal check was not performed"))
+    else:
+        state, details = check
+        reason = {"clear": "no other security signals on the host around the alert",
+                  "signals": "other security signals exist on the host around the alert: " + "; ".join(details),
+                  "unavailable": "the host-level signal check was incomplete: " + "; ".join(details)}[state]
+        reqs.append(CollectionRequirement(name="host_signals", satisfied=state == "clear", reason=reason,
+                                          call_ids=["system-host-signals"]))
+
+    # 5. The assessment was made with every retrieved record in view.
     issues = inputs.model_visibility_issues
     if issues is None:
         issues = ["no model assessment prompt was recorded"]
@@ -460,6 +495,7 @@ def build_coverage(trace: InvestigationTrace, store: EvidenceStore, alert: Alert
     if "get_host_context" not in ok_tools:
         unknowns.append("Asset/role context for the host was not retrieved.")
     unknowns.extend(inputs.visibility_gaps)
+    unknowns.extend(inputs.visibility_notes)
     if any(e.raw_truncated for e in store.all()):
         unknowns.append("Some raw records exceeded the storage bound and are kept as a hashed preview "
                         "(raw_sha256 identifies the full record).")
@@ -482,8 +518,11 @@ def _status(trace: InvestigationTrace, coverage: CollectionCoverage, inputs: Rep
     if coverage.failed:
         kinds = sorted({i.error_kind or "unknown" for i in coverage.items if i.outcome == "failed"})
         reasons.append(f"{coverage.failed} collection request(s) failed ({', '.join(kinds)}).")
-    if coverage.truncated:
-        reasons.append(f"{coverage.truncated} collection request(s) hit a result or budget cap.")
+    # v0.3: a capped exploratory query is disclosed in the coverage ledger
+    # (truncated count, known unknowns, verification steps) but no longer makes
+    # the investigation "incomplete": on a real host every host-wide query is
+    # capped. Required collection is judged by the benign requirements instead,
+    # where a truncated query never counts.
     reasons.extend(inputs.visibility_gaps)
     for e in trace.errors:
         if e.startswith((FINAL_REPORT_FAILED, "collection:")):

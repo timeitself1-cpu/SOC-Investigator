@@ -26,6 +26,7 @@ class EventQuery(BaseModel):
     process_guid: str | None = None
     parent_process_guid: str | None = None
     keyword: str | None = None
+    user: str | None = None  # account name (DOMAIN\\name or name); exact, case-insensitive
     limit: int = Field(default=25, ge=1, le=51)  # tools request limit+1 to detect truncation
     # "asc" returns the earliest matches first; "desc" the latest first. Tools use
     # both to select events on each side of an anchor time (time-centered retrieval).
@@ -38,6 +39,22 @@ class EventQuery(BaseModel):
         if self.start > self.end:
             raise ValueError("event query start must not be after end")
         return self
+
+
+class EventList(list):
+    """A search result that can carry coverage caveats.
+
+    Backends that know some source for the requested data is missing, disabled
+    or unreadable return the events they could read plus ``gaps`` (plain-text
+    known unknowns). ``degraded`` means the result cannot be treated as the
+    complete answer for the requested category (tools report it as ``partial``).
+    A plain ``list`` is still a valid return value (no caveats).
+    """
+
+    def __init__(self, items=(), *, gaps: list[str] | None = None, degraded: bool = False) -> None:
+        super().__init__(items)
+        self.gaps = list(gaps or [])
+        self.degraded = degraded
 
 
 @runtime_checkable

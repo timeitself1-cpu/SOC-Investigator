@@ -56,6 +56,13 @@ MANAGEMENT_AGENT_DIRS = (
     "c:\\program files\\microsoft intune management extension\\",
 )
 USER_WRITABLE_MARKERS = ("\\appdata\\", "\\users\\public\\", "\\windows\\temp\\", "\\downloads\\", "\\temp\\")
+# PowerShell script-block content that is characteristic of download cradles,
+# in-memory loading, obfuscation or Defender tampering. An indicator, not a verdict.
+_SUSPICIOUS_SCRIPT = re.compile(
+    r"frombase64string|\biex\b|invoke-expression|downloadstring|downloaddata|downloadfile|net\.webclient"
+    r"|reflection\.assembly\]::load|virtualalloc|-bxor|add-mppreference\s+-exclusion"
+    r"|set-mppreference\s+-disable|amsiutils|invoke-mimikatz|-encodedcommand",
+    re.IGNORECASE)
 _ENCODED_ARG = re.compile(r"(?:^|\s)-(?:e|ec|enc|enco|encod|encode|encoded|encodedc\w*)\s+([A-Za-z0-9+/=]{16,})", re.IGNORECASE)
 
 
@@ -183,6 +190,14 @@ def derive_indicators(ev: NormalizedEvent) -> list[str]:
         tags.append("discovery_command")
     if ev.category == "file" and (ev.target_filename or "").lower().endswith(".dmp"):
         tags.append("memory_dump_file")
+    if ev.category == "script":
+        tags.append("powershell_script_block")
+        if ev.script_text and _SUSPICIOUS_SCRIPT.search(ev.script_text):
+            tags.append("suspicious_script_content")
+    if ev.category == "detection":
+        tags.append("defender_detection")
+    if ev.category == "privilege":
+        tags.append("special_privileges_assigned")
     return sorted(set(tags))
 
 
@@ -214,6 +229,19 @@ def describe_event(ev: NormalizedEvent) -> str:
         return f"Logon {outcome} for {ev.user} from {ev.src_ip or 'unknown'} (logon type {ev.logon_type})"
     if ev.category == "scheduled_task":
         return f"Scheduled task created: {ev.task_name} by {ev.user}"
+    if ev.category == "process_termination":
+        return f"Process terminated: {img}"
+    if ev.category == "script":
+        text = ev.script_text or ""
+        where = f" from {ev.script_path}" if ev.script_path else ""
+        return (f"PowerShell script block{where} ({len(text)} chars) in process {ev.process_id or '?'}"
+                + (f" — {text}" if text else ""))
+    if ev.category == "detection":
+        return (f"Microsoft Defender detection: {ev.threat_name or 'unknown threat'} "
+                f"(severity {ev.threat_severity or '?'}) at {ev.target_filename or '?'}; "
+                f"process {basename(ev.image) or '?'}; action {ev.action or 'none recorded'}")
+    if ev.category == "privilege":
+        return f"Special privileges assigned to new logon for {ev.user}: {ev.details or ''}"
     return ev.rule_description or f"Event {ev.event_id} from {ev.source}"
 
 
@@ -235,6 +263,8 @@ _ATTR_FIELDS = (
     "src_ip", "dest_ip", "dest_port", "dest_hostname", "target_image", "granted_access",
     "target_object", "details", "target_filename", "logon_type", "auth_outcome",
     "task_name", "task_content", "query_name", "rule_id", "rule_level", "rule_description",
+    "parent_process_id", "hashes", "protocol", "src_port", "integrity_level", "script_text", "script_path",
+    "threat_name", "threat_severity", "action",
 )
 
 
@@ -295,7 +325,8 @@ class EvidenceStore:
                 val = getattr(ev, name)
                 if val is None:
                     continue
-                limit = MAX_COMMAND_CHARS if name in ("command_line", "parent_command_line", "task_content") else MAX_FIELD_CHARS
+                limit = (MAX_COMMAND_CHARS if name in ("command_line", "parent_command_line", "task_content",
+                                                       "script_text") else MAX_FIELD_CHARS)
                 attrs[name] = sanitize_text(val, limit)
                 if len(str(val)) > limit:
                     truncated_fields.append(name)

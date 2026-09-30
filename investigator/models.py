@@ -22,6 +22,10 @@ EventCategory = Literal[
     "process_access",
     "authentication",
     "scheduled_task",
+    "process_termination",  # Sysmon 5
+    "script",               # PowerShell script-block / module logging (4104/4103)
+    "detection",            # Microsoft Defender detections (1116/1117)
+    "privilege",            # Security 4672 special privileges assigned
     "other",
 ]
 
@@ -43,6 +47,8 @@ Claim = Literal[
     "privilege_escalation",
     "data_exfiltration",
     "benign_administration",
+    "security_product_detection",
+    "suspicious_script",
 ]
 
 EVIDENCE_ID_PATTERN = r"^EV-\d{4}$"
@@ -98,6 +104,27 @@ class NormalizedEvent(Strict):
     task_name: str | None = None
     task_content: str | None = None
     query_name: str | None = None
+    # Windows-native fields (v0.3). All optional: other backends leave them empty.
+    parent_process_id: int | None = None
+    hashes: str | None = None             # Sysmon "Hashes" (e.g. SHA256=...,IMPHASH=...)
+    protocol: str | None = None
+    src_port: int | None = None
+    provider: str | None = None           # event provider (e.g. Microsoft-Windows-Sysmon)
+    channel: str | None = None            # event log channel
+    record_id: int | None = None          # EventRecordID within the channel
+    integrity_level: str | None = None
+    logon_id: str | None = None
+    # PowerShell script-block logging
+    script_text: str | None = None
+    script_block_id: str | None = None
+    script_path: str | None = None
+    # Microsoft Defender
+    threat_name: str | None = None
+    threat_severity: str | None = None
+    action: str | None = None
+    # True when process_guid was attached by application correlation (host + PID +
+    # time against Sysmon process creation) rather than recorded in the event.
+    process_guid_inferred: bool = False
     raw: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -238,7 +265,7 @@ class ToolCall(Strict):
     # clamping. Collection requirements are checked against this, never against
     # the model's arguments or prose.
     target: dict[str, Any] | None = None
-    partial_reason: Literal["ancestry_outside_window", "target_not_found"] | None = None
+    partial_reason: Literal["ancestry_outside_window", "target_not_found", "source_degraded"] | None = None
     injection_suspected: bool = False  # instruction-like text in a non-evidence result (host context)
 
 
@@ -273,6 +300,7 @@ class LLMExchange(Strict):
     prompt_token_limit: int | None = None
     blobs_compacted: int = 0       # encoded/high-entropy runs replaced by a bounded description
     evidence_summarized: int = 0   # items shown as one-line summaries without attributes
+    priority_evidence_hidden: int = 0  # trigger/tree/suspicious items summarized or omitted
 
 
 class ActivityEvent(Strict):
@@ -323,7 +351,7 @@ class CollectionRequirement(Strict):
     Evaluated by application code from the resolved tool-call records.
     """
 
-    name: Literal["process_tree", "network_activity", "host_context", "model_visibility"]
+    name: Literal["process_tree", "network_activity", "host_context", "host_signals", "model_visibility"]
     satisfied: bool
     reason: str
     call_ids: list[str] = Field(default_factory=list)

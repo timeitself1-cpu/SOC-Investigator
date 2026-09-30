@@ -16,6 +16,14 @@ from .base import EventQuery
 from .normalize import event_matches_keyword, normalize_wazuh_doc
 
 
+def _user_matches(recorded: str | None, wanted: str) -> bool:
+    """Exact account match, case-insensitive; a bare name also matches DOMAIN\\name."""
+    if not recorded:
+        return False
+    r, w = recorded.casefold(), wanted.casefold()
+    return r == w or ("\\" not in w and r.rsplit("\\", 1)[-1] == w)
+
+
 class FixtureBackend:
     name = "fixture"
 
@@ -105,6 +113,8 @@ class FixtureBackend:
             if query.parent_process_guid and (ev.parent_process_guid or "").lower() != query.parent_process_guid.lower():
                 continue
             if query.keyword and not event_matches_keyword(ev, query.keyword):
+                continue
+            if query.user and not _user_matches(ev.user, query.user):
                 continue
             out.append(ev)
             if len(out) >= query.limit:

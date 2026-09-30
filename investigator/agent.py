@@ -19,7 +19,7 @@ import re
 import threading
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Callable
 
 from pydantic import ValidationError
@@ -98,7 +98,8 @@ Rules: every finding needs >=1 evidence_id from the evidence list. Tag each find
 # Keys shown to the model, in priority order (later keys are dropped first under pressure).
 _PROMPT_ATTRS = ("image", "parent_image", "command_line", "decoded_command", "user", "dest_ip",
                  "dest_hostname", "dest_port", "src_ip", "logon_type", "auth_outcome", "target_image",
-                 "granted_access", "target_object", "details", "target_filename", "task_name")
+                 "granted_access", "target_object", "details", "target_filename", "task_name",
+                 "script_text", "threat_name", "threat_severity", "action", "hashes", "protocol")
 # Token room reserved beyond the prompt and the response (num_predict): the chat
 # template and message framing, and one repair turn (the echoed invalid answer,
 # up to 2,000 chars, plus the correction note).
@@ -233,19 +234,30 @@ class InvestigationAgent:
                                     limitations=["The investigation was cancelled; no assessment was accepted."])
                 final_exchange = None
 
-        visibility_gaps: list[str] = []
+        visibility_gaps: list[str] = []   # make the investigation incomplete
+        visibility_notes: list[str] = []  # disclosed known unknowns only
         visibility_issues: list[str] | None = None
         if final_exchange is not None:
             visibility_issues = []
-            if final_exchange.evidence_omitted:
-                visibility_gaps.append(
-                    f"{final_exchange.evidence_omitted} retrieved evidence item(s) were not shown to the model in the "
-                    "final-report prompt (context budget); the assessment did not consider them.")
-                visibility_issues.append(f"{final_exchange.evidence_omitted} evidence item(s) were omitted "
-                                         "from the assessment prompt")
-            if final_exchange.evidence_summarized:
-                visibility_issues.append(f"{final_exchange.evidence_summarized} evidence item(s) were shown to the "
-                                         "model only as one-line summaries")
+            hidden = final_exchange.priority_evidence_hidden
+            if hidden:
+                # The trigger, the alerted process tree or a suspicious record did
+                # not reach the model in full: the assessment cannot be trusted.
+                gap = (f"{hidden} priority evidence item(s) (trigger, alerted process tree or suspicious "
+                       "records) were summarized or omitted in the final-report prompt; the assessment did not "
+                       "see them in full.")
+                visibility_gaps.append(gap)
+                visibility_issues.append(gap)
+            routine_omitted = final_exchange.evidence_omitted
+            routine_summarized = final_exchange.evidence_summarized
+            if routine_omitted or routine_summarized:
+                # Routine records outside the alerted tree: the model did not read
+                # them in full, but the application's verdict gates checked all
+                # retrieved evidence. Disclosed, not a coverage failure.
+                visibility_notes.append(
+                    f"The final-report prompt omitted {routine_omitted} and summarized {routine_summarized} "
+                    "retrieved record(s) outside the alerted process tree to fit the context budget "
+                    "(routine records not shown to the model in full; application checks covered them).")
         overflowed = [x for x in trace.llm_exchanges if x.context_overflow_suspected]
         if overflowed:
             gap = (f"{len(overflowed)} model prompt(s) may have exceeded the context window; the model may not "
@@ -253,18 +265,39 @@ class InvestigationAgent:
             visibility_gaps.append(gap)
             if visibility_issues is not None:
                 visibility_issues.append(gap)
+        host_signals = self._host_signal_check(alert) if not cancelled else None
         completed_at = utcnow()
         report = validate_report(
             draft, store, alert, trace, process_tree, self.model.name, self.backend.name, started_at, completed_at,
             inputs=ReportInputs(host_contexts=list(ctx.host_contexts.values()),
                                 backend_caveats=self._backend_caveats(),
-                                visibility_gaps=visibility_gaps, cancelled=cancelled,
+                                visibility_gaps=visibility_gaps, visibility_notes=visibility_notes,
+                                cancelled=cancelled,
                                 model_visibility_issues=visibility_issues,
+                                host_signal_check=host_signals,
                                 min_network_window_minutes=min(15, self.settings.max_window_minutes)),
         )
         note = "valid" if report.validation.valid else f"{len(report.validation.issues)} validation note(s)"
         emit("done", f"Investigation {report.status}: {report.verdict} (confidence {report.confidence:.2f}); {note}")
         return report
+
+    def _host_signal_check(self, alert: Alert) -> tuple[str, list[str]]:
+        """Other deterministic signals on the alerted host within the investigation
+        window. Application-owned; the model cannot skip or influence it."""
+        try:
+            alerts = list(self.backend.list_alerts())
+        except Exception as exc:  # noqa: BLE001 - reported as an unavailable check
+            kind, _ = safe_error(exc)
+            return "unavailable", [f"host signals could not be listed ({kind})"]
+        notes = [str(n) for n in (getattr(self.backend, "signal_notes", None) or [])]
+        window = timedelta(minutes=self.settings.max_window_minutes)
+        others = [a for a in alerts if a.alert_id != alert.alert_id and a.host.casefold() == alert.host.casefold()
+                  and abs(a.timestamp - alert.timestamp) <= window and a.event_ref != alert.event_ref]
+        if others:
+            return "signals", [f"{a.title} at {a.timestamp.strftime('%H:%M')} UTC" for a in others[:5]]
+        if notes:
+            return "unavailable", notes
+        return "clear", []
 
     def _backend_caveats(self) -> list[str]:
         caveats = getattr(self.backend, "coverage_caveats", None)
@@ -393,7 +426,8 @@ class InvestigationAgent:
                 estimated_prompt_tokens=sum(estimate_tokens(m["content"], self.settings.prompt_chars_per_token)
                                             for m in convo),
                 prompt_token_limit=self.prompt_token_limit(), blobs_compacted=meta.get("blobs", 0),
-                evidence_summarized=meta.get("summarized", 0))
+                evidence_summarized=meta.get("summarized", 0),
+                priority_evidence_hidden=meta.get("priority_hidden", 0))
             last_exchange = exchange
             if exchange.estimated_prompt_tokens > exchange.prompt_token_limit:
                 self._flag_overflow(exchange, trace, emit, step, purpose,
@@ -469,7 +503,10 @@ class InvestigationAgent:
         triggers = ctx.store.trigger_ids()
         anchor = next((e.timestamp for e in items if e.evidence_id in triggers), ctx.alert.timestamp)
         # Highest priority first: triggers, evidence with indicators, then nearest in time.
-        ranked = sorted(items, key=lambda e: (e.evidence_id not in triggers, not e.indicators,
+        priority = priority_evidence_ids(items, triggers)
+        # Order: triggers, the alerted process tree and suspicious records, then the
+        # rest nearest in time. Compaction summarizes/omits from the end.
+        ranked = sorted(items, key=lambda e: (e.evidence_id not in triggers, e.evidence_id not in priority,
                                               abs((e.timestamp - anchor).total_seconds()), e.evidence_id))
         if budget_chars is None:
             budget_chars = 10**9
@@ -481,8 +518,10 @@ class InvestigationAgent:
                                       counter)
             if len(text) <= budget_chars:
                 summarized = max(0, keep - _SUMMARY_AFTER) if level >= 3 else 0
+                full_view = set(e.evidence_id for e in ranked[:_SUMMARY_AFTER if level >= 3 else keep])
                 return text, {"level": level, "evidence_shown": keep, "evidence_omitted": len(ranked) - keep,
-                              "blobs": counter[0], "summarized": summarized}
+                              "blobs": counter[0], "summarized": summarized,
+                              "priority_hidden": len(priority - full_view)}
             if level < _MAX_LEVEL - 1:
                 level += 1
             elif level == _MAX_LEVEL - 1:
@@ -493,7 +532,8 @@ class InvestigationAgent:
                 per_item = max(1, len(text) // max(keep, 1))
                 keep = max(0, keep - max(1, over // per_item))
             else:
-                return None, {"level": level, "evidence_shown": 0, "evidence_omitted": len(ranked)}
+                return None, {"level": level, "evidence_shown": 0, "evidence_omitted": len(ranked),
+                              "priority_hidden": len(priority)}
 
     def _render_state(self, ctx, trace, step, phase, shown: list[Evidence], triggers: set[str], level: int,
                       omitted: int, blob_counter: list[int] | None = None) -> str:
@@ -517,7 +557,7 @@ class InvestigationAgent:
             evidence.append({
                 "evidence_id": e.evidence_id, "timestamp": e.timestamp.isoformat(), "host": e.host,
                 "category": e.category, "source": e.source, "event_id": e.event_id,
-                "process_guid": e.process_guid,
+                "process_guid": e.process_guid, "parent_process_guid": e.parent_process_guid,
                 "description": (compact_value(e.description, blob_counter) if not attr_limit
                                 else _clip_keep_markers(compact_value(e.description, blob_counter), attr_limit)),
                 "indicators": e.indicators, "injection_suspected": e.injection_suspected,
@@ -576,6 +616,31 @@ def _clip_keep_markers(value: str, limit: int) -> str:
     return "".join(out)
 
 
+# Indicators that make a record worth showing the model in full even outside the
+# alerted process tree: host-level contradictions and suspicious behaviour.
+# (Tree-only contradictions such as external_destination matter inside the
+# tree, which is prioritized as a whole.)
+_PRIORITY_INDICATORS = {"lsass_target", "memory_dump_file", "run_key", "scheduled_task", "masquerade_suspect",
+                        "defender_detection", "failed_logon", "encoded_command", "office_parent",
+                        "suspicious_script_content", "discovery_command", "remote_interactive_logon",
+                        "external_source", "possible_prompt_injection"}
+
+
+def priority_evidence_ids(items: list[Evidence], triggers: set[str]) -> set[str]:
+    """Evidence the assessment must see in full: triggers, every record of the
+    alerted process tree, and records with non-routine indicators."""
+    from .report import process_tree_keys
+    roots = [e for e in items if e.evidence_id in triggers]
+    tree = process_tree_keys(items, roots)
+    out = set(triggers)
+    for e in items:
+        if e.process_guid and (e.host.casefold(), e.process_guid.casefold()) in tree:
+            out.add(e.evidence_id)
+        elif e.injection_suspected or set(e.indicators) & _PRIORITY_INDICATORS:
+            out.add(e.evidence_id)
+    return out
+
+
 def _parse(text: str, schema):
     raw = _extract_json(text)
     if raw is None:
@@ -611,6 +676,9 @@ def build_agent(settings: Settings):
     from .backends.fixture import FixtureBackend
     if settings.backend == "fixture":
         backend: TelemetryBackend = FixtureBackend(settings.cases_dir)
+    elif settings.backend in ("windows", "windows-replay"):
+        from .backends.windows import build_windows_backend
+        backend = build_windows_backend(settings)
     else:
         from .backends.wazuh import WazuhBackend
         backend = WazuhBackend(settings)

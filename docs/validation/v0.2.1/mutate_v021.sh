@@ -57,6 +57,6 @@ run "M9 cancellation during assessment ignored" investigator/agent.py \
 run "M10 chars/token cap removed (3.0 accepted)" investigator/config.py \
 "            return min(float(value), 2.0)  # type: ignore[arg-type]" "            return value" \
 "tests/test_integrity_v021.py::test_chars_per_token_is_capped_at_two"
-run "M11 summarized evidence not treated as a visibility issue" investigator/agent.py \
-"            if final_exchange.evidence_summarized:" "            if False:" \
+run "M11 hidden priority evidence not treated as a visibility issue" investigator/agent.py \
+"            if hidden:" "            if False:" \
 "tests/test_integrity_v021.py::test_D_evidence_shown_only_as_summaries_blocks_benign_without_omission"

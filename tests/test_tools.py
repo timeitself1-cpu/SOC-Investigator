@@ -22,13 +22,17 @@ def _ctx(backend):
 
 
 def test_no_remediation_or_execution_tool_exists():
-    banned = {"execute", "run", "shell", "powershell", "remediate", "isolate", "delete",
-              "write_file", "http", "ssh", "query", "kill", "quarantine"}
+    # Name tokens, not substrings: "get_powershell_activity" reads PowerShell
+    # *logs*; no tool name may contain an execution or modification verb.
+    banned = {"execute", "exec", "run", "shell", "invoke", "remediate", "isolate", "delete", "write", "http",
+              "ssh", "query", "kill", "quarantine", "block", "disable", "set", "modify", "stop", "start"}
     for name in TOOLS:
-        assert not any(b in name for b in banned), f"suspicious tool {name}"
-    # exactly the six read-only tools
+        assert name.startswith(("get_", "search_")), f"tool {name} is not a read verb"
+        assert not (set(name.split("_")) & banned), f"suspicious tool {name}"
+    # exactly the nine read-only tools (v0.3 added three category-scoped readers)
     assert ALLOWED_TOOLS == {"search_events", "get_process_tree", "get_process_details",
-                             "get_network_activity", "get_related_events", "get_host_context"}
+                             "get_network_activity", "get_related_events", "get_host_context",
+                             "get_logon_activity", "get_powershell_activity", "get_defender_activity"}
 
 
 def test_unknown_tool_is_rejected(backend):

@@ -204,7 +204,8 @@ def test_status_gate_alone_withholds_benign_when_any_collection_failed():
     incomplete. The status gate in validate_report must still withhold benign.
     (Dedicated test for the gate that REVIEW_FOLLOWUP F6 found untested.)"""
     be, store = _admin_store()
-    inputs = ReportInputs(host_contexts=[CLEAN_HOST[HOST]], model_visibility_issues=[])
+    inputs = ReportInputs(host_contexts=[CLEAN_HOST[HOST]], model_visibility_issues=[],
+                          host_signal_check=("clear", []))
     ok = validate_report(_benign_draft(), store, be.alert, _requirements_met_trace(), [], "m", "fixture",
                          T0, T0, inputs=inputs)
     assert ok.verdict == "benign" and ok.status == "completed"
@@ -384,20 +385,39 @@ def test_D_encoded_floods_stay_within_the_conservative_token_limit(kind):
     assert "[[compacted" in messages[1]["content"] and "[[compacted" not in ev.attributes["command_line"]
 
 
-def test_D_evidence_that_cannot_reach_the_model_marks_incomplete_and_blocks_benign():
-    docs = [admin_trigger()] + [proc(f"N{i}", i, f"{{n{i}}}", "{explorer}", r"C:\Windows\System32\svchost.exe",
-                                     r"C:\Windows\explorer.exe", cmd="svchost.exe -k netsvcs " + "q" * 900)
-                                for i in range(1, 40)]
-    plan = FULL_PLAN + [call("search_events", category="process")]
-    r = investigate(docs, plan=plan, ollama_num_ctx=8192, ollama_num_predict=1024)
+def _big_tree(n_children=20, noise=0):
+    docs = [admin_trigger()]
+    docs += [proc(f"K{i}", i, f"{{k{i}}}", "{p1}", CMD, PS, cmd="cmd.exe /c inventory-step " + "q" * 900)
+             for i in range(1, n_children + 1)]
+    docs += [proc(f"N{i}", i, f"{{n{i}}}", "{explorer}", r"C:\Windows\System32\svchost.exe",
+                  r"C:\Windows\explorer.exe", cmd="svchost.exe -k netsvcs " + "q" * 900) for i in range(1, noise + 1)]
+    return docs
+
+
+def test_D_priority_evidence_that_cannot_reach_the_model_marks_incomplete_and_blocks_benign():
+    """The alerted tree itself does not fit the prompt in full: incomplete, no benign."""
+    r = investigate(_big_tree(20), ollama_num_ctx=8192, ollama_num_predict=1024)
+    assert req(r, "process_tree").satisfied  # collection was complete...
     final = [x for x in r.trace.llm_exchanges if x.purpose == "final_report"][-1]
-    assert final.evidence_omitted > 0 or final.evidence_summarized > 0
-    assert r.verdict == "insufficient_evidence" and not req(r, "model_visibility").satisfied
+    assert final.priority_evidence_hidden > 0  # ...but the model could not see all of it
+    assert r.status == "incomplete" and r.verdict == "insufficient_evidence"
+    assert not req(r, "model_visibility").satisfied
+
+
+def test_routine_noise_that_does_not_fit_is_disclosed_but_does_not_block_benign():
+    """v0.3: records outside the alerted tree without suspicious indicators may be
+    summarized/omitted (disclosed); application gates still check them all."""
+    plan = FULL_PLAN + [call("search_events", category="process")]
+    r = investigate(_big_tree(0, noise=20), plan=plan, ollama_num_ctx=8192, ollama_num_predict=1024)
+    final = [x for x in r.trace.llm_exchanges if x.purpose == "final_report"][-1]
+    assert final.evidence_omitted + final.evidence_summarized > 0 and final.priority_evidence_hidden == 0
+    assert any("outside the alerted process tree" in u for u in r.coverage.unknowns)
+    assert r.verdict == "benign" and r.status == "completed", r.validation.issues
 
 
 def test_D_evidence_shown_only_as_summaries_blocks_benign_without_omission(monkeypatch):
-    """Level-3 compaction (one-line summaries, nothing omitted) must still make
-    the model's view incomplete for benign closure."""
+    """Priority evidence shown only as one-line summaries (nothing omitted) must
+    still make the model's view incomplete for benign closure."""
     be = ListBackend([admin_trigger()], "T", hosts=CLEAN_HOST)
     agent = InvestigationAgent(be, Scripted(FULL_PLAN, BENIGN), settings())
     real = agent._build_state
@@ -405,15 +425,15 @@ def test_D_evidence_shown_only_as_summaries_blocks_benign_without_omission(monke
     def summarized(ctx, trace, step, phase, budget_chars=None):
         text, meta = real(ctx, trace, step, phase, budget_chars)
         if phase == "final_report":
-            meta = {**meta, "level": 3, "summarized": 2, "evidence_omitted": 0}
+            meta = {**meta, "level": 3, "summarized": 2, "evidence_omitted": 0, "priority_hidden": 2}
         return text, meta
 
     monkeypatch.setattr(agent, "_build_state", summarized)
     r = agent.investigate(be.alert)
     final = [x for x in r.trace.llm_exchanges if x.purpose == "final_report"][-1]
-    assert final.evidence_summarized == 2 and final.evidence_omitted == 0
+    assert final.evidence_summarized == 2 and final.evidence_omitted == 0 and final.priority_evidence_hidden == 2
     assert r.verdict == "insufficient_evidence" and not req(r, "model_visibility").satisfied
-    assert "one-line summaries" in req(r, "model_visibility").reason
+    assert "priority evidence" in req(r, "model_visibility").reason
 
 
 class ReportsTokens(Scripted):

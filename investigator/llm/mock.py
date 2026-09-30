@@ -85,8 +85,29 @@ class MockInvestigatorModel:
             return self._tool("get_network_activity", {"host": host},
                               "Check outbound network activity on the host")
 
-        # 6. Correlate around the trigger.
         trigger_ev = self._first(evidence, lambda e: e.get("is_trigger")) or (evidence[0] if evidence else None)
+        # 5a. A busy host caps the host-wide query: collect the alerted process
+        # tree's own connections instead (complete regardless of host noise).
+        host_net_capped = any(c.get("tool") == "get_network_activity" and c.get("outcome") == "truncated"
+                              for c in called)
+        tree_net_done = any(c.get("tool") == "get_network_activity" and "process_tree" in str(c.get("arguments"))
+                            for c in called)
+        if host_net_capped and not tree_net_done and trigger_ev and trigger_ev.get("process_guid"):
+            return self._tool("get_network_activity", {"scope": "process_tree"},
+                              "Collect network activity of the alerted process tree")
+        # 5b. Category-specific context (v0.3 tools): PowerShell script blocks for
+        # PowerShell activity, logons for authentication alerts, Defender history
+        # for detections.
+        if any("powershell" in e.get("indicators", []) for e in evidence) and not attempted("get_powershell_activity"):
+            args = {"evidence_id": proc_ev["evidence_id"]} if proc_ev else {}
+            return self._tool("get_powershell_activity", args, "Examine PowerShell script-block activity")
+        if trigger_ev and trigger_ev.get("category") == "authentication" and not attempted("get_logon_activity"):
+            return self._tool("get_logon_activity", {"center_evidence_id": trigger_ev["evidence_id"]},
+                              "Review logon activity around the alert")
+        if trigger_ev and trigger_ev.get("category") == "detection" and not attempted("get_defender_activity"):
+            return self._tool("get_defender_activity", {}, "Review Microsoft Defender detection history")
+
+        # 6. Correlate around the trigger.
         if trigger_ev and not attempted("get_related_events"):
             return self._tool("get_related_events", {"evidence_id": trigger_ev["evidence_id"], "window_minutes": 15},
                               "Correlate events surrounding the trigger")
@@ -107,11 +128,32 @@ class MockInvestigatorModel:
         return None
 
     # -- report phase ----------------------------------------------------
+    @staticmethod
+    def _tree_guids(evidence: list[dict]) -> set[str]:
+        """Process GUIDs of the alerted process and its descendants, from parent links."""
+        tree = {str(e.get("process_guid")).casefold() for e in evidence if e.get("is_trigger") and e.get("process_guid")}
+        for _ in range(len(evidence)):
+            added = {str(e["process_guid"]).casefold() for e in evidence if e.get("process_guid")
+                     and str(e.get("parent_process_guid") or "").casefold() in tree
+                     and str(e["process_guid"]).casefold() not in tree}
+            if not added:
+                break
+            tree |= added
+        return tree
+
     def _build_report(self, state: dict) -> dict:
         evidence = state.get("evidence", [])
+        # Network indicators from processes outside the alerted tree (a browser,
+        # Windows Update) describe the host, not the alert: ignore them when the
+        # alert is a process with a known tree.
+        tree = self._tree_guids(evidence)
         ind: dict[str, list[str]] = {}
         for e in evidence:
+            unrelated = tree and e.get("category") in ("network", "dns") and \
+                str(e.get("process_guid") or "").casefold() not in tree
             for tag in e.get("indicators", []):
+                if unrelated and tag in ("external_destination", "internal_destination"):
+                    continue
                 ind.setdefault(tag, []).append(e["evidence_id"])
 
         def ids(*tags: str) -> list[str]:
@@ -200,6 +242,21 @@ class MockInvestigatorModel:
                                         ["account_compromise"], ["T1078"]))
                 techniques.add("T1078"); malicious_signals += 2
 
+        # Security product detections and suspicious script content (v0.3 sources).
+        if ind.get("defender_detection"):
+            ev = ids("defender_detection")
+            findings.append(self._f("Microsoft Defender detection",
+                                    "Microsoft Defender recorded a detection on this host. Review the threat, the "
+                                    "remediation action and how the file arrived.", "high", ev,
+                                    ["security_product_detection"], []))
+            malicious_signals += 1
+        if ind.get("suspicious_script_content"):
+            ev = ids("suspicious_script_content")
+            findings.append(self._f("Suspicious PowerShell script content",
+                                    "A logged PowerShell script block contains download, in-memory loading, "
+                                    "obfuscation or tampering patterns.", "high", ev, ["suspicious_script"], []))
+            malicious_signals += 1
+
         # Network.
         if ind.get("external_destination"):
             ev = ids("external_destination")
@@ -251,6 +308,7 @@ class MockInvestigatorModel:
                       or (len(ind.get("failed_logon", [])) >= 3 and ind.get("successful_logon")))
         benign_dominant = ind.get("management_agent_parent") and not (
             ind.get("office_parent") or ind.get("external_destination") or ind.get("lsass_target")
+            or ind.get("defender_detection") or ind.get("suspicious_script_content")
             or ind.get("scheduled_task") or ind.get("run_key") or len(ind.get("failed_logon", [])) >= 3)
         if benign_dominant:
             return ("benign", 0.7,

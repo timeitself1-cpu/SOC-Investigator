@@ -192,6 +192,8 @@ CLAIM_RULES: dict[str, tuple[Pred, str]] = {
     "privilege_escalation": (_unavailable, "a verified privilege transition unavailable in the current schema"),
     "data_exfiltration": (_unavailable, "verified unauthorized outbound data transfer unavailable in the current schema"),
     "benign_administration": (has_indicator("management_agent_parent"), "a process-creation event from a recognized management agent; authorization still requires review"),
+    "security_product_detection": (has_indicator("defender_detection"), "a cited Microsoft Defender detection event"),
+    "suspicious_script": (has_indicator("suspicious_script_content"), "a cited PowerShell script block with download, in-memory loading, obfuscation or tampering content"),
 }
 
 

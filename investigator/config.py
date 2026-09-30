@@ -17,6 +17,8 @@ PROJECT_ROOT = PACKAGE_DIR.parent
 # Demo fixtures ship inside the package so a wheel install can run the demo.
 PACKAGED_CASES = PACKAGE_DIR / "cases"
 PACKAGED_BENCHMARKS = PACKAGE_DIR / "benchmarks"
+# Synthetic, schema-faithful Windows event XML for the windows-replay demo/tests.
+PACKAGED_WINDOWS_SAMPLES = PACKAGE_DIR / "windows_samples" / "demo"
 
 
 def _is_source_checkout() -> bool:
@@ -55,7 +57,10 @@ def _read_dotenv(path: Path) -> dict[str, str]:
 class Settings(BaseModel):
     # Modes
     llm: Literal["ollama", "mock"] = "ollama"
-    backend: Literal["fixture", "wazuh"] = "fixture"
+    # fixture: bundled demo incidents. windows: this computer's event logs (read-only,
+    # Windows only). windows-replay: recorded Windows event XML (tests, offline
+    # replay of a real machine's exports). wazuh: optional SIEM integration.
+    backend: Literal["fixture", "windows", "windows-replay", "wazuh"] = "fixture"
 
     # Web
     host: str = "127.0.0.1"
@@ -98,6 +103,13 @@ class Settings(BaseModel):
     prompt_chars_per_token: float = Field(default=2.0, ge=1.0, le=2.0)
     # Send the response JSON schema as Ollama's `format` (Ollama >= 0.5).
     ollama_structured_output: bool = True
+
+    # Windows event logs (backend=windows / windows-replay)
+    windows_replay_dir: Path | None = None
+    windows_signal_lookback_hours: int = Field(default=24, ge=1, le=720)
+    windows_scan_limit: int = Field(default=2000, ge=50, le=5000)  # events read per source per signal scan
+    windows_discovery_days: int = Field(default=7, ge=1, le=90)    # "recent" window for source discovery
+    windows_discovery_refresh_seconds: int = Field(default=300, ge=10, le=86400)
 
     # Wazuh (read-only). Credentials only from env / .env — never hardcoded.
     wazuh_indexer_url: str | None = None

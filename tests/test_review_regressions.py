@@ -215,7 +215,11 @@ def test_r3_prompts_sent_to_model_never_exceed_budget_and_omission_is_disclosed(
         assert x.prompt_budget_chars == budget
     final = [x for x in report.trace.llm_exchanges if x.purpose == "final_report"][-1]
     assert final.evidence_omitted > 0
-    assert report.status == "incomplete"
+    # v0.3: routine records outside the alerted process tree that do not fit are
+    # disclosed as a known unknown; only hidden priority evidence (trigger, tree,
+    # suspicious records) makes the investigation incomplete (tested in
+    # test_integrity_v021.py::test_D_priority_evidence_*).
+    assert final.priority_evidence_hidden == 0
     assert any("not shown to the model" in u for u in report.coverage.unknowns)
 
 

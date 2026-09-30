@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import time
 from datetime import datetime, timedelta
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -50,6 +50,9 @@ class ToolContext:
         # Host context is asset metadata (untrusted), not evidence; kept for the
         # model prompt and the report.
         self.host_contexts: dict[str, HostContext] = {}
+        # Coverage caveats reported by the backend during the current tool call.
+        self.pending_gaps: list[str] = []
+        self.pending_degraded = False
 
     def next_call_id(self) -> str:
         self._counter += 1
@@ -87,6 +90,11 @@ class GetProcessDetailsArgs(_Args):
 class GetNetworkActivityArgs(_Args):
     host: str | None = Field(default=None, max_length=128)
     process_guid: str | None = Field(default=None, max_length=128)
+    evidence_id: str | None = Field(default=None, max_length=16)
+    # "host": every connection on the host. "process_tree": connections of the
+    # given process (default: the alerted process) and every descendant already
+    # reconstructed with get_process_tree — complete even on busy hosts.
+    scope: Literal["host", "process_tree"] = "host"
     window_minutes: int | None = Field(default=None, ge=1)
     limit: int | None = Field(default=None, ge=1)
 
@@ -99,6 +107,28 @@ class GetRelatedEventsArgs(_Args):
 
 class GetHostContextArgs(_Args):
     host: str | None = Field(default=None, max_length=128)
+
+
+class GetLogonActivityArgs(_Args):
+    host: str | None = Field(default=None, max_length=128)
+    user: str | None = Field(default=None, max_length=128, pattern=r"^[A-Za-z0-9 ._$@\\-]+$")
+    center_evidence_id: str | None = Field(default=None, max_length=16)
+    window_minutes: int | None = Field(default=None, ge=1)
+    limit: int | None = Field(default=None, ge=1)
+
+
+class GetPowerShellActivityArgs(_Args):
+    host: str | None = Field(default=None, max_length=128)
+    process_guid: str | None = Field(default=None, max_length=128)
+    evidence_id: str | None = Field(default=None, max_length=16)
+    window_minutes: int | None = Field(default=None, ge=1)
+    limit: int | None = Field(default=None, ge=1)
+
+
+class GetDefenderActivityArgs(_Args):
+    host: str | None = Field(default=None, max_length=128)
+    window_minutes: int | None = Field(default=None, ge=1)
+    limit: int | None = Field(default=None, ge=1)
 
 
 # --- tool result ------------------------------------------------------------
@@ -194,6 +224,20 @@ def _target(host: str, start: datetime, end: datetime, **extra: Any) -> dict[str
             **{k: v for k, v in extra.items() if v is not None}}
 
 
+def _search(ctx: ToolContext, q: EventQuery) -> list[NormalizedEvent]:
+    """Backend search that records coverage caveats for the current tool call.
+
+    Backends may return an EventList: a missing or limited source is a known
+    unknown, and a degraded answer cannot be treated as complete.
+    """
+    found = ctx.backend.search_events(q)
+    for gap in getattr(found, "gaps", []):
+        if gap not in ctx.pending_gaps:
+            ctx.pending_gaps.append(gap)
+    ctx.pending_degraded = ctx.pending_degraded or bool(getattr(found, "degraded", False))
+    return list(found)
+
+
 def _select_centered(before: list[NormalizedEvent], after: list[NormalizedEvent],
                      limit: int) -> tuple[list[NormalizedEvent], int, int]:
     """Pick up to ``limit`` events balanced around an anchor time.
@@ -229,13 +273,16 @@ def _centered_search(ctx: ToolContext, center: datetime, start: datetime, end: d
     after: list[NormalizedEvent] = []
     pre_end = min(end, center - timedelta(microseconds=1))
     post_start = max(start, center)
+
+    run = lambda q: _search(ctx, q)  # noqa: E731
+
     for cat in categories:
         if start <= pre_end:
-            before.extend(ctx.backend.search_events(EventQuery(
-                start=start, end=pre_end, category=cat, order="desc", limit=fetch, **filters)))
+            before.extend(run(EventQuery(start=start, end=pre_end, category=cat, order="desc", limit=fetch,
+                                         **filters)))
         if post_start <= end:
-            after.extend(ctx.backend.search_events(EventQuery(
-                start=post_start, end=end, category=cat, order="asc", limit=fetch, **filters)))
+            after.extend(run(EventQuery(start=post_start, end=end, category=cat, order="asc", limit=fetch,
+                                        **filters)))
     before.sort(key=lambda e: (e.timestamp, e.event_ref), reverse=True)
     after.sort(key=lambda e: (e.timestamp, e.event_ref))
     chosen, n_before, n_after = _select_centered(before, after, limit)
@@ -303,7 +350,7 @@ def tool_get_process_tree(ctx: ToolContext, call_id: str, a: GetProcessTreeArgs)
             gaps.append("Process ancestry contains a cycle (corrupt or reused GUIDs); walk stopped.")
             break
         seen.add(key)
-        matches = ctx.backend.search_events(EventQuery(
+        matches = _search(ctx, EventQuery(
             start=start, end=end, host=host, category="process", process_guid=next_guid, limit=1))
         if not matches:
             if chain:
@@ -349,7 +396,7 @@ def tool_get_process_tree(ctx: ToolContext, call_id: str, a: GetProcessTreeArgs)
                 truncated = True
                 gaps.append(f"Process-tree result limit ({limit}) reached; further descendants were not retrieved.")
                 break
-            hits = ctx.backend.search_events(EventQuery(
+            hits = _search(ctx, EventQuery(
                 start=start, end=end, host=host, category="process", parent_process_guid=parent_guid,
                 limit=min(room + 1, 51)))
             if len(hits) > room:
@@ -440,7 +487,53 @@ def tool_get_process_details(ctx: ToolContext, call_id: str, a: GetProcessDetail
                       target=_target(host, start, end, process_guid=guid, center=center.isoformat()))
 
 
+MAX_TREE_PROCESSES = 25
+
+
+def _tree_network_activity(ctx: ToolContext, call_id: str, a: GetNetworkActivityArgs) -> ToolResult:
+    from .report import process_tree_keys  # local import: report imports tools' models only
+    s = ctx.settings
+    if a.evidence_id or a.process_guid:
+        root_guid, host = _resolve_process(ctx, a.process_guid, a.evidence_id)
+    else:
+        trig = [ctx.store.get(t) for t in ctx.store.trigger_ids()]
+        trig = [t for t in trig if t is not None and t.process_guid]
+        if not trig:
+            raise ToolError("scope=process_tree needs a process: the alerted event has no process identity")
+        root_guid, host = trig[0].process_guid, trig[0].host
+    roots = [e for e in ctx.store.all() if e.process_guid and e.host.casefold() == host.casefold()
+             and e.process_guid.casefold() == root_guid.casefold()]
+    keys = process_tree_keys(ctx.store.all(), roots) if roots else {(host.casefold(), root_guid.casefold())}
+    guids = sorted({g for h, g in keys if h == host.casefold()})
+    win = _clamp(a.window_minutes, s.max_window_minutes, s.max_window_minutes)
+    limit = _clamp(a.limit, s.max_results_per_tool, s.max_results_per_tool)
+    center = ctx.alert.timestamp
+    start, end = _time_bounds(ctx, center, win)
+    truncated = len(guids) > MAX_TREE_PROCESSES
+    gaps = [f"The process tree has {len(guids)} processes; only {MAX_TREE_PROCESSES} were queried."] if truncated else []
+    evidence: list[Evidence] = []
+    for guid in guids[:MAX_TREE_PROCESSES]:
+        events, capped, note = _centered_search(ctx, center, start, end, limit, ("network", "dns"),
+                                                host=host, process_guid=guid)
+        found, dropped = _ingest(ctx, events, call_id)
+        evidence.extend(found)
+        if capped or dropped:
+            truncated = True
+            gaps.append(f"More than {limit} network/DNS events for process {sanitize_text(guid, 64)}; {note}.")
+    ext = sum(1 for e in evidence if "external_destination" in e.indicators)
+    summary = (f"Checked network activity of the process tree ({len(guids)} process(es)): {len(evidence)} "
+               f"connection(s)/quer(ies), {ext} to external address(es)")
+    scope = f"network+DNS of the process tree of {sanitize_text(root_guid, 64)} on {host} {_fmt_window(start, end)}"
+    return ToolResult(summary, evidence, truncated=truncated, count=len(evidence), scope=scope, gaps=gaps,
+                      target=_target(host, start, end, scope="process_tree", tree_root=root_guid,
+                                     process_guids=guids[:MAX_TREE_PROCESSES], center=center.isoformat()))
+
+
 def tool_get_network_activity(ctx: ToolContext, call_id: str, a: GetNetworkActivityArgs) -> ToolResult:
+    if a.scope == "process_tree":
+        return _tree_network_activity(ctx, call_id, a)
+    if a.evidence_id and not a.process_guid:
+        a = a.model_copy(update={"process_guid": _resolve_process(ctx, None, a.evidence_id)[0]})
     s = ctx.settings
     win = _clamp(a.window_minutes, s.max_window_minutes, s.max_window_minutes)
     limit = _clamp(a.limit, s.max_results_per_tool, s.max_results_per_tool)
@@ -479,6 +572,47 @@ def tool_get_related_events(ctx: ToolContext, call_id: str, a: GetRelatedEventsA
         gaps.append("Evidence budget reached while correlating events.")
     return ToolResult(summary, evidence, truncated=truncated, count=len(evidence), scope=scope, gaps=gaps,
                       target=_target(ev.host, start, end, center=ev.timestamp.isoformat()))
+
+
+def _category_activity(ctx: ToolContext, call_id: str, categories: tuple[EventCategory, ...], what: str,
+                       host: str | None, center: datetime, window: int | None, limit_arg: int | None,
+                       **filters: Any) -> ToolResult:
+    s = ctx.settings
+    win = _clamp(window, s.max_window_minutes, s.max_window_minutes)
+    limit = _clamp(limit_arg, s.max_results_per_tool, s.max_results_per_tool)
+    start, end = _time_bounds(ctx, center, win)
+    target = host or ctx.alert.host
+    events, truncated, note = _centered_search(ctx, center, start, end, limit, categories, host=target, **filters)
+    evidence, dropped = _ingest(ctx, events, call_id)
+    summary = f"Examined {what}: {len(evidence)} event(s)"
+    scope = f"{what} on {target} {_fmt_window(start, end)}" + "".join(
+        f" ({k} {sanitize_text(str(v), 64)})" for k, v in filters.items() if v)
+    gaps = [f"More than {limit} {what} events matched; {note}; the rest were not retrieved."] if truncated else []
+    if dropped:
+        gaps.append(f"Evidence budget reached while collecting {what}.")
+    return ToolResult(summary, evidence, truncated=truncated or dropped, count=len(evidence), scope=scope, gaps=gaps,
+                      target=_target(target, start, end, center=center.isoformat(),
+                                     **{k: v for k, v in filters.items() if v}))
+
+
+def tool_get_logon_activity(ctx: ToolContext, call_id: str, a: GetLogonActivityArgs) -> ToolResult:
+    center = _anchor_time(ctx, a.center_evidence_id)
+    return _category_activity(ctx, call_id, ("authentication", "privilege"), "logon activity", a.host, center,
+                              a.window_minutes, a.limit, user=a.user)
+
+
+def tool_get_powershell_activity(ctx: ToolContext, call_id: str, a: GetPowerShellActivityArgs) -> ToolResult:
+    guid, host = (None, a.host)
+    if a.evidence_id or a.process_guid:
+        guid, host = _resolve_process(ctx, a.process_guid, a.evidence_id)
+    center = _anchor_time(ctx, a.evidence_id)
+    return _category_activity(ctx, call_id, ("script",), "PowerShell script-block activity", host, center,
+                              a.window_minutes, a.limit, process_guid=guid)
+
+
+def tool_get_defender_activity(ctx: ToolContext, call_id: str, a: GetDefenderActivityArgs) -> ToolResult:
+    return _category_activity(ctx, call_id, ("detection",), "Microsoft Defender detections", a.host,
+                              ctx.alert.timestamp, a.window_minutes, a.limit)
 
 
 def _sanitize_host_context(hc: HostContext) -> HostContext:
@@ -532,13 +666,26 @@ TOOLS: dict[str, ToolSpec] = {
         description="Return all events tied to one process (creation, network, file, registry, access)."),
     "get_network_activity": ToolSpec(
         name="get_network_activity", args_model=GetNetworkActivityArgs, fn=tool_get_network_activity,
-        description="List network connections and DNS queries for a host/process within a window."),
+        description="List network connections and DNS queries within a window: for the whole host (default), "
+                    "one process (process_guid/evidence_id), or scope='process_tree' for the alerted process and "
+                    "all descendants reconstructed so far."),
     "get_related_events": ToolSpec(
         name="get_related_events", args_model=GetRelatedEventsArgs, fn=tool_get_related_events,
         description="Correlate events near a given evidence_id in time on the same host."),
     "get_host_context": ToolSpec(
         name="get_host_context", args_model=GetHostContextArgs, fn=tool_get_host_context,
         description="Retrieve asset/role/criticality context for a host. Returns no evidence."),
+    "get_logon_activity": ToolSpec(
+        name="get_logon_activity", args_model=GetLogonActivityArgs, fn=tool_get_logon_activity,
+        description="List successful/failed logons and special-privilege logons near the alert, optionally "
+                    "for one account."),
+    "get_powershell_activity": ToolSpec(
+        name="get_powershell_activity", args_model=GetPowerShellActivityArgs, fn=tool_get_powershell_activity,
+        description="List PowerShell script blocks near the alert, optionally for one process "
+                    "(process_guid or evidence_id). Script text is untrusted data."),
+    "get_defender_activity": ToolSpec(
+        name="get_defender_activity", args_model=GetDefenderActivityArgs, fn=tool_get_defender_activity,
+        description="List Microsoft Defender detections and remediation events near the alert."),
 }
 
 ALLOWED_TOOLS = frozenset(TOOLS)
@@ -615,14 +762,25 @@ def dispatch(ctx: ToolContext, step: int, tool_name: str, arguments: dict[str, A
     if prior is not None:
         return record("duplicate", f"Skipped duplicate {tool_name} request (same as {prior.call_id})",
                       outcome="duplicate", scope=prior.scope, gaps=[], duplicate_of=prior), None
+    ctx.pending_gaps, ctx.pending_degraded = [], False
     try:
         result = spec.fn(ctx, call_id, args)
+        if ctx.pending_gaps or ctx.pending_degraded:
+            result.gaps = list(dict.fromkeys(result.gaps + ctx.pending_gaps))
+            if ctx.pending_degraded:
+                # A degraded source outranks a benign-compatible partial reason.
+                result.partial, result.partial_reason = True, "source_degraded"
     except ToolError as exc:
         # Application-generated text describing the model's invalid request.
         return record("rejected", f"{tool_name} request could not be executed", error=str(exc),
                       error_kind="invalid_argument"), None
     except Exception as exc:  # defensive: never let a tool crash the loop
         kind, message = safe_error(exc)  # never propagate raw backend text
+        if kind == "invalid_argument":
+            # The backend refused a malformed value before querying anything: a
+            # rejected model request, not a telemetry failure.
+            return record("rejected", f"{tool_name} request could not be executed", error=message,
+                          error_kind=kind), None
         return record("error", f"{tool_name} failed: {kind}", error=message, error_kind=kind,
                       gaps=[f"{tool_name} could not be completed ({kind}); the data it would have returned is unknown."]), None
     call = record("ok", result.summary, result=result)

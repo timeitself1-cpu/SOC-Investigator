@@ -25,6 +25,7 @@ ErrorKind = Literal[
     "invalid_response", # malformed payload or unparseable record
     "rate_limited",     # 429
     "unavailable",      # connection refused, DNS, 5xx
+    "source_unavailable",  # the telemetry source does not exist / is not installed / not local
     "model_output",     # model returned unusable output (truncated, empty, invalid)
     "invalid_argument", # the model's tool request referenced something invalid
     "cancelled",
@@ -43,6 +44,7 @@ SAFE_MESSAGES: dict[str, str] = {
     "invalid_response": "The service returned a malformed response or record.",
     "rate_limited": "The service is rate limiting requests.",
     "unavailable": "The service could not be reached or returned a server error.",
+    "source_unavailable": "The telemetry source is not available on this computer.",
     "model_output": "The model returned unusable output.",
     "invalid_argument": "The tool request was invalid.",
     "cancelled": "The operation was cancelled.",
