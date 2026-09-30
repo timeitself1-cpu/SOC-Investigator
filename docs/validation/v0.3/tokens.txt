@@ -1,0 +1,9 @@
+R3 repro filler ('x'*900)                    decide       chars= 25,011 tokens= 7,677 chars/token=3.26 level=4 omitted=116  prompt+num_predict= 9,725 / num_ctx 16,384 ok
+R3 repro filler ('x'*900)                    final_report chars= 25,125 tokens= 7,688 chars/token=3.27 level=4 omitted=117  prompt+num_predict= 9,736 / num_ctx 16,384 ok
+base64 -EncodedCommand (random bytes)        decide       chars= 25,052 tokens= 9,439 chars/token=2.65 level=4 omitted=125  prompt+num_predict=11,487 / num_ctx 16,384 ok
+base64 -EncodedCommand (random bytes)        final_report chars= 25,022 tokens= 9,371 chars/token=2.67 level=4 omitted=126  prompt+num_predict=11,419 / num_ctx 16,384 ok
+base64 -EncodedCommand (UTF-16LE script)     decide       chars= 25,115 tokens= 9,208 chars/token=2.73 level=4 omitted=130  prompt+num_predict=11,256 / num_ctx 16,384 ok
+base64 -EncodedCommand (UTF-16LE script)     final_report chars= 25,045 tokens= 9,135 chars/token=2.74 level=4 omitted=131  prompt+num_predict=11,183 / num_ctx 16,384 ok
+hex blob command lines                       decide       chars= 25,174 tokens=10,017 chars/token=2.51 level=4 omitted=117  prompt+num_predict=12,065 / num_ctx 16,384 ok
+hex blob command lines                       final_report chars= 25,198 tokens= 9,958 chars/token=2.53 level=4 omitted=118  prompt+num_predict=12,006 / num_ctx 16,384 ok
+largest real fixture/benchmark prompt: 8644 tokens; BM-X08 final_report chars=23,806 ratio=2.75

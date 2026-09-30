@@ -40,7 +40,7 @@ def test_healthz(client):
 
 def test_queue_lists_incidents(client):
     html = client.get("/").text
-    assert "Incident Queue" in html
+    assert "Recent signals" in html and "System status" in html
     for aid in ["INC-001", "INC-002", "INC-005"]:
         assert aid in html
 

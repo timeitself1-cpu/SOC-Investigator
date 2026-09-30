@@ -1,0 +1,6 @@
+Telemetry sources on DESKTOP-RW01 (reader: recorded-eventlog; elevated: yes)
+  ✓ Sysmon               active         
+  ✓ Windows Security     active         
+  ✓ PowerShell           active         
+  ✓ Microsoft Defender   active         
+exit code: 0

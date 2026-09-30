@@ -92,3 +92,42 @@ VALIDATION.md.
   truncated.
 * A benign verdict requires successful, application-verified collection; the model
   cannot close an alert by skipping investigation.
+
+## v0.3: Windows event logs
+
+### Read-only boundary
+
+* The only operating-system access is reading four event-log channels through
+  `EvtQuery` / `EvtNext` / `EvtRender` (pywin32). A static test
+  (`tests/test_tools.py::test_codebase_has_no_remediation_or_os_modification_calls`)
+  fails if the package uses subprocess, registry, service, process-control, firewall,
+  Defender-configuration, file-deletion or log-clearing/exporting APIs.
+* The model receives nine bounded, schema-validated read-only tools. It cannot run
+  PowerShell, cmd, WMI or arbitrary event-log queries, and cannot supply XPath.
+* Event content (command lines, script blocks, user names, Defender text) is untrusted
+  data: sanitized, injection-screened, compacted for prompts, never followed.
+* Recommendations are never executed. There is no kill, quarantine, registry, account,
+  firewall, Defender or file-deletion capability.
+
+### Windows event log privileges
+
+Expected Windows defaults (**not observed in this project's environment — verify with
+`python -m investigator --backend windows sources` on your machine**):
+
+| Channel | Standard user | Administrators / Event Log Readers |
+| --- | --- | --- |
+| Security | denied | readable |
+| Microsoft-Windows-Sysmon/Operational | denied (Sysmon's channel ACL) | readable |
+| Microsoft-Windows-PowerShell/Operational | commonly readable | readable |
+| Microsoft-Windows-Windows Defender/Operational | verify on your build | readable |
+
+* **Least privilege:** run the investigator as a normal user who is a member of the
+  local *Event Log Readers* group (`net localgroup "Event Log Readers" <user> /add`,
+  then sign in again). Running the whole web app elevated is not required.
+* **Enabling** telemetry (installing Sysmon, audit policy, script block logging) needs an
+  administrator once; the investigator never changes these settings.
+* **Detection of insufficient access:** each channel is probed at startup and every five
+  minutes; `ERROR_ACCESS_DENIED` becomes `access denied` on the dashboard and in
+  `sources`, and a query that hits it raises a `permission` error for that tool call.
+  Permission failures are never read as "no events"; they make the investigation
+  incomplete and block `benign`.

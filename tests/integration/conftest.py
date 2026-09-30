@@ -7,6 +7,7 @@ skip unless explicitly enabled:
     # PowerShell
     $env:SOCI_IT_OLLAMA = "1"               # uses SOCI_OLLAMA_URL / SOCI_OLLAMA_MODEL
     $env:SOCI_IT_WAZUH  = "1"               # uses SOCI_WAZUH_* settings (read-only)
+    $env:SOCI_IT_WINDOWS = "1"              # reads THIS computer's event logs (Windows only, read-only)
     python -m pytest -m integration -v tests/integration
 
 Optional Wazuh knobs for negative-path checks (each check skips if unset):
@@ -47,3 +48,13 @@ def wazuh_settings():
     if not (s.wazuh_indexer_url and s.wazuh_indexer_user and s.wazuh_indexer_password):
         pytest.skip("SOCI_WAZUH_INDEXER_URL/USER/PASSWORD are required")
     return s
+
+
+@pytest.fixture(scope="session")
+def windows_settings():
+    import sys
+    if not _enabled("SOCI_IT_WINDOWS"):
+        pytest.skip("set SOCI_IT_WINDOWS=1 to run live Windows event log tests")
+    if sys.platform != "win32":
+        pytest.skip("live Windows event log tests need Windows")
+    return load_settings(llm="mock", backend="windows")

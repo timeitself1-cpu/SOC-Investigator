@@ -1,0 +1,7 @@
+Telemetry sources on DESKTOP-RW05 (reader: recorded-eventlog; elevated: yes)
+  ○ Sysmon               not installed  The Microsoft-Windows-Sysmon/Operational event log does not exist on this computer.
+  ✓ Windows Security     active         
+  ✓ PowerShell           active         
+  ✓ Microsoft Defender   active         
+  note: Sysmon is not installed: its signals are unavailable.
+exit code: 2

@@ -67,7 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             import anyio
             await anyio.to_thread.run_sync(service.shutdown)
 
-    app = FastAPI(title="SOC Investigation Agent", version="0.2.1", lifespan=lifespan)
+    app = FastAPI(title="Investigator", version="0.3.0", lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
     app.state.service = None
     app.state.settings = settings
@@ -125,10 +125,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         for a in alerts:
             run = service.latest_run_for_alert(a.alert_id)
             rows.append({"alert": a, "run": run})
+        sources = []
+        status_fn = getattr(service.backend, "source_status", None)
+        if callable(status_fn):
+            try:
+                sources = status_fn()
+            except Exception:  # noqa: BLE001 - shown as degraded telemetry below
+                sources = []
+        if sources:
+            states = {s.state for s in sources}
+            telemetry_state = "ok" if states == {"active"} else ("bad" if not states & {"active", "limited"} else "warn")
+        else:
+            telemetry_state = "bad" if queue_error else "ok"
+        labels = {"fixture": "demo incidents (fixtures)", "windows": "this computer's Windows event logs",
+                  "windows-replay": "recorded Windows events (replay)", "wazuh": "Wazuh (optional integration)"}
         return templates.TemplateResponse(request, "queue.html", {
             "rows": rows, "settings": settings, "model_name": service.agent.model.name,
             "queue_error": queue_error, "skipped_alerts": getattr(service.backend, "skipped_alerts", 0),
-            "recovery_notes": service.recovery_notes,
+            "recovery_notes": service.recovery_notes, "sources": sources,
+            "signal_notes": list(getattr(service.backend, "signal_notes", []) or []),
+            "model_status": service.model_status(), "telemetry_state": telemetry_state,
+            "backend_label": labels.get(settings.backend, settings.backend),
         })
 
     @app.get("/history", response_class=HTMLResponse)

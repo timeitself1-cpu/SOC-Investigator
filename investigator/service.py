@@ -240,6 +240,24 @@ class InvestigationService:
             self._by_alert[run.alert.alert_id] = run.run_id
 
     # -- queries ----------------------------------------------------------
+    def model_status(self) -> dict[str, Any]:
+        """Local model reachability for the dashboard (cached for 30 s)."""
+        now = time.monotonic()
+        cached = getattr(self, "_model_status", None)
+        if cached and now - cached[0] < 30:
+            return cached[1]
+        health = getattr(self.agent.model, "health", None)
+        if callable(health):
+            try:
+                ok, msg = health()
+            except Exception as exc:  # noqa: BLE001
+                ok, msg = False, safe_error(exc)[1]
+            status = {"ok": ok, "detail": f"{self.agent.model.name}: {'connected' if ok else msg}"}
+        else:
+            status = {"ok": True, "detail": f"{self.agent.model.name} (deterministic demo model, no LLM)"}
+        self._model_status = (now, status)
+        return status
+
     def list_alerts(self) -> list[Alert]:
         return self.backend.list_alerts()
 

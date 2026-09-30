@@ -102,3 +102,11 @@ h3.small{margin:12px 0 4px;font-size:13px}
 .badge{white-space:nowrap}
 .facts li,.kv span,.timeline li,details.evidence summary,td{overflow-wrap:anywhere;word-break:break-word}
 td.mono{white-space:nowrap;overflow-wrap:normal;word-break:normal}
+
+.status-grid{display:flex;gap:24px;flex-wrap:wrap;margin:4px 0 8px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:var(--muted, #888)}
+.dot.ok{background:#3fb950}.dot.warn{background:#d29922}.dot.bad{background:#f85149}
+.sources{list-style:none;padding:0;margin:4px 0}.sources li{padding:2px 0}
+.sources .mark{display:inline-block;width:1.4em;font-weight:bold}
+.src-active .mark{color:#3fb950}.src-limited .mark{color:#d29922}
+.src-not_installed .mark{color:#8b949e}.src-access_denied .mark,.src-error .mark{color:#f85149}

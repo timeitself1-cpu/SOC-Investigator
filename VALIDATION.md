@@ -1,4 +1,37 @@
-# Validation — v0.2.1 (Investigation Integrity Fix, 2026-09-30)
+# Validation — v0.3.0 (standalone Windows investigator, 2026-09-30)
+
+Executed on Linux x86-64, CPython 3.12.3 (`.venv`: pinned `requirements-validated.txt`,
+`pip install -e '.[dev]'`, `playwright`, `tokenizers`), Node v22.22.2, Chromium 1194.
+**No Windows host and no Ollama were available.** Raw outputs:
+[`docs/validation/v0.3/`](docs/validation/v0.3/); summary with VERIFIED / NOT VERIFIED:
+[V0.3_RELEASE_NOTES.md](V0.3_RELEASE_NOTES.md).
+
+| # | Command | Result | Output file |
+| --- | --- | --- | --- |
+| 1 | `python -m pytest -q` ×5 | 328 passed, 4 skipped, 19 deselected — every run | `pytest_5x.txt` |
+| 2 | `SOCI_TOKENIZER_JSON=… pytest tests/test_integrity_v021.py tests/test_windows_backend.py tests/test_v03_requirements.py` | 103 passed | `pytest_5x.txt` |
+| 3 | `pytest tests/test_windows_backend.py tests/test_v03_requirements.py` (Windows backend unit tests) | 47 passed | `pytest_5x.txt` |
+| 4 | `node --test tests/test_activity_dom.cjs` | 6 passed | `node_dom_tests.txt` |
+| 5 | `python -m investigator --llm mock --backend fixture evaluate` | 5/5 | `evaluate_demo.txt` |
+| 6 | `python -m investigator --llm mock benchmark [--adversary …]` | benign FP 0 in all three; exit 0 | `benchmark_*.txt/.json` |
+| 7 | `python docs/validation/v0.2.1/final_gate.py . <tokenizer.json>` | 9/9 | `final_gate_v021_on_v03.txt` |
+| 8 | `python docs/validation/v0.3/replay_e2e.py` (SYNTHETIC Windows XML) | see file | `replay_synthetic_e2e.txt` |
+| 9 | `python -m investigator --backend windows-replay [--replay-dir …] sources` | demo all ✓ (exit 0); no-Sysmon host ○ Sysmon (exit 2) | `sources_replay_*.txt` |
+| 10 | `python -m investigator --backend windows sources` on Linux | classified failure, exit 1 | `sources_live_on_linux.txt` |
+| 11 | `PY=… docs/validation/v0.3/mutate_v03.sh . <scratch>` | 10/10 dedicated tests fail under mutation | `mutation_output.txt` |
+| 12 | `PY=… docs/validation/v0.2.1/mutate_v021.sh . <scratch>` (on 0.3.0) | 11/11 | `mutation_v021_rerun.txt` |
+| 13 | `python docs/validation/followup/probe_tokens.py . <tokenizer.json>` | no overflow; max 10,017 tokens | `tokens.txt` |
+| 14 | wheel → fresh venv → unrelated dir → `sources/list/investigate/evaluate` | 0.3.0 works | `packaging_restart.txt` |
+| 15 | installed `serve` (windows-replay) → 2 runs → SIGTERM → new process | both restored | `packaging_restart.txt` |
+| 16 | `pytest -m integration tests/integration -rs` (+ `SOCI_IT_WINDOWS=1`) | 19 skipped (no Ollama, no Wazuh, not Windows) | `pytest_integration.txt` |
+
+**NOT VERIFIED:** the live Windows event log reader; RW-01…RW-05 on a real machine
+(`docs/validation/v0.3/RESULTS.md` — NOT RUN); Windows channel permissions; Ollama;
+Wazuh.
+
+---
+
+# Historical: validation — v0.2.1 (Investigation Integrity Fix, 2026-09-30)
 
 Executed in this pass on Linux x86-64, CPython 3.12.3 (`.venv`, pinned
 `requirements-validated.txt` + `pip install -e '.[dev]'` + `playwright` for the

@@ -198,3 +198,21 @@ def test_default_search_is_scoped_to_alert_host(backend):
     call, _ = dispatch(ctx, 1, "search_events", {})
     assert call.status == "ok"
     assert queries[0].host == ctx.alert.host
+
+
+def test_codebase_has_no_remediation_or_os_modification_calls():
+    """Static guard (v0.3): the only OS access is reading event logs. No process,
+    registry, service, firewall, Defender, file-deletion or log-modifying API is used."""
+    import re
+    from pathlib import Path
+    root = Path(__file__).resolve().parent.parent / "investigator"
+    banned = re.compile(
+        r"\bsubprocess\b|os\.system|os\.popen|\bPopen\b|os\.startfile|\bwinreg\b|win32service|win32process|"
+        r"win32api\.TerminateProcess|TerminateProcess|EvtClearLog|EvtExportLog|ClearEventLog|EvtSubscribe|"
+        r"EvtSetChannelConfigProperty|EvtSaveChannelConfig|Set-MpPreference|Remove-Item|netsh|shutil\.rmtree")
+    hits = [f"{p.relative_to(root)}:{i}" for p in root.rglob("*.py")
+            for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1) if banned.search(line)]
+    assert hits == []
+    reader = (root / "backends" / "winevt_reader.py").read_text(encoding="utf-8")
+    used = set(re.findall(r"win32evtlog\.(Evt\w+)\(", reader))
+    assert used == {"EvtQuery", "EvtNext", "EvtRender"}  # read-only event log API only

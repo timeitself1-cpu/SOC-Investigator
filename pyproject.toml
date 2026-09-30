@@ -1,7 +1,7 @@
 [project]
 name = "soc-investigator"
-version = "0.2.1"
-description = "Local-first AI SOC Investigation Agent — alert to evidence-grounded, auditable investigation."
+version = "0.3.0"
+description = "Local-first AI security investigation agent for Windows: security signals to evidence-grounded investigations."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }

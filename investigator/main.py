@@ -7,8 +7,9 @@
     python -m investigator health          # check Ollama / backend wiring
     python -m investigator diagnose        # read-only live checks (auth, TLS, indexes, mapping, model)
     python -m investigator benchmark       # independent benchmark with separated metrics
+    python -m investigator sources         # telemetry sources on this computer (windows backends)
 
-Flags: --llm mock|ollama  --backend fixture|wazuh  --max-steps N
+Flags: --llm mock|ollama  --backend fixture|windows|windows-replay|wazuh  --replay-dir DIR  --max-steps N
 """
 
 from __future__ import annotations
@@ -29,6 +30,8 @@ def _settings_from_args(args: argparse.Namespace) -> Settings:
         overrides["backend"] = args.backend
     if args.max_steps is not None:
         overrides["max_steps"] = args.max_steps
+    if getattr(args, "replay_dir", None):
+        overrides["windows_replay_dir"] = args.replay_dir
     return load_settings(**overrides)
 
 
@@ -36,7 +39,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
     settings = _settings_from_args(args)
-    print(f"SOC Investigation Agent — llm={settings.llm} backend={settings.backend} "
+    print(f"Investigator — llm={settings.llm} backend={settings.backend} "
           f"model={settings.ollama_model if settings.llm=='ollama' else 'mock-analyst'}")
     print(f"Open http://{settings.host}:{settings.port}  (Ctrl+C to stop)")
     from .app import create_app
@@ -133,7 +136,9 @@ def cmd_health(args: argparse.Namespace) -> int:
         _, backend = build_agent(settings)
         print(f"backend: OK — {len(backend.list_alerts())} alert(s) available")
     except Exception as exc:  # noqa: BLE001
-        print(f"backend: FAIL — {exc}")
+        from .errors import safe_error
+        kind, msg = safe_error(exc)
+        print(f"backend: FAIL [{kind}] — {msg}")
         return 1
     return 0 if healthy else 1
 
@@ -187,6 +192,18 @@ def cmd_diagnose(args: argparse.Namespace) -> int:
             rows.extend(backend.probe(host=args.host))
             rows.extend({"check": "caveat", "ok": True, "kind": None, "detail": c}
                         for c in backend.coverage_caveats())
+    elif settings.backend in ("windows", "windows-replay"):
+        from .backends.windows import build_windows_backend
+        from .errors import safe_error
+        try:
+            backend = build_windows_backend(settings)
+        except Exception as exc:  # noqa: BLE001
+            kind, msg = safe_error(exc)
+            rows.append({"check": "windows event log backend", "ok": False, "kind": kind, "detail": msg})
+        else:
+            rows.extend(backend.probe())
+            rows.extend({"check": "caveat", "ok": True, "kind": None, "detail": c}
+                        for c in backend.coverage_caveats())
     else:
         rows.append({"check": "fixture backend", "ok": True, "kind": None,
                      "detail": f"{settings.cases_dir} (synthetic telemetry)"})
@@ -198,6 +215,39 @@ def cmd_diagnose(args: argparse.Namespace) -> int:
             kind = f" [{r['kind']}]" if r.get("kind") else ""
             print(f"{mark} {r['check']}{kind}: {r['detail']}")
     return 0 if all(r["ok"] for r in rows if r["check"] != "caveat") else 1
+
+
+def cmd_sources(args: argparse.Namespace) -> int:
+    """Capability discovery for the Windows event log backends."""
+    settings = _settings_from_args(args)
+    if settings.backend not in ("windows", "windows-replay"):
+        print(f"backend={settings.backend}: telemetry-source discovery applies to the windows backends "
+              "(use --backend windows).")
+        return 0
+    from .backends.windows import build_windows_backend
+    from .errors import safe_error
+    try:
+        backend = build_windows_backend(settings)
+    except Exception as exc:  # noqa: BLE001
+        kind, msg = safe_error(exc)
+        print(f"FAIL [{kind}] {msg}")
+        return 1
+    statuses = backend.source_status()
+    facts = backend.reader.host_facts()
+    backend.list_alerts()
+    if args.json:
+        print(json.dumps({"host": backend.primary_host(), "facts": facts,
+                          "sources": [s.model_dump() for s in statuses],
+                          "signal_notes": backend.signal_notes}, indent=2))
+    else:
+        marks = {"active": "✓", "limited": "⚠", "not_installed": "○", "access_denied": "✗", "error": "✗"}
+        print(f"Telemetry sources on {backend.primary_host()} (reader: {backend.reader.name}; "
+              f"elevated: {facts.get('elevated', 'unknown')})")
+        for st in statuses:
+            print(f"  {marks[st.state]} {st.label:<20} {st.state.replace('_', ' '):<14} {st.detail}")
+        for note in backend.signal_notes:
+            print(f"  note: {note}")
+    return 0 if all(s.state == "active" for s in statuses) else 2
 
 
 def cmd_benchmark(args: argparse.Namespace) -> int:
@@ -222,9 +272,11 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="investigator", description="Local-first SOC Investigation Agent")
+    p = argparse.ArgumentParser(prog="investigator", description="Investigator — local-first AI security "
+                                "investigation agent for Windows")
     p.add_argument("--llm", choices=["mock", "ollama"])
-    p.add_argument("--backend", choices=["fixture", "wazuh"])
+    p.add_argument("--backend", choices=["fixture", "windows", "windows-replay", "wazuh"])
+    p.add_argument("--replay-dir", help="recorded Windows event XML directory (backend windows-replay)")
     p.add_argument("--max-steps", type=int)
     sub = p.add_subparsers(dest="command")
 
@@ -253,6 +305,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--host", help="agent/host name to check for Sysmon telemetry")
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(func=cmd_diagnose)
+
+    sp = sub.add_parser("sources", help="show telemetry sources and access on this computer (windows backends)")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(func=cmd_sources)
 
     sp = sub.add_parser("benchmark", help="run the independent benchmark suite and report separated metrics")
     sp.add_argument("--suite", help="benchmark suite directory (default: packaged independent suite)")

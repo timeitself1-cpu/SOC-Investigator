@@ -205,3 +205,51 @@ claims, evidence and operational metrics separately.
   the pre-flight overflow check.
 * `tools._centered_search` issues one descending query before and one ascending
   query at/after the anchor (`EventQuery.order`) and balances the result.
+
+## v0.3: standalone Windows
+
+The product path is now a single Windows computer. The engine is unchanged; a new
+backend implements the same `TelemetryBackend` protocol.
+
+```
+signals.py (deterministic rules) ──► Alert ──► InvestigationAgent (unchanged loop)
+                                                    │  9 read-only tools
+                                                    ▼
+                               WindowsEventBackend (backends/windows.py)
+                                 ├─ capability discovery: active / limited / not installed / access denied
+                                 ├─ per-category source plan (Sysmon first; Security 4688 fallback)
+                                 ├─ EventList(gaps, degraded) → tool outcome "partial"
+                                 ├─ PID→GUID correlation for PowerShell script blocks
+                                 └─ EventLogReader ── ChannelQuery (validated) ── build_xpath()
+                                        ├─ PyWin32Reader: EvtQuery / EvtNext / EvtRender (read-only)
+                                        └─ RecordedEventReader: exported/synthetic XML, same semantics
+```
+
+* **Normalization.** `backends/windows_events.py` maps Sysmon 1/3/5/10/11/12-14/22,
+  Security 4624/4625/4688/4672/4698, PowerShell 4104 and Defender 1116/1117 onto
+  `NormalizedEvent` (flat, optional fields; extended in v0.3 with parent PID, hashes,
+  protocol, source port, provider/channel/record id, script and Defender fields).
+  Unsupported IDs become `other`. The parsed event and the original XML are kept in
+  `raw` for provenance (`raw_sha256`).
+* **Queries.** Only `ChannelQuery` reaches the event log: an allowlisted channel,
+  1–16 event IDs, times, and EventData equality filters whose field names and value
+  shapes are allowlisted per source (GUIDs, account names, numeric PIDs). The XPath is
+  rendered by `build_xpath`; neither the model nor alert text can supply XPath.
+  Malformed values are rejected before any query (`invalid_argument` → rejected call).
+* **Coverage honesty.** A category whose sources are all missing or denied raises
+  `source_unavailable` / `permission` (tool call fails, run incomplete). A partial answer
+  (fallback source, source recording no such events recently, unparseable records, scan
+  cap) returns `EventList(degraded=True)`; the tool reports `partial` with
+  `partial_reason="source_degraded"`, which never satisfies a benign requirement.
+* **Signals.** `signals.py` applies seven fixed rules (Defender detection, LSASS access,
+  persistence, Office → script interpreter, interpreter → abused binary, suspicious
+  PowerShell, failed-logon burst) to recent events. One signal per triggering event;
+  stable IDs (`SIG-<hash>`). The same rules back the `host_signals` benign requirement.
+* **Requirements (v0.3).** `network_activity` is met by a complete host-wide query *or*
+  by `get_network_activity(scope="process_tree")` covering every process of the alerted
+  tree as it stands at report time. New `host_signals`: no other signal on the host within
+  the investigation window (checked deterministically; an incomplete scan fails it).
+  `model_visibility` is judged on priority evidence (trigger, alerted process tree,
+  records with contradiction/suspicion indicators); routine records that do not fit are
+  disclosed as known unknowns. A capped exploratory query is disclosed in the coverage
+  ledger but no longer marks the run incomplete.

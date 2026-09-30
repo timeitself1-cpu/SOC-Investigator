@@ -1,0 +1,2 @@
+FAIL [source_unavailable] The Windows event log backend needs pywin32 (pip install pywin32) and must run on Windows.
+exit code: 1

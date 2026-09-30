@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Incident Queue{% endblock %}
+{% block title %}Investigator — Signals{% endblock %}
 {% block mode %}
   <span class="pill">model: {{ model_name }}</span>
   <span class="pill">backend: {{ settings.backend }}</span>
@@ -10,9 +10,28 @@
 {% if skipped_alerts %}<div class="notice warning" role="status">{{ skipped_alerts }} alert record(s) could not be parsed and are not listed.</div>{% endif %}
 {% for note in recovery_notes %}<div class="notice warning small" role="status">{{ note }}</div>{% endfor %}
 <div class="card">
-  <h2>Incident Queue <a class="small" style="float:right" href="/history">History →</a></h2>
+  <h2>System status</h2>
+  <div class="status-grid">
+    <div><span class="dot {{ 'ok' if model_status.ok else 'bad' }}"></span> Local model
+      <span class="muted small">{{ model_status.detail }}</span></div>
+    <div><span class="dot {{ telemetry_state }}"></span> Telemetry
+      <span class="muted small">{{ backend_label }}</span></div>
+  </div>
+  {% if sources %}
+  <h3 class="small">Telemetry sources</h3>
+  <ul class="sources">
+    {% for s in sources %}
+    <li class="src-{{ s.state }}"><span class="mark">{{ {"active": "✓", "limited": "⚠", "not_installed": "○", "access_denied": "✗", "error": "✗"}[s.state] }}</span>
+      {{ s.label }} <span class="muted small">{{ s.state|replace("_", " ") }}{% if s.detail %} — {{ s.detail }}{% endif %}</span></li>
+    {% endfor %}
+  </ul>
+  {% for note in signal_notes %}<div class="small muted">{{ note }}</div>{% endfor %}
+  {% endif %}
+</div>
+<div class="card">
+  <h2>Recent signals <a class="small" style="float:right" href="/history">History →</a></h2>
   <table>
-    <thead><tr><th>Incident</th><th>Time (UTC)</th><th>Host</th><th>Alert</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Signal</th><th>Time (UTC)</th><th>Host</th><th>Description</th><th>Severity</th><th>Status</th><th></th></tr></thead>
     <tbody>
     {% for row in rows %}
       {% set a = row.alert %}
@@ -52,14 +71,14 @@
         </td>
       </tr>
     {% else %}
-      <tr><td colspan="7" class="muted">No alerts were returned for the configured source and time window.</td></tr>
+      <tr><td colspan="7" class="muted">No signals were raised for the configured source and time window.</td></tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 <p class="small muted">
-  Three modes: <code>mock + fixture</code> (deterministic demo/tests),
-  <code>ollama + fixture</code> (real local agent), <code>ollama + wazuh</code> (live lab).
-  Set them with <code>SOCI_LLM</code> and <code>SOCI_BACKEND</code>.
+  Signals are raised by deterministic rules; the agent investigates only when you click Investigate.
+  Sources: <code>SOCI_BACKEND=windows</code> (this computer's event logs), <code>windows-replay</code>
+  (recorded events), <code>fixture</code> (demo incidents); optional <code>wazuh</code> integration.
 </p>
 {% endblock %}

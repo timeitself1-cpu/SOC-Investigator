@@ -1,0 +1,29 @@
+sssssssssssssssssss                                                      [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_live_ollama.py:17: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_ollama.py:22: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_ollama.py:28: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_ollama.py:35: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_ollama.py:40: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_ollama.py:47: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_ollama.py:62: set SOCI_IT_OLLAMA=1 to run live Ollama tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:26: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:34: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:41: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:51: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:60: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:67: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:74: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_wazuh.py:85: set SOCI_IT_WAZUH=1 to run live Wazuh tests
+SKIPPED [1] tests/integration/test_live_windows.py:31: set SOCI_IT_WINDOWS=1 to run live Windows event log tests
+SKIPPED [1] tests/integration/test_live_windows.py:38: set SOCI_IT_WINDOWS=1 to run live Windows event log tests
+SKIPPED [1] tests/integration/test_live_windows.py:46: set SOCI_IT_WINDOWS=1 to run live Windows event log tests
+SKIPPED [1] tests/integration/test_live_windows.py:60: set SOCI_IT_WINDOWS=1 to run live Windows event log tests
+19 skipped in 0.15s
+
+# with SOCI_IT_WINDOWS=1 on Linux
+SKIPPED [1] tests/integration/test_live_windows.py:31: live Windows event log tests need Windows
+SKIPPED [1] tests/integration/test_live_windows.py:38: live Windows event log tests need Windows
+SKIPPED [1] tests/integration/test_live_windows.py:46: live Windows event log tests need Windows
+SKIPPED [1] tests/integration/test_live_windows.py:60: live Windows event log tests need Windows
+4 skipped in 0.09s

@@ -1,0 +1,35 @@
+# pip wheel --no-deps
+soc_investigator-0.3.0-py3-none-any.whl
+164 files; windows_samples xml: 7 ; windows backend modules: ['windows.py', 'windows_events.py', 'winevt_reader.py']
+['Version: 0.3.0', 'Requires-Dist: fastapi>=0.110', 'Requires-Dist: uvicorn>=0.27', 'Requires-Dist: pydantic>=2.6', 'Requires-Dist: httpx>=0.26', 'Requires-Dist: jinja2>=3.1', 'Requires-Dist: pywin32>=306; sys_platform == "win32"', 'Requires-Dist: pytest>=8.0; extra == "dev"']
+# fresh venv + pinned deps + wheel
+installed 0.3.0
+# from unrelated dir (XDG_DATA_HOME set)
+Telemetry sources on DESKTOP-RW01 (reader: recorded-eventlog; elevated: yes)
+  ✓ Sysmon               active         
+  ✓ Windows Security     active         
+  ✓ PowerShell           active         
+  ✓ Microsoft Defender   active         
+sources exit 0
+SIG-e5f7da4e24e1 medium    DESKTOP-RW01     Repeated failed logons: 5+ failures for DESKTOP-RW01\rw_nonexistent within 10 min
+SIG-767b89e5fdef medium    DESKTOP-RW01     Suspicious PowerShell (encoded command)
+SIG-9aa3b547b1b4 high      DESKTOP-RW01     Suspicious PowerShell (encoded command, hidden window)
+SIG-04bf70e07024 medium    DESKTOP-RW01     Suspicious PowerShell (hidden window)
+SIG-d35b70dbd5a2 critical  DESKTOP-RW01     Microsoft Defender detection: Virus:DOS/EICAR_Test_File
+
+Verdict: benign (confidence 0.70)
+Findings: 1 | Evidence: 32 | Tool calls: 9 | Valid: True
+  - F-001 Process launched by a software-management agent  ['EV-0001']  claims=['benign_administration']
+Evaluation: 5/5 passed  (pass_rate=1.0, mean_recall=1.0, invalid_refs=0, forbidden_claims=0)
+# installed wheel, backend windows-replay; process 1 pid=17802: {"status":"ok","llm":"mock","backend":"windows-replay","model":"mock-analyst","max_steps":12}
+dashboard shows sources: 1  signals listed: 10
+run-4860b0b4008e4578a93507e57f73236f SIG-04bf70e07024 benign completed {'process_tree': True, 'network_activity': True, 'host_context': True, 'host_signals': True, 'model_visibility': True} Recommendations only — no response actions were executed.
+run-4e8d6f05cc67414da1a90c9f19cd0d5b SIG-9aa3b547b1b4 suspicious completed {'process_tree': True, 'network_activity': True, 'host_context': True, 'host_signals': False, 'model_visibility': True} Recommendations only — no response actions were executed.
+foreign Origin POST: 403  foreign Host: 400
+[1]+  Terminated              nohup $S/wv3/bin/investigator serve > $S/srv3a.log 2>&1
+process 1 exited after SIGTERM
+# process 2 pid=17843 (1 start in its log)
+run-4860b0b4008e4578a93507e57f73236f: in /history=1 report=200 md=200 api=recovered True completed completed
+run-4e8d6f05cc67414da1a90c9f19cd0d5b: in /history=1 report=200 md=200 api=recovered True completed completed
+[1]+  Terminated              nohup $S/wv3/bin/investigator serve > $S/srv3b.log 2>&1
+process 2 exited after SIGTERM

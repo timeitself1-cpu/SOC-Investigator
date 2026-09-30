@@ -1,0 +1,12 @@
+# python -m pytest -q  (5 consecutive runs)
+run 1: 328 passed, 4 skipped, 19 deselected, 1 warning in 27.77s
+run 2: 328 passed, 4 skipped, 19 deselected, 1 warning in 25.94s
+run 3: 328 passed, 4 skipped, 19 deselected, 1 warning in 25.41s
+run 4: 328 passed, 4 skipped, 19 deselected, 1 warning in 26.29s
+run 5: 328 passed, 4 skipped, 19 deselected, 1 warning in 25.78s
+
+# SOCI_TOKENIZER_JSON=<Qwen2.5 tokenizer.json> pytest tests/test_integrity_v021.py tests/test_windows_backend.py tests/test_v03_requirements.py
+103 passed, 1 warning in 15.82s
+
+# Windows backend unit tests only
+47 passed, 1 warning in 4.55s

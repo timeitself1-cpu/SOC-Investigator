@@ -189,7 +189,10 @@ class RecordedEventReader:
         if not root.is_dir():
             raise ClassifiedError("source_unavailable", "The recorded-event directory does not exist.")
         for path in sorted(root.glob("*.xml")):
-            for xml in split_events(path.read_text(encoding="utf-8-sig")):
+            data = path.read_bytes()
+            # Windows PowerShell 5.1 redirection (">") writes UTF-16 with a BOM.
+            text = data.decode("utf-16") if data[:2] in (b"\xff\xfe", b"\xfe\xff") else data.decode("utf-8-sig")
+            for xml in split_events(text):
                 try:
                     src = source_of(parse_event_xml(xml))
                 except EventParseError:

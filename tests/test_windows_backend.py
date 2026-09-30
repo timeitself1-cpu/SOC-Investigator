@@ -414,3 +414,47 @@ def test_build_agent_wires_windows_replay():
     agent, b = build_agent(settings())
     assert b.name == "windows" and len(b.list_alerts()) == 5
     assert json.loads(json.dumps([s.model_dump() for s in b.source_status()]))
+
+
+# --- dashboard ------------------------------------------------------------------------------
+
+def _client(directory, tmp_path):
+    from fastapi.testclient import TestClient
+    from investigator.app import create_app
+    s = load_settings(llm="mock", backend="windows-replay", windows_replay_dir=directory, reports_dir=tmp_path)
+    return TestClient(create_app(s), base_url="http://127.0.0.1")
+
+
+def test_dashboard_shows_sources_signals_and_investigates(tmp_path):
+    import time as _time
+    c = _client(DEMO, tmp_path)
+    html = c.get("/").text
+    assert "Telemetry sources" in html and "Sysmon" in html and "Microsoft Defender" in html
+    assert "Suspicious PowerShell (hidden window)" in html and "Investigate" in html
+    alert = next(a for a in backend().list_alerts() if a.title == "Suspicious PowerShell (hidden window)")
+    r = c.post(f"/investigate/{alert.alert_id}", follow_redirects=False, headers={"Origin": "http://127.0.0.1"})
+    assert r.status_code == 303
+    run_id = r.headers["location"].rsplit("/", 1)[-1]
+    for _ in range(200):
+        snap = c.get(f"/api/run/{run_id}").json()
+        if snap["status"] != "running":
+            break
+        _time.sleep(0.02)
+    report = c.get(f"/export/{run_id}.json").json()
+    assert report["verdict"] == "benign" and report["notice"].startswith("Recommendations only")
+    page = c.get(f"/report/{run_id}").text
+    assert "Required for benign closure" in page and "host signals" in page
+
+
+def test_dashboard_shows_missing_source_honestly(tmp_path):
+    html = _client(NO_SYSMON, tmp_path).get("/").text
+    assert "not installed" in html and "src-not_installed" in html
+    assert "Sysmon is not installed: its signals are unavailable." in html
+
+
+def test_replay_accepts_utf16_exports(tmp_path):
+    """Windows PowerShell 5.1 '>' redirection writes UTF-16 LE with a BOM."""
+    src = (DEMO / "security.xml").read_text(encoding="utf-8")
+    (tmp_path / "security.xml").write_bytes(b"\xff\xfe" + src.encode("utf-16-le"))
+    r = RecordedEventReader.from_directory(tmp_path)
+    assert len(r.events["security"]) == len(split_events(src))
