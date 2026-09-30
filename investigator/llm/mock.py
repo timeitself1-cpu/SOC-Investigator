@@ -23,7 +23,10 @@ class MockInvestigatorModel:
     name = "mock-analyst"
 
     def complete(self, messages: list[dict[str, str]], *, temperature: float | None = None) -> LLMResponse:
-        text = messages[-1]["content"] if messages else ""
+        # A repair turn appends messages after the prompt; use the most recent
+        # message that carries the state block.
+        text = next((m["content"] for m in reversed(messages) if "<STATE_JSON>" in m.get("content", "")),
+                    messages[-1]["content"] if messages else "")
         state = self._parse_state(text)
         if state.get("phase") == "final_report":
             out = self._build_report(state)
