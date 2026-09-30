@@ -1,0 +1,31 @@
+Benchmark: /home/claude/v2/soc-investigator/investigator/benchmarks/independent  model=mock-analyst
+Cases: 18 (malicious 7, benign 6, ambiguous 5); fully correct: 18
+
+Detection (escalation = suspicious|likely_malicious):
+  TP 7  FN 0  FP 1  TN 5   FNR 0.0  FPR 0.167
+Detection (strict = likely_malicious only):
+  TP 4  FN 3  FP 0   FNR 0.429  FPR 0.0
+  benign cleared: 0.167  forbidden verdicts: 0  ambiguous over-confident: 0
+Claims: retained forbidden 0  proposed-then-rejected 1  invalid evidence refs 0
+Evidence recall: retrieved 0.971  cited 0.833
+Operational: failed 0  incomplete 2  model errors 0  repairs 0  harness errors 0  mean runtime 33.9 ms
+
+case     label      verdict                status      ok  outcome  recall  notes
+BM-A01   benign     insufficient_evidence  completed   Y   TN       1.00    
+BM-A02   ambiguous  suspicious             completed   Y   -        1.00    
+BM-B01   benign     benign                 completed   Y   TN       1.00    
+BM-B02   benign     insufficient_evidence  completed   Y   TN       1.00    
+BM-B03   benign     suspicious             completed   Y   FP       1.00    
+BM-B04   benign     insufficient_evidence  completed   Y   TN       1.00    
+BM-M01   malicious  suspicious             completed   Y   TP       1.00    
+BM-M02   malicious  likely_malicious       completed   Y   TP       1.00    
+BM-M03   malicious  likely_malicious       completed   Y   TP       1.00    
+BM-M04   malicious  likely_malicious       completed   Y   TP       1.00    
+BM-M05   malicious  likely_malicious       completed   Y   TP       1.00    
+BM-X01   ambiguous  insufficient_evidence  completed   Y   -        1.00    
+BM-X02   ambiguous  suspicious             completed   Y   -        1.00    
+BM-X03   malicious  suspicious             completed   Y   TP       1.00    
+BM-X04   benign     insufficient_evidence  completed   Y   TN       1.00    
+BM-X05   ambiguous  insufficient_evidence  incomplete  Y   -        -       
+BM-X06   ambiguous  insufficient_evidence  completed   Y   -        1.00    
+BM-X07   malicious  suspicious             incomplete  Y   TP       0.50    missing ['X07-1']

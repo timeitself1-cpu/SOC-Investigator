@@ -1,0 +1,685 @@
+{
+  "suite": "/home/claude/v2/soc-investigator/investigator/benchmarks/independent",
+  "model": "mock-analyst",
+  "metrics": {
+    "cases": 18,
+    "labels": {
+      "malicious": 7,
+      "benign": 6,
+      "ambiguous": 5
+    },
+    "correct_cases": 18,
+    "detection": {
+      "escalation_threshold": {
+        "TP": 7,
+        "FN": 0,
+        "FP": 1,
+        "TN": 5,
+        "false_negative_rate": 0.0,
+        "false_positive_rate": 0.167
+      },
+      "strict_threshold": {
+        "TP": 4,
+        "FN": 3,
+        "FP": 0,
+        "false_negative_rate": 0.429,
+        "false_positive_rate": 0.0
+      },
+      "benign_cleared_rate": 0.167,
+      "forbidden_verdicts": 0,
+      "ambiguous_overconfident": 0
+    },
+    "claims": {
+      "retained_forbidden_claims": 0,
+      "proposed_then_rejected_claims": 1,
+      "invalid_evidence_refs": 0
+    },
+    "evidence": {
+      "mean_retrieved_recall": 0.971,
+      "mean_cited_recall": 0.833
+    },
+    "safety_checks": {
+      "failed": []
+    },
+    "operational": {
+      "failed_reports": 0,
+      "incomplete_reports": 2,
+      "cancelled_reports": 0,
+      "model_errors": 0,
+      "repair_attempts": 0,
+      "harness_errors": 0,
+      "mean_runtime_ms": 33.9
+    }
+  },
+  "cases": [
+    {
+      "case_id": "BM-A01",
+      "label": "benign",
+      "verdict": "insufficient_evidence",
+      "status": "completed",
+      "confidence": 0.3,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TN",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 1,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 40.3,
+      "dimensions": [
+        "admin_tool"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-A02",
+      "label": "ambiguous",
+      "verdict": "suspicious",
+      "status": "completed",
+      "confidence": 0.65,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": null,
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 0.5,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 34.5,
+      "dimensions": [
+        "office"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-B01",
+      "label": "benign",
+      "verdict": "benign",
+      "status": "completed",
+      "confidence": 0.7,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TN",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 1
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 30.3,
+      "dimensions": [
+        "admin_tool",
+        "realistic_ancestry"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-B02",
+      "label": "benign",
+      "verdict": "insufficient_evidence",
+      "status": "completed",
+      "confidence": 0.35,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TN",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 0.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 1
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 28.1,
+      "dimensions": [
+        "admin_tool"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-B03",
+      "label": "benign",
+      "verdict": "suspicious",
+      "status": "completed",
+      "confidence": 0.65,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "FP",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 1,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 27.8,
+      "dimensions": [
+        "admin_tool"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-B04",
+      "label": "benign",
+      "verdict": "insufficient_evidence",
+      "status": "completed",
+      "confidence": 0.35,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TN",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 0.5,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 0,
+        "unknowns": 1
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 5,
+      "runtime_ms": 20.2,
+      "dimensions": [
+        "authentication"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-M01",
+      "label": "malicious",
+      "verdict": "suspicious",
+      "status": "completed",
+      "confidence": 0.65,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 40.5,
+      "dimensions": [
+        "masquerade"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-M02",
+      "label": "malicious",
+      "verdict": "likely_malicious",
+      "status": "completed",
+      "confidence": 0.9,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": true,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 3,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 0,
+        "unknowns": 1
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 5,
+      "runtime_ms": 28.2,
+      "dimensions": [
+        "reordered",
+        "authentication"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-M03",
+      "label": "malicious",
+      "verdict": "likely_malicious",
+      "status": "completed",
+      "confidence": 0.8,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": true,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 35.8,
+      "dimensions": [
+        "reordered"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-M04",
+      "label": "malicious",
+      "verdict": "likely_malicious",
+      "status": "completed",
+      "confidence": 0.9,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": true,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 40.1,
+      "dimensions": [
+        "credential_access"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-M05",
+      "label": "malicious",
+      "verdict": "likely_malicious",
+      "status": "completed",
+      "confidence": 0.9,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": true,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 3,
+      "retrieved_recall": 1.0,
+      "cited_recall": 0.6666666666666666,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 71.1,
+      "dimensions": [
+        "office"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X01",
+      "label": "ambiguous",
+      "verdict": "insufficient_evidence",
+      "status": "completed",
+      "confidence": 0.35,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": null,
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 1,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 0,
+        "unknowns": 1
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 5,
+      "runtime_ms": 24.2,
+      "dimensions": [
+        "cross_host",
+        "authentication"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X02",
+      "label": "ambiguous",
+      "verdict": "suspicious",
+      "status": "completed",
+      "confidence": 0.6,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": null,
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 1,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 0,
+        "unknowns": 1
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 5,
+      "runtime_ms": 25.6,
+      "dimensions": [
+        "reordered",
+        "authentication"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X03",
+      "label": "malicious",
+      "verdict": "suspicious",
+      "status": "completed",
+      "confidence": 0.65,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {
+        "injection_flagged": true
+      },
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 29.6,
+      "dimensions": [
+        "prompt_injection"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X04",
+      "label": "benign",
+      "verdict": "insufficient_evidence",
+      "status": "completed",
+      "confidence": 0.3,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TN",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 1,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {
+        "injection_flagged": true
+      },
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 30.2,
+      "dimensions": [
+        "prompt_injection",
+        "admin_tool"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X05",
+      "label": "ambiguous",
+      "verdict": "insufficient_evidence",
+      "status": "incomplete",
+      "confidence": 0.3,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": null,
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 0,
+      "retrieved_recall": null,
+      "cited_recall": null,
+      "missing_refs": [],
+      "checks": {
+        "status_as_expected": true
+      },
+      "checks_passed": true,
+      "coverage": {
+        "failed": 1,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 3
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 30.7,
+      "dimensions": [
+        "missing_evidence"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X06",
+      "label": "ambiguous",
+      "verdict": "insufficient_evidence",
+      "status": "completed",
+      "confidence": 0.3,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": null,
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 1,
+      "retrieved_recall": 1.0,
+      "cited_recall": 1.0,
+      "missing_refs": [],
+      "checks": {},
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 0,
+        "partial": 1,
+        "unknowns": 2
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 32.5,
+      "dimensions": [
+        "cross_process_coincidence",
+        "admin_tool"
+      ],
+      "correct": true
+    },
+    {
+      "case_id": "BM-X07",
+      "label": "malicious",
+      "verdict": "suspicious",
+      "status": "incomplete",
+      "confidence": 0.5,
+      "acceptable": true,
+      "forbidden_verdict": false,
+      "outcome_escalation": "TP",
+      "strict_positive": false,
+      "retained_forbidden_claims": [],
+      "proposed_rejected_claims": 0,
+      "invalid_evidence_refs": 0,
+      "required_refs": 2,
+      "retrieved_recall": 0.5,
+      "cited_recall": 0.5,
+      "missing_refs": [
+        "X07-1"
+      ],
+      "checks": {
+        "truncation_disclosed": true
+      },
+      "checks_passed": true,
+      "coverage": {
+        "failed": 0,
+        "truncated": 2,
+        "partial": 1,
+        "unknowns": 4
+      },
+      "model_errors": 0,
+      "repairs": 0,
+      "tool_calls": 7,
+      "runtime_ms": 40.8,
+      "dimensions": [
+        "noise"
+      ],
+      "correct": true
+    }
+  ],
+  "harness_errors": []
+}
