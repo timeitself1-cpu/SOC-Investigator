@@ -313,3 +313,20 @@ def test_markdown_and_html_render_new_sections(backend, tmp_path):
                    'data-cited="yes"', "/static/report.js", "Rerun"):
         assert marker in html
     assert "script-src 'self'" in client.get(f"/report/{run_id}").headers["content-security-policy"]
+
+
+def test_final_journal_is_durable_before_status_is_published(tmp_path):
+    """A crash between 'status=completed' and the journal write must be impossible."""
+    svc = InvestigationService(settings(reports_dir=tmp_path / "reports"))
+    observed = []
+    real = svc._write_journal
+
+    def spy(run, record=None):
+        if record and record["status"] != "running":
+            observed.append((record["status"], run.status))
+        return real(run, record)
+
+    svc._write_journal = spy
+    run = _wait(svc, svc.start("INC-001"))
+    assert observed == [("completed", "running")]  # journal written while status still 'running'
+    assert run.status == "completed"

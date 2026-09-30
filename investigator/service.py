@@ -97,26 +97,37 @@ class RunState:
         with self._lock:
             self.activity.append(ev)
 
-    def finish(self, report: InvestigationReport, persistence_error: str | None) -> None:
+    def finish(self, report: InvestigationReport, persistence_error: str | None,
+               before_publish=None) -> None:
+        """Record the result; ``before_publish(journal)`` runs before the status flips,
+        so a crash can never leave a durable 'running' record for a finished run."""
+        final = "cancelled" if report.status == "cancelled" else "completed"
         with self._lock:
             self._report = report
             self.report_status = report.status
             self.verdict = report.verdict
             self.persistence_error = persistence_error
-            if persistence_error:
-                self.activity.append(ActivityEvent(kind="warning", message=persistence_error))
+            self.finished_at = datetime.now(timezone.utc)
+        journal_error = before_publish(self.journal(status=final)) if before_publish else None
+        with self._lock:
+            if journal_error and not self.persistence_error:
+                self.persistence_error = journal_error
+            if self.persistence_error:
+                self.activity.append(ActivityEvent(kind="warning", message=self.persistence_error))
             # A finished job may have an incomplete assessment. Keep that
             # distinction in report_status rather than mislabelling the job.
-            self.status = "cancelled" if report.status == "cancelled" else "completed"
-            self.finished_at = datetime.now(timezone.utc)
+            self.status = final
 
-    def fail(self, exc: BaseException) -> None:
+    def fail(self, exc: BaseException, before_publish=None) -> None:
         kind, message = safe_error(exc)
         with self._lock:
             self.error = f"Investigation failed ({kind}): {message}"
             self.activity.append(ActivityEvent(kind="error", message=self.error))
-            self.status = "error"
             self.finished_at = datetime.now(timezone.utc)
+        if before_publish:
+            before_publish(self.journal(status="error"))
+        with self._lock:
+            self.status = "error"
 
     def snapshot(self, since: int = 0) -> dict[str, Any]:
         if since < 0:
@@ -136,10 +147,10 @@ class RunState:
                 "cancel_requested": self.cancel_event.is_set(), "recovered": self.recovered,
             }
 
-    def journal(self) -> dict[str, Any]:
+    def journal(self, status: str | None = None) -> dict[str, Any]:
         with self._lock:
             return {
-                "version": 1, "run_id": self.run_id, "status": self.status,
+                "version": 1, "run_id": self.run_id, "status": status or self.status,
                 "alert": self.alert.model_dump(mode="json"),
                 "started_at": self.started_at.isoformat(),
                 "finished_at": self.finished_at.isoformat() if self.finished_at else None,
@@ -169,9 +180,9 @@ class InvestigationService:
     def _journal_path(self, run_id: str) -> Path:
         return self.journal_dir / f"{run_id}.json"
 
-    def _write_journal(self, run: RunState) -> str | None:
+    def _write_journal(self, run: RunState, record: dict[str, Any] | None = None) -> str | None:
         try:
-            _atomic_write(self._journal_path(run.run_id), json.dumps(run.journal(), indent=2))
+            _atomic_write(self._journal_path(run.run_id), json.dumps(record or run.journal(), indent=2))
             return None
         except OSError as exc:
             return f"Run history could not be saved ({type(exc).__name__})."
@@ -288,8 +299,7 @@ class InvestigationService:
             except Exception as exc:
                 # Thread creation can fail too; never leak a concurrency slot.
                 self._active_by_alert.pop(alert_id, None)
-                run.fail(exc)
-                self._write_journal(run)
+                run.fail(exc, before_publish=lambda record: self._write_journal(run, record))
                 raise
         return run
 
@@ -348,16 +358,13 @@ class InvestigationService:
                     f"Report could not be saved to disk ({type(exc).__name__}). "
                     "Download it before this run is evicted or the server stops."
                 )
-            if run.status == "interrupted":
-                # Shutdown already recorded this run; a late finish still saves the report.
-                run.status = "running"
-            run.finish(report, persistence_error)
+            # (A late finish after a shutdown timeout still saves the report and
+            # replaces the 'interrupted' journal record.)
+            run.finish(report, persistence_error,
+                       before_publish=lambda record: self._write_journal(run, record))
         except Exception as exc:  # keep the server alive; surface a classified error
-            run.fail(exc)
+            run.fail(exc, before_publish=lambda record: self._write_journal(run, record))
         finally:
-            journal_error = self._write_journal(run)
-            if journal_error and not run.persistence_error:
-                run.persistence_error = journal_error
             with self._lock:
                 if self._active_by_alert.get(run.alert.alert_id) == run.run_id:
                     self._active_by_alert.pop(run.alert.alert_id, None)
