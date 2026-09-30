@@ -121,3 +121,71 @@ GET  /export/{run_id}.md   → Markdown
 - **Deterministic indicators + support predicates** → claims are checkable by code.
 - **Everything read-only, allowlisted, bounded** → the blast radius is "reads some
   logs", enforced by types and dispatch, not by asking the model nicely.
+
+---
+
+## v0.2 additions
+
+### Collection coverage (what was and was not seen)
+Every tool call records a human-readable `scope` (host, window, filters), an
+`outcome` (`complete`, `empty`, `truncated`, `partial`, `failed`, `rejected`,
+`duplicate`), a classified `error_kind`, and `gaps` (known unknowns).
+`report.build_coverage()` turns these into `InvestigationReport.coverage`:
+counts, hosts/categories queried, backend caveats (e.g. "only rule-matched events
+are searchable"), and explicit unknowns (earlier ancestry, never-queried network
+activity, evidence hidden from the model by the context budget).
+
+Report status is derived from that ledger:
+
+| Condition | Status |
+| --- | --- |
+| cancelled by analyst / shutdown | `cancelled` |
+| model produced no valid report | `failed` |
+| backend failure, result-cap truncation, step/time/evidence budget, missing trigger, model stopped gathering, evidence omitted from the final prompt | `incomplete` |
+| ancestry beyond the retained window (`partial`), rejected or duplicate model requests | stays `completed`; disclosed as known unknowns |
+
+The last row is a deliberate change: real Sysmon always records a parent GUID and
+long-lived parents predate any window, so treating that as a failure made every
+realistic report `incomplete` and a benign verdict unreachable.
+
+### Report structure
+`validate_report()` now builds, alongside the validated findings:
+`observed_facts` (code-generated statements from cited/trigger records),
+`hypotheses` (each accepted claim and ATT&CK mapping with the prerequisite it met),
+`verification_steps` (deterministic next checks from hypotheses and coverage gaps),
+an application-generated `summary`, and `model_narrative` (the model's prose, kept
+only when validation made no corrections, always labelled unverified).
+
+### Benign guard
+`benign_blockers()` withholds a benign verdict unless the *alerted process itself*
+was launched by a management agent from its install directory, no correlated
+malicious prerequisites exist, no contradicting indicators appear on the process tree
+(Office parent, external destination, user-writable path, masquerade) or host
+(LSASS access, dump file, Run key, scheduled task), no telemetry is instruction-like,
+and collection was complete.
+
+### Context budget
+`InvestigationAgent._build_state()` renders the prompt state under
+`(num_ctx - num_predict - 256) * chars_per_token - repair_reserve` characters,
+compacting in recorded levels (shorter attributes → shorter tool history →
+one-line low-priority evidence → omit lowest-priority evidence). Priority: trigger,
+evidence with indicators, then nearest in time. `LLMExchange` records budget,
+compaction level, evidence shown/omitted, prompt/response SHA-256 and sizes,
+`done_reason`, and suspected server-side context overflow.
+
+### Run lifecycle
+`InvestigationService` journals each run to `<reports_dir>/runs/<run_id>.json`
+(atomic writes; the final record is durable *before* the status is published),
+replays the journal on startup (in-flight runs become `interrupted`), supports
+cooperative cancellation (`POST /run/{id}/cancel`), and on shutdown cancels active
+runs, waits `shutdown_grace_seconds`, and records stragglers as interrupted.
+
+### Errors
+`errors.py` classifies every backend/model failure into a stable kind with a fixed
+safe message. Response bodies are inspected only for error-type tokens (e.g.
+`index_not_found_exception` → `index_missing`) and never copied.
+
+### Evaluation
+`evaluation/evaluator.py` scores the five demo fixtures. `evaluation/benchmark.py`
+runs the independent suite with per-case isolated backends and reports detection,
+claims, evidence and operational metrics separately.

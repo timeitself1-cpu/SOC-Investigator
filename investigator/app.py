@@ -67,7 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             import anyio
             await anyio.to_thread.run_sync(service.shutdown)
 
-    app = FastAPI(title="SOC Investigation Agent", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="SOC Investigation Agent", version="0.2.0", lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
     app.state.service = None
     app.state.settings = settings

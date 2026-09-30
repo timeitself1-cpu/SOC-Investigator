@@ -1,3 +1,5 @@
+> **Superseded in part by [REVIEW.md](REVIEW.md) (v0.2.0).** This file is preserved as the previous review's record; its findings are re-checked in REVIEW.md §1.
+
 # Investigation and improvements — 2026-09-30
 
 The original ZIP is preserved. Changes are in the extracted `soc-investigator` directory.

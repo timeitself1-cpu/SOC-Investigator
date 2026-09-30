@@ -4,6 +4,7 @@
 
 # Reports produced at runtime
 reports/*.json
+reports/runs/
 !reports/.gitkeep
 
 # Python

@@ -1,4 +1,48 @@
-# Current validation — 2026-09-30
+# Validation — v0.2.0 (this pass, 2026-09-30)
+
+Everything in this section was **executed in this pass** and the exact outputs are
+saved in `docs/validation/`. Sections further below are historical records from
+earlier packages and are not re-verified claims.
+
+Environment: Linux x86-64, CPython 3.12.3 (`.venv`, `pip install -e '.[dev]'`),
+Node v22.22.2, Chromium 1194 via Playwright (browser tests only). **Not re-run on
+Windows in this pass**; the PowerShell instructions are unchanged from the verified
+Windows run in the previous review.
+
+## VERIFIED (executed here)
+
+| Command | Result | Output |
+| --- | --- | --- |
+| `python -m pytest -q` | **228 passed**, 15 deselected (opt-in integration), 0 failed | `pytest_default.txt` |
+| same, repeated | 5 consecutive full runs green (228 passed each) after the final fix; the browser test file alone 15/15 green. Two intermittent failures were found and fixed on the way: a real journal/status race (R18) and a test-harness wait that the CSP correctly blocked | — |
+| `node --test tests/test_activity_dom.cjs` | **6 passed** | `node_dom_tests.txt` |
+| `python -m pytest -m integration tests/integration -rs` | 15 collected, **15 skipped** (no `SOCI_IT_*` set) — the harness imports and gates correctly; nothing live was exercised | `pytest_integration_unconfigured.txt` |
+| `python -m investigator --llm mock --backend fixture evaluate --json` | 5/5 demo fixtures pass (recall 1.0, 0 invalid refs, 0 forbidden claims), with fixtures now carrying realistic parent GUIDs | `evaluate_demo.json` |
+| `python -m investigator --llm mock benchmark` | 18 cases; 0 harness errors, 0 forbidden verdicts, 0 retained forbidden claims; escalation FPR 0.167 / FNR 0.0; strict FNR 0.429; benign cleared 1/6; recall 0.971 retrieved / 0.833 cited | `benchmark_mock.txt`, `benchmark_mock.json` |
+| Same suite against the **uploaded baseline** | 17/18 acceptable; X05 harness `KeyError`; M01 retained forbidden `benign_administration`; 14/18 reports `incomplete` | `benchmark_baseline_uploaded_source.txt` |
+| Review reproductions R1–R11 on baseline vs current | every reproduced defect resolved (diff of the two outputs) | `repro_baseline.txt`, `repro_current.txt`, `repro_r1b_*.txt` |
+| Wheel build + install into a fresh venv, run from an unrelated directory | `list`, `evaluate`, `benchmark`, `diagnose` work; packaged cases/benchmark present; reports under the per-user data dir, not site-packages | (commands in REVIEW.md, R14) |
+| Installed wheel, out of process: serve → investigate → SIGTERM → restart | run journaled; restored in `/history`; `/report/<run>` 200 after restart; foreign-Origin POST 403; foreign Host 400 | `wheel_restart_check.txt` |
+| Real Chromium: queue → Investigate → live activity → report; evidence filters, anchors, cancel, history | pass; external scripts run under `script-src 'self'`; string-`eval` automation is refused by the CSP | `tests/test_browser_ui.py`, `docs/screenshots/v2_*.png` |
+
+## IMPLEMENTED BUT NOT LIVE-VERIFIED
+
+| Capability | What *is* tested | What is not |
+| --- | --- | --- |
+| Ollama client: `num_predict`, JSON-schema `format`, `done_reason`, classified errors, exact tag health check | payloads, error classification and truncation handling with mock transports / stand-in models | a real Ollama server; whether your Ollama version accepts the Pydantic schemas (fallback: `SOCI_OLLAMA_STRUCTURED_OUTPUT=false`); the real chars-per-token ratio (the live test measures it) |
+| Wazuh backend: read-only allowlist, missing-index detection, 401 token refresh, malformed-alert skipping, classified auth/permission/TLS/timeout/mapping/partial errors, `probe()`/`diagnose` | all of the above through the real HTTP code with mock transports (`test_failure_modes.py`, `test_wazuh.py`, `test_review_regressions.py`) | a real indexer/API: index names, field mappings for your Sysmon config, real TLS/auth/permission behaviour, archives |
+| Opt-in live suites `tests/integration/` (15 tests) | they collect and skip cleanly | none executed |
+| Real-model investigation quality | — | no real model was run; all verdict metrics above are for the rule-based mock |
+
+## NOT IMPLEMENTED (by design or deferred)
+
+Authentication/authorization, multi-tenant isolation, autonomous remediation, shell
+execution, external data transmission, multi-process-safe journaling, per-tool
+deadlines, signer/hash enrichment, calibrated confidence.
+
+---
+
+# Historical: previous review's validation (2026-09-30, Windows)
 
 The improved source passes **161 Python tests** and **5/5 fixture evaluations** on
 Windows/Python 3.12. See [AUDIT_AND_IMPROVEMENTS.md](AUDIT_AND_IMPROVEMENTS.md) for
