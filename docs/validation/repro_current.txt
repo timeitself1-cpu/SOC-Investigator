@@ -1,0 +1,36 @@
+
+======== R1 masquerading 'AgentExecutor.exe' in a user-writable path -> benign accepted ========
+end-to-end mock verdict: suspicious 0.55 status: completed valid: True
+indicators on masquerade process: ['encoded_command', 'masquerade_suspect', 'powershell']
+validator on model-drafted benign: insufficient_evidence valid: False issues: ["Finding 'Mgmt agent': rejected claim (claim 'benign_administration' requires a process-creation event from a recognized management agent; authorization still requires review).", "Finding 'Mgmt agent': replaced unchecked narrative with retrieved observations.", 'Verdict downgraded to insufficient_evidence: no supported structured claims remained.']
+
+======== R2 get_host_context result never reaches the model or report ========
+host notes: Managed by SCCM; runs scheduled inventory scripts as SYSTEM.
+'SCCM' / role text in any prompt after get_host_context: True
+host context in report JSON: True
+
+======== R3 prompt size is unbounded relative to num_ctx; R4 audit clipping has no structured flag ========
+state chars=37,922 (budget 38,240) ~tokens=12,640 num_ctx=16,384 compaction=4 omitted=62
+INC-004 exchanges (purpose, stored chars, clipped-in-audit): [('decide', 3621, False), ('decide', 3904, False), ('decide', 8155, False), ('decide', 8292, False), ('decide', 8558, False), ('final_report', 9021, False)]
+structured disclosure fields: ['prompt_sha256', 'response_sha256', 'clipped']
+
+======== R5 realistic Sysmon parentProcessGuid (parent outside retention) -> every tree 'incomplete'; benign unreachable ========
+INC-005 with realistic parent GUID -> verdict: benign status: completed
+  truncated calls: []
+
+======== R6 Wazuh: nonexistent archives index returns 0 shards/0 hits and is treated as 'no activity' ========
+raised: WazuhSearchError index_missing | request: https://idx:9200/wazuh-archives-*/_search?allow_partial_search_results=false&allow_no_indices=false&ignore_unavailable=false
+
+======== R7 Wazuh API token cached forever; expired token (401) is not refreshed ========
+first: H
+second: ok
+
+======== R8 raw backend exception text flows into trace/model prompt; R9 one malformed alert breaks the queue ========
+1
+ToolCall.error (also serialized into STATE_JSON tools_called): An unexpected internal error occurred.
+
+======== R10 identical repeated tool calls are re-executed until the step budget is exhausted ========
+backend queries: 1 statuses: ['duplicate', 'ok'] report status: incomplete
+
+======== R11 raw telemetry key '_role' is trusted as the application's trigger marker ========
+is_trigger flags: [('EV-0001', False), ('EV-0002', False)]

@@ -48,7 +48,7 @@
       "model_errors": 0,
       "repair_attempts": 0,
       "harness_errors": 0,
-      "mean_runtime_ms": 33.9
+      "mean_runtime_ms": 44.6
     }
   },
   "cases": [
@@ -80,7 +80,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 40.3,
+      "runtime_ms": 55.0,
       "dimensions": [
         "admin_tool"
       ],
@@ -114,7 +114,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 34.5,
+      "runtime_ms": 48.2,
       "dimensions": [
         "office"
       ],
@@ -148,7 +148,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 30.3,
+      "runtime_ms": 43.1,
       "dimensions": [
         "admin_tool",
         "realistic_ancestry"
@@ -183,7 +183,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 28.1,
+      "runtime_ms": 34.4,
       "dimensions": [
         "admin_tool"
       ],
@@ -217,7 +217,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 27.8,
+      "runtime_ms": 37.8,
       "dimensions": [
         "admin_tool"
       ],
@@ -251,7 +251,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 5,
-      "runtime_ms": 20.2,
+      "runtime_ms": 29.4,
       "dimensions": [
         "authentication"
       ],
@@ -285,7 +285,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 40.5,
+      "runtime_ms": 48.5,
       "dimensions": [
         "masquerade"
       ],
@@ -319,7 +319,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 5,
-      "runtime_ms": 28.2,
+      "runtime_ms": 41.5,
       "dimensions": [
         "reordered",
         "authentication"
@@ -354,7 +354,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 35.8,
+      "runtime_ms": 47.4,
       "dimensions": [
         "reordered"
       ],
@@ -388,7 +388,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 40.1,
+      "runtime_ms": 48.9,
       "dimensions": [
         "credential_access"
       ],
@@ -422,7 +422,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 71.1,
+      "runtime_ms": 86.0,
       "dimensions": [
         "office"
       ],
@@ -456,7 +456,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 5,
-      "runtime_ms": 24.2,
+      "runtime_ms": 39.7,
       "dimensions": [
         "cross_host",
         "authentication"
@@ -491,7 +491,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 5,
-      "runtime_ms": 25.6,
+      "runtime_ms": 40.9,
       "dimensions": [
         "reordered",
         "authentication"
@@ -528,7 +528,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 29.6,
+      "runtime_ms": 58.3,
       "dimensions": [
         "prompt_injection"
       ],
@@ -564,7 +564,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 30.2,
+      "runtime_ms": 41.8,
       "dimensions": [
         "prompt_injection",
         "admin_tool"
@@ -601,7 +601,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 30.7,
+      "runtime_ms": 32.9,
       "dimensions": [
         "missing_evidence"
       ],
@@ -635,7 +635,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 32.5,
+      "runtime_ms": 29.6,
       "dimensions": [
         "cross_process_coincidence",
         "admin_tool"
@@ -674,7 +674,7 @@
       "model_errors": 0,
       "repairs": 0,
       "tool_calls": 7,
-      "runtime_ms": 40.8,
+      "runtime_ms": 40.2,
       "dimensions": [
         "noise"
       ],

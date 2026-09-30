@@ -8,7 +8,7 @@ Detection (strict = likely_malicious only):
   benign cleared: 0.167  forbidden verdicts: 0  ambiguous over-confident: 0
 Claims: retained forbidden 0  proposed-then-rejected 1  invalid evidence refs 0
 Evidence recall: retrieved 0.971  cited 0.833
-Operational: failed 0  incomplete 2  model errors 0  repairs 0  harness errors 0  mean runtime 33.9 ms
+Operational: failed 0  incomplete 2  model errors 0  repairs 0  harness errors 0  mean runtime 44.6 ms
 
 case     label      verdict                status      ok  outcome  recall  notes
 BM-A01   benign     insufficient_evidence  completed   Y   TN       1.00    

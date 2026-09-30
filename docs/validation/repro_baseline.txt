@@ -1,0 +1,37 @@
+
+======== R1 masquerading 'AgentExecutor.exe' in a user-writable path -> benign accepted ========
+end-to-end mock verdict: benign 0.7 status: completed valid: True
+indicators on masquerade process: ['encoded_command', 'management_agent_parent', 'powershell']
+validator on model-drafted benign: benign valid: True issues: []
+
+======== R2 get_host_context result never reaches the model or report ========
+host notes: Managed by SCCM; runs scheduled inventory scripts as SYSTEM.
+'SCCM' / role text in any prompt after get_host_context: False
+host context in report JSON: False
+
+======== R3 prompt size is unbounded relative to num_ctx; R4 audit clipping has no structured flag ========
+state chars=302,906  ~tokens=75,726  num_ctx=16,384  (no budget)
+INC-004 exchanges (purpose, stored chars, clipped-in-audit): [('decide', 3391, False), ('decide', 3504, False), ('decide', 6011, True), ('decide', 6011, True), ('decide', 6011, True), ('final_report', 6011, True)]
+structured disclosure fields: []
+
+======== R5 realistic Sysmon parentProcessGuid (parent outside retention) -> every tree 'incomplete'; benign unreachable ========
+INC-005 with realistic parent GUID -> verdict: insufficient_evidence status: incomplete
+  truncated calls: ['get_process_tree']
+
+======== R6 Wazuh: nonexistent archives index returns 0 shards/0 hits and is treated as 'no activity' ========
+result: [] | request: https://idx:9200/wazuh-archives-*/_search?allow_partial_search_results=false
+
+======== R7 Wazuh API token cached forever; expired token (401) is not refreshed ========
+first: H
+second call after token expiry -> HTTPStatusError Client error '401 Unauthorized' for url 'https://api:55000/agents?name=H'
+For more information check: https://developer.
+
+======== R8 raw backend exception text flows into trace/model prompt; R9 one malformed alert breaks the queue ========
+list_alerts -> ValueError : Invalid isoformat string: 'not-a-time'
+ToolCall.error (also serialized into STATE_JSON tools_called): RuntimeError: OpenSearch said: {"error":"...Authorization: Basic dTpw..."}
+
+======== R10 identical repeated tool calls are re-executed until the step budget is exhausted ========
+backend queries: 12 statuses: ['ok'] report status: incomplete
+
+======== R11 raw telemetry key '_role' is trusted as the application's trigger marker ========
+is_trigger flags: [('EV-0001', False), ('EV-0002', True)]

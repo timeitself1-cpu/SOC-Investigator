@@ -1,0 +1,22 @@
+v22.22.2
+# Subtest: hostile activity is inserted as literal text, with a fixed class allowlist
+ok 1 - hostile activity is inserted as literal text, with a fixed class allowlist
+# Subtest: incomplete assessment and persistence failure remain visible
+ok 2 - incomplete assessment and persistence failure remain visible
+# Subtest: expired run ends polling and displays a recoverable error
+ok 3 - expired run ends polling and displays a recoverable error
+# Subtest: cancelled run shows completion note and hides the cancel control
+ok 4 - cancelled run shows completion note and hides the cancel control
+# Subtest: interrupted run (server restarted mid-run) is shown as a recoverable failure
+ok 5 - interrupted run (server restarted mid-run) is shown as a recoverable failure
+# Subtest: incomplete assessment points the analyst at collection coverage
+ok 6 - incomplete assessment points the analyst at collection coverage
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 150.12382
+evaluate exit=0

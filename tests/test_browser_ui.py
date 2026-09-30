@@ -57,7 +57,10 @@ def server(tmp_path_factory):
 def page():
     with playwright.sync_playwright() as p:
         try:
-            browser = p.chromium.launch(executable_path=_chromium_path()) if _chromium_path() else p.chromium.launch()
+            # No background calls to browser vendor services; the app itself is local-only.
+            args = ["--disable-background-networking", "--disable-component-update", "--no-first-run"]
+            browser = (p.chromium.launch(executable_path=_chromium_path(), args=args) if _chromium_path()
+                       else p.chromium.launch(args=args))
         except Exception as exc:  # noqa: BLE001
             pytest.skip(f"Chromium not available: {exc}")
         pg = browser.new_page(viewport={"width": 1200, "height": 900})
@@ -93,7 +96,9 @@ def test_investigate_watch_and_navigate_report(server, page):
     first_fact = page.locator("#facts a.tag").first
     target = first_fact.inner_text()
     first_fact.click()
-    page.wait_for_function(f"document.getElementById('{target}').open === true")
+    # (A string predicate via wait_for_function would need eval, which the CSP
+    # correctly refuses; wait on the DOM attribute instead.)
+    page.locator(f"details#{target}[open]").wait_for(state="visible", timeout=5_000)
     assert page.locator(f"details#{target}").is_visible()
     SHOTS.mkdir(parents=True, exist_ok=True)
     page.goto(page.url.split("#")[0])

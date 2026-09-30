@@ -113,20 +113,28 @@ ctx = ToolContext(be, EvidenceStore("fixture", 150), be.alert, S)
 for d in big:
     ctx.store.add(be.events[d["id"]], "t")
 tr = InvestigationTrace(investigation_id="x", model="m", backend="fixture", max_steps=12)
-state = InvestigationAgent(be, MockInvestigatorModel(), S)._state_block(ctx, tr, 1, "decide")
-print(f"state chars={len(state):,}  ~tokens={len(state)//4:,}  num_ctx={S.ollama_num_ctx:,}")
-rep = build_agent(S)[0].investigate(FixtureBackend(ROOT / 'cases').get_alert("INC-001"))
-ex = rep.trace.llm_exchanges[0]
-print("first exchange user-message length stored:", len(ex.messages[-1]["content"]),
-      "clipped marker:", ex.messages[-1]["content"].endswith("[clipped]"),
-      "structured clip fields:", [k for k in ex.model_fields if "clip" in k or "sha" in k or "orig" in k])
+ag = InvestigationAgent(be, MockInvestigatorModel(), S)
+if hasattr(ag, "_build_state"):
+    state, meta = ag._build_state(ctx, tr, 1, "decide", ag.prompt_budget_chars())
+    print(f"state chars={len(state):,} (budget {ag.prompt_budget_chars():,}) ~tokens={len(state)//3:,} "
+          f"num_ctx={S.ollama_num_ctx:,} compaction={meta['level']} omitted={meta['evidence_omitted']}")
+else:
+    state = ag._state_block(ctx, tr, 1, "decide")
+    print(f"state chars={len(state):,}  ~tokens={len(state)//4:,}  num_ctx={S.ollama_num_ctx:,}  (no budget)")
+ag4, b4 = build_agent(S)
+rep = ag4.investigate(b4.get_alert("INC-004"))
+print("INC-004 exchanges (purpose, stored chars, clipped-in-audit):",
+      [(x.purpose, len(x.messages[-1]["content"]), x.messages[-1]["content"].rstrip().endswith("[clipped]")
+        or getattr(x, "clipped", False)) for x in rep.trace.llm_exchanges])
+print("structured disclosure fields:", [k for k in type(rep.trace.llm_exchanges[0]).model_fields
+                                        if "clip" in k or "sha" in k])
 
 # ---------------------------------------------------------------- R5
 header("R5 realistic Sysmon parentProcessGuid (parent outside retention) -> every tree 'incomplete'; benign unreachable")
 tmp = Path(sys.argv[2]) / "cases_r5"
 import shutil
 shutil.rmtree(tmp, ignore_errors=True)
-shutil.copytree(ROOT / "cases", tmp)
+shutil.copytree(ROOT / "investigator" / "cases" if (ROOT / "investigator" / "cases").is_dir() else ROOT / "cases", tmp)
 ev = json.loads((tmp / "INC005" / "events.json").read_text())
 ev[0]["data"]["win"]["eventdata"]["parentProcessGuid"] = "{dddd5555-0000-0000-0005-0000000000aa}"  # AgentExecutor, long-lived, not in window
 (tmp / "INC005" / "events.json").write_text(json.dumps(ev))
@@ -151,8 +159,11 @@ def handler(req: httpx.Request):
 WS = load_settings(backend="wazuh", wazuh_indexer_url="https://idx:9200", wazuh_indexer_user="u",
                    wazuh_indexer_password="p", wazuh_events_index="wazuh-archives-*")
 wb = WazuhBackend(WS, transport=httpx.MockTransport(handler))
-out = wb.search_events(EventQuery(start=T0 - timedelta(hours=1), end=T0, host="H", limit=5))
-print("result:", out, "| request:", seen[-1])
+try:
+    out = wb.search_events(EventQuery(start=T0 - timedelta(hours=1), end=T0, host="H", limit=5))
+    print("result:", out, "| request:", seen[-1])
+except Exception as exc:
+    print("raised:", type(exc).__name__, getattr(exc, "kind", ""), "| request:", seen[-1])
 
 # ---------------------------------------------------------------- R7
 header("R7 Wazuh API token cached forever; expired token (401) is not refreshed")
