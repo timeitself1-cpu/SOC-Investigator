@@ -1,0 +1,26 @@
+{
+  "description": "External password-guessing against the domain admin, ending in a successful logon.",
+  "required_evidence": [
+    "multiple_failed_logons",
+    "successful_logon",
+    "external_source_ip"
+  ],
+  "required_indicators": [
+    "failed_logon",
+    "successful_logon",
+    "external_source"
+  ],
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "expected_attack": [
+    "T1110",
+    "T1078"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "persistence"
+  ],
+  "min_tool_calls": 2
+}

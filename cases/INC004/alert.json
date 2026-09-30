@@ -1,0 +1,7 @@
+{
+  "alert_id": "INC-004",
+  "title": "Multiple authentication failures followed by success",
+  "severity": "high",
+  "event_ref": "INC004-0009",
+  "status": "new"
+}

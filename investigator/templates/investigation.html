@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Investigating {{ alert.alert_id }}{% endblock %}
+{% block mode %}<span class="pill">{{ alert.alert_id }}</span>{% endblock %}
+{% block body %}
+<div class="card">
+  <h2>Investigating {{ alert.alert_id }} — {{ alert.title }}</h2>
+  <div class="small muted">Host <span class="mono">{{ alert.host }}</span> ·
+    severity <span class="badge sev-{{ alert.severity }}">{{ alert.severity }}</span></div>
+</div>
+<div class="card">
+  <h2><span id="spin" class="spinner"></span> &nbsp;Investigation activity</h2>
+  <p class="small muted">Human-readable activity only — the agent's internal reasoning is not shown.</p>
+  <ul class="activity" id="activity" data-run-id="{{ run.run_id }}" aria-live="polite"></ul>
+  <p id="connection" class="small muted" role="status"></p>
+  <div id="done" style="display:none;margin-top:14px">
+    <a class="btn" id="reportlink" href="/report/{{ run.run_id }}">View report →</a>
+    <p id="reportstatus" class="small muted"></p>
+  </div>
+  <div id="failed" style="display:none;margin-top:14px" class="small">
+    <span class="badge sev-high">error</span> <span id="errmsg" class="muted"></span>
+  </div>
+</div>
+<script src="/static/investigation.js" defer></script>
+{% endblock %}

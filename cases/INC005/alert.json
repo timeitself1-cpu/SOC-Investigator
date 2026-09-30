@@ -1,0 +1,7 @@
+{
+  "alert_id": "INC-005",
+  "title": "Powershell with encoded arguments (SCCM host)",
+  "severity": "high",
+  "event_ref": "INC005-0001",
+  "status": "new"
+}

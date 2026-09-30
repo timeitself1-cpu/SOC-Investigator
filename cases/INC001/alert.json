@@ -1,0 +1,7 @@
+{
+  "alert_id": "INC-001",
+  "title": "PowerShell with encoded & hidden window arguments",
+  "severity": "high",
+  "event_ref": "INC001-0002",
+  "status": "new"
+}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Report {{ r.alert.alert_id }}{% endblock %}
+{% block mode %}<span class="pill">{{ r.alert.alert_id }}</span><span class="pill">{{ r.model }}</span>{% endblock %}
+
+{% macro node(n, depth) %}
+{{ "  " * depth }}├─ {{ n.image }}{% if n.evidence_id %} <span class="tag">{{ n.evidence_id }}</span>{% endif %}{% if n.user %} <span class="muted">({{ n.user }})</span>{% endif %}
+{% if n.command_line %}{{ "  " * depth }}   <span class="muted">{{ n.command_line }}</span>
+{% endif %}{% for c in n.children %}{{ node(c, depth+1) }}{% endfor %}{% endmacro %}
+
+{% block body %}
+<div class="notice">{{ r.notice }}</div>
+{% if r.status != "completed" %}
+<div class="notice warning" role="alert">Assessment {{ r.status }}. Evidence gathering or report generation did not finish successfully. Review the limitations and audit trace before making a decision.</div>
+{% endif %}
+{% if run.persistence_error %}
+<div class="notice warning" role="alert">This report could not be saved to disk. Export a copy before closing this session.</div>
+{% endif %}
+
+<div class="card verdict-hero">
+  <span class="big v-{{ r.verdict }}">{{ r.verdict.replace("_"," ") }}</span>
+  <div>
+    <div class="small muted">model confidence · uncalibrated</div>
+    <div class="meter"><span style="width: {{ (r.confidence*100)|round(0,'floor') }}%"></span></div>
+    <div class="small muted">{{ "%.0f"|format(r.confidence*100) }}%</div>
+  </div>
+  <div style="margin-left:auto;text-align:right">
+    <div class="mono small">{{ r.alert.alert_id }} · {{ r.alert.host }}</div>
+    <div class="small muted">{{ r.investigation_id }} · {{ r.backend }} backend</div>
+    <div style="margin-top:8px">
+      <a class="btn ghost" href="/export/{{ run.run_id }}.json">Export JSON</a>
+      <a class="btn ghost" href="/export/{{ run.run_id }}.md">Export Markdown</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Summary</h2>
+  <p>{{ r.summary }}</p>
+  <div class="small muted">Alert: {{ r.alert.title }}</div>
+</div>
+
+{% if not r.validation.valid or r.validation.issues %}
+<div class="card">
+  <h2>Validation notes</h2>
+  <p class="small muted">Every finding below references evidence that was actually retrieved. The following adjustments were made by the application when validating the model's draft:</p>
+  <ul class="small">{% for i in r.validation.issues %}<li>{{ i }}</li>{% endfor %}</ul>
+</div>
+{% else %}
+<div class="card small"><span class="badge sev-low">checks passed</span> Evidence references and structured claim prerequisites passed automated checks. Narrative, verdict and ATT&CK hypotheses still require analyst review.</div>
+{% endif %}
+
+{% if r.process_tree %}
+<div class="card">
+  <h2>Process tree</h2>
+  <div class="tree">{% for root in r.process_tree %}{{ node(root, 0) }}{% endfor %}</div>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Findings ({{ r.findings|length }})</h2>
+  {% if not r.findings %}<p class="muted small">No evidence-supported findings.</p>{% endif %}
+  {% for f in r.findings %}
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div><span class="mono small muted">{{ f.finding_id }}</span>
+        <strong>{{ f.title }}</strong>
+        <span class="badge sev-{{ f.severity }}">{{ f.severity }}</span></div>
+      <p style="margin:6px 0">{{ f.description }}</p>
+      <div class="small">
+        {% for e in f.evidence_ids %}<a class="tag" href="#{{ e }}">{{ e }}</a>{% endfor %}
+        {% for c in f.claims %}<span class="tag" style="color:var(--accent)">{{ c }}</span>{% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if r.attack_techniques %}
+<div class="card">
+  <h2>MITRE ATT&CK</h2>
+  <table>
+    <thead><tr><th>Technique</th><th>Name</th><th>Tactic</th><th>Findings</th><th>Evidence</th></tr></thead>
+    <tbody>
+    {% for m in r.attack_techniques %}
+      <tr class="attackrow">
+        <td class="mono">{{ m.technique_id }}</td><td>{{ m.name }}</td>
+        <td class="small muted">{{ m.tactic }}</td>
+        <td class="small">{{ m.finding_ids|join(", ") }}</td>
+        <td class="small">{% for e in m.evidence_ids %}<span class="tag">{{ e }}</span>{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="grid2">
+  <div class="card">
+    <h2>Recommended actions <span class="small muted">(not executed)</span></h2>
+    {% if not r.recommended_actions %}<p class="muted small">None.</p>{% endif %}
+    <ul class="small">
+    {% for a in r.recommended_actions %}
+      <li><span class="badge sev-{{ 'high' if a.priority=='high' else ('medium' if a.priority=='medium' else 'low') }}">{{ a.priority }}</span>
+        {{ a.action }} — <span class="muted">{{ a.rationale }}</span></li>
+    {% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Limitations</h2>
+    <ul class="small muted">{% for l in r.limitations %}<li>{{ l }}</li>{% endfor %}</ul>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Timeline <span class="small muted">UTC</span></h2>
+  <ul class="timeline">
+  {% for t in r.timeline %}
+    <li class="{{ 'cited' if t.cited else '' }}">
+      <span class="mono small muted">{{ t.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</span>
+      <span class="tag">{{ t.evidence_id }}</span> {{ t.description }}
+      {% if t.cited %}<span class="tag" style="color:var(--accent)">cited</span>{% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Evidence ({{ r.evidence|length }})</h2>
+  <p class="small muted">Each item was retrieved by a recorded tool call. Expand to inspect the source reference.</p>
+  {% for e in r.evidence %}
+    <details id="{{ e.evidence_id }}">
+      <summary><span class="mono">{{ e.evidence_id }}</span> · {{ e.category }} ·
+        {{ e.description }}
+        {% if e.injection_suspected %}<span class="inj"> ⚠ possible-injection</span>{% endif %}</summary>
+      <div class="kv">
+        <div><span class="k">source</span><span>{{ e.source }} ({{ e.backend }})</span></div>
+        <div><span class="k">source ref</span><span class="mono">{{ e.source_ref }}</span></div>
+        <div><span class="k">host / time</span><span>{{ e.host }} · {{ e.timestamp.isoformat() }}</span></div>
+        {% if e.event_id %}<div><span class="k">event id</span><span>{{ e.event_id }}</span></div>{% endif %}
+        {% for k, v in e.attributes.items() %}
+          <div><span class="k">{{ k }}</span><span class="mono">{{ v }}</span></div>
+        {% endfor %}
+        {% if e.indicators %}<div><span class="k">indicators</span><span>{% for i in e.indicators %}<span class="tag">{{ i }}</span>{% endfor %}</span></div>{% endif %}
+        <div><span class="k">retrieved by</span><span class="mono">{{ e.retrieved_by }}</span></div>
+      </div>
+    </details>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2>Audit trace</h2>
+  <div class="small muted">{{ r.trace.tool_calls|length }} tool call(s), {{ r.trace.llm_exchanges|length }} model exchange(s), {{ r.trace.steps_used }} step(s).</div>
+  {% if r.trace.errors %}<ul class="small">{% for error in r.trace.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+  <table style="margin-top:10px">
+    <thead><tr><th>#</th><th>Tool</th><th>Status</th><th>Summary</th><th>Evidence</th></tr></thead>
+    <tbody>
+    {% for c in r.trace.tool_calls %}
+      <tr>
+        <td class="mono small">{{ c.step }}</td>
+        <td class="mono small">{{ c.tool }}</td>
+        <td class="small"><span class="badge sev-{{ 'low' if c.status=='ok' else 'high' }}">{{ c.status }}</span></td>
+        <td class="small">{{ c.summary }}{% if c.error %} <span class="muted">— {{ c.error }}</span>{% endif %}</td>
+        <td class="small">{% for e in c.evidence_ids %}<span class="tag">{{ e }}</span>{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p class="small"><a href="/">← back to queue</a></p>
+{% endblock %}

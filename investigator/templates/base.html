@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SOC Investigation Agent{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header>
+  <span class="spinner" style="animation:none;border-top-color:var(--accent);border-color:var(--accent) var(--border) var(--border)"></span>
+  <h1><a href="/" style="color:inherit">SOC Investigation Agent</a></h1>
+  <span class="mode">
+    {% block mode %}{% endblock %}
+  </span>
+</header>
+<div class="wrap">
+{% block body %}{% endblock %}
+</div>
+</body>
+</html>

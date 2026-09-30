@@ -1,0 +1,11 @@
+[
+  {
+    "host": "HR-WKS-002",
+    "os": "Windows 11 23H2",
+    "ip": "10.20.5.22",
+    "role": "HR workstation",
+    "owner": "CORP\\mgarcia",
+    "criticality": "high",
+    "agent_status": "active"
+  }
+]

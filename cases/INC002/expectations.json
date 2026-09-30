@@ -1,0 +1,24 @@
+{
+  "description": "comsvcs.dll MiniDump of LSASS \u2014 classic credential dumping.",
+  "required_evidence": [
+    "lsass_access",
+    "dump_file",
+    "rundll32_execution"
+  ],
+  "required_indicators": [
+    "lsass_target",
+    "memory_dump_file"
+  ],
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "expected_attack": [
+    "T1003.001"
+  ],
+  "forbidden_claims": [
+    "lateral_movement",
+    "data_exfiltration"
+  ],
+  "min_tool_calls": 3
+}

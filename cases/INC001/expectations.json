@@ -1,0 +1,29 @@
+{
+  "description": "Malicious-document style execution: Office spawns encoded PowerShell that beacons out.",
+  "required_evidence": [
+    "powershell_execution",
+    "winword_parent",
+    "encoded_command",
+    "outbound_connection"
+  ],
+  "required_indicators": [
+    "powershell",
+    "encoded_command",
+    "office_parent",
+    "external_destination"
+  ],
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "expected_attack": [
+    "T1059.001",
+    "T1027"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "lateral_movement",
+    "persistence"
+  ],
+  "min_tool_calls": 3
+}

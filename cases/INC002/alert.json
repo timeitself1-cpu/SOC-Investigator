@@ -1,0 +1,7 @@
+{
+  "alert_id": "INC-002",
+  "title": "Possible LSASS memory access (credential dumping)",
+  "severity": "critical",
+  "event_ref": "INC002-0003",
+  "status": "new"
+}

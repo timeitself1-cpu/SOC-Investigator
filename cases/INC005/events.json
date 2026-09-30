@@ -1,0 +1,94 @@
+[
+  {
+    "id": "INC005-0001",
+    "timestamp": "2026-09-29T11:00:00.000Z",
+    "agent": {
+      "id": "001",
+      "name": "IT-ADMIN-01",
+      "ip": "10.20.5.11"
+    },
+    "rule": {
+      "id": "92052",
+      "level": 12,
+      "description": "Powershell with encoded arguments"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "IT-ADMIN-01"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -NonInteractive -ExecutionPolicy Bypass -EncodedCommand RwBlAHQALQBDAGkAbQBJAG4AcwB0AGEAbgBjAGUAIABXAGkAbgAzADIAXwBPAHAAZQByAGEAdABpAG4AZwBTAHkAcwB0AGUAbQAgAHwAIABTAGUAbABlAGMAdAAtAE8AYgBqAGUAYwB0ACAAQwBhAHAAdABpAG8AbgAsAFYAZQByAHMAaQBvAG4AIAB8ACAAQwBvAG4AdgBlAHIAdABUAG8ALQBKAHMAbwBuAA==",
+          "processGuid": "{dddd5555-0000-0000-0005-000000000001}",
+          "processId": "8100",
+          "parentImage": "C:\\Program Files\\Microsoft Configuration Manager\\bin\\x64\\AgentExecutor.exe",
+          "parentCommandLine": "AgentExecutor.exe -powershell ...",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC005-0002",
+    "timestamp": "2026-09-29T11:00:02.000Z",
+    "agent": {
+      "id": "001",
+      "name": "IT-ADMIN-01",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "IT-ADMIN-01"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{dddd5555-0000-0000-0005-000000000001}",
+          "processId": "8100",
+          "destinationIp": "10.20.5.40",
+          "destinationPort": "443",
+          "destinationHostname": "sccm.corp.local",
+          "protocol": "tcp",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC005-0003",
+    "timestamp": "2026-09-29T11:00:05.000Z",
+    "agent": {
+      "id": "001",
+      "name": "IT-ADMIN-01",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "IT-ADMIN-01"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\wbem\\WMIC.exe",
+          "commandLine": "wmic os get caption",
+          "processGuid": "{dddd5555-0000-0000-0005-000000000002}",
+          "processId": "8140",
+          "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "parentProcessGuid": "{dddd5555-0000-0000-0005-000000000001}",
+          "user": "NT AUTHORITY\\SYSTEM"
+        }
+      }
+    }
+  }
+]

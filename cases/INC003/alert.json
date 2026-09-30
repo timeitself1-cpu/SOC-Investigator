@@ -1,0 +1,7 @@
+{
+  "alert_id": "INC-003",
+  "title": "Scheduled task created for logon persistence",
+  "severity": "high",
+  "event_ref": "INC003-0003",
+  "status": "new"
+}

@@ -1,0 +1,25 @@
+{
+  "description": "Downloaded payload persisted via a scheduled task and a Run key.",
+  "required_evidence": [
+    "scheduled_task_creation",
+    "run_key_modification"
+  ],
+  "required_indicators": [
+    "scheduled_task",
+    "run_key",
+    "user_writable_path"
+  ],
+  "acceptable_verdicts": [
+    "suspicious",
+    "likely_malicious"
+  ],
+  "expected_attack": [
+    "T1053.005",
+    "T1547.001"
+  ],
+  "forbidden_claims": [
+    "credential_theft",
+    "lateral_movement"
+  ],
+  "min_tool_calls": 3
+}

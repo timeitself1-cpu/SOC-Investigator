@@ -1,0 +1,10 @@
+[
+  {
+    "host": "DC-01",
+    "os": "Windows Server 2022",
+    "ip": "10.20.5.5",
+    "role": "Domain Controller",
+    "criticality": "critical",
+    "agent_status": "active"
+  }
+]

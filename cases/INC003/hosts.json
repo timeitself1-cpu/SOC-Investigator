@@ -1,0 +1,11 @@
+[
+  {
+    "host": "ENG-WKS-030",
+    "os": "Windows 11 23H2",
+    "ip": "10.20.6.30",
+    "role": "Engineering workstation",
+    "owner": "CORP\\dlee",
+    "criticality": "medium",
+    "agent_status": "active"
+  }
+]

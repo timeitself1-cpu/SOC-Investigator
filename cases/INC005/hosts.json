@@ -1,0 +1,12 @@
+[
+  {
+    "host": "IT-ADMIN-01",
+    "os": "Windows 11 23H2",
+    "ip": "10.20.5.40",
+    "role": "IT admin / SCCM-managed",
+    "owner": "CORP\\it-admin",
+    "criticality": "medium",
+    "agent_status": "active",
+    "notes": "Managed by SCCM; runs scheduled inventory scripts as SYSTEM."
+  }
+]

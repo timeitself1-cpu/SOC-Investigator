@@ -1,0 +1,11 @@
+[
+  {
+    "host": "FIN-WKS-014",
+    "os": "Windows 11 23H2",
+    "ip": "10.20.5.11",
+    "role": "Finance workstation",
+    "owner": "CORP\\jhopkins",
+    "criticality": "medium",
+    "agent_status": "active"
+  }
+]

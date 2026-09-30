@@ -1,0 +1,29 @@
+{
+  "description": "Legitimate SCCM inventory run. Encoded PowerShell, but SYSTEM, management-agent parent, internal destination.",
+  "required_evidence": [
+    "powershell_execution",
+    "encoded_command",
+    "internal_connection"
+  ],
+  "required_indicators": [
+    "powershell",
+    "encoded_command",
+    "management_agent_parent",
+    "internal_destination"
+  ],
+  "acceptable_verdicts": [
+    "benign",
+    "suspicious",
+    "insufficient_evidence"
+  ],
+  "expected_attack": [],
+  "forbidden_claims": [
+    "credential_theft",
+    "command_and_control",
+    "persistence",
+    "office_child_process",
+    "payload_download"
+  ],
+  "min_tool_calls": 3,
+  "notes": "Guards against 'PowerShell + encoded == malicious'. Should NOT be likely_malicious."
+}

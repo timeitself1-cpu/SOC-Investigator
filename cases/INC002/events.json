@@ -1,0 +1,118 @@
+[
+  {
+    "id": "INC002-0001",
+    "timestamp": "2026-09-29T09:15:00.000Z",
+    "agent": {
+      "id": "001",
+      "name": "HR-WKS-002",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "HR-WKS-002"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\cmd.exe",
+          "commandLine": "cmd.exe /c rundll32 C:\\Windows\\System32\\comsvcs.dll, MiniDump 700 C:\\Users\\Public\\lsass.dmp full",
+          "processGuid": "{bbbb2222-0000-0000-0002-000000000001}",
+          "processId": "4102",
+          "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "user": "CORP\\svc-backup"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC002-0002",
+    "timestamp": "2026-09-29T09:15:01.000Z",
+    "agent": {
+      "id": "001",
+      "name": "HR-WKS-002",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "1",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "HR-WKS-002"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\rundll32.exe",
+          "commandLine": "rundll32 C:\\Windows\\System32\\comsvcs.dll, MiniDump 700 C:\\Users\\Public\\lsass.dmp full",
+          "processGuid": "{bbbb2222-0000-0000-0002-000000000002}",
+          "processId": "4180",
+          "parentImage": "C:\\Windows\\System32\\cmd.exe",
+          "parentProcessGuid": "{bbbb2222-0000-0000-0002-000000000001}",
+          "user": "CORP\\svc-backup"
+        }
+      }
+    }
+  },
+  {
+    "id": "INC002-0003",
+    "timestamp": "2026-09-29T09:15:01.500Z",
+    "agent": {
+      "id": "001",
+      "name": "HR-WKS-002",
+      "ip": "10.20.5.11"
+    },
+    "rule": {
+      "id": "92034",
+      "level": 12,
+      "description": "Possible LSASS memory access (credential dumping)"
+    },
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "10",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "HR-WKS-002"
+        },
+        "eventdata": {
+          "sourceImage": "C:\\Windows\\System32\\rundll32.exe",
+          "sourceProcessGUID": "{bbbb2222-0000-0000-0002-000000000002}",
+          "sourceProcessId": "4180",
+          "targetImage": "C:\\Windows\\System32\\lsass.exe",
+          "grantedAccess": "0x1fffff",
+          "sourceUser": "CORP\\svc-backup",
+          "callTrace": "C:\\Windows\\System32\\comsvcs.dll+..."
+        }
+      }
+    }
+  },
+  {
+    "id": "INC002-0004",
+    "timestamp": "2026-09-29T09:15:02.200Z",
+    "agent": {
+      "id": "001",
+      "name": "HR-WKS-002",
+      "ip": "10.20.5.11"
+    },
+    "rule": {},
+    "data": {
+      "win": {
+        "system": {
+          "providerName": "Microsoft-Windows-Sysmon",
+          "eventID": "11",
+          "channel": "Microsoft-Windows-Sysmon/Operational",
+          "computer": "HR-WKS-002"
+        },
+        "eventdata": {
+          "image": "C:\\Windows\\System32\\rundll32.exe",
+          "processGuid": "{bbbb2222-0000-0000-0002-000000000002}",
+          "targetFilename": "C:\\Users\\Public\\lsass.dmp",
+          "user": "CORP\\svc-backup"
+        }
+      }
+    }
+  }
+]

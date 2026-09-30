@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Incident Queue{% endblock %}
+{% block mode %}
+  <span class="pill">model: {{ model_name }}</span>
+  <span class="pill">backend: {{ settings.backend }}</span>
+{% endblock %}
+{% block body %}
+<div class="notice">Recommendations only — this tool is read-only and never executes response actions.</div>
+<div class="card">
+  <h2>Incident Queue</h2>
+  <table>
+    <thead><tr><th>Incident</th><th>Time (UTC)</th><th>Host</th><th>Alert</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      {% set a = row.alert %}
+      <tr>
+        <td class="mono">{{ a.alert_id }}</td>
+        <td class="small muted">{{ a.timestamp.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td class="mono">{{ a.host }}</td>
+        <td>{{ a.title }}</td>
+        <td><span class="badge sev-{{ a.severity }}">{{ a.severity }}</span></td>
+        <td class="small">
+          {% if row.run and row.run.status == "completed" and row.run.report %}
+            <span class="badge v-{{ row.run.report.verdict }}">{{ row.run.report.verdict }}</span>
+            {% if row.run.report.status != "completed" %}<span class="badge sev-medium">{{ row.run.report.status }}</span>{% endif %}
+          {% elif row.run and row.run.status == "running" %}
+            <span class="muted">investigating…</span>
+          {% elif row.run and row.run.status == "error" %}
+            <a href="/run/{{ row.run.run_id }}" class="badge sev-high">failed · details</a>
+          {% else %}
+            <span class="muted">{{ a.status }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if row.run and row.run.status == "completed" %}
+            <a class="btn ghost" href="/report/{{ row.run.run_id }}">View report</a>
+          {% elif row.run and row.run.status == "running" %}
+            <a class="btn ghost" href="/run/{{ row.run.run_id }}">Watch</a>
+          {% else %}
+            <form method="post" action="/investigate/{{ a.alert_id | urlencode }}" style="display:inline">
+              <button class="btn" type="submit">Investigate</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No alerts were returned for the configured source and time window.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="small muted">
+  Three modes: <code>mock + fixture</code> (deterministic demo/tests),
+  <code>ollama + fixture</code> (real local agent), <code>ollama + wazuh</code> (live lab).
+  Set them with <code>SOCI_LLM</code> and <code>SOCI_BACKEND</code>.
+</p>
+{% endblock %}
