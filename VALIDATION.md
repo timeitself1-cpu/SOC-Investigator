@@ -3,7 +3,7 @@
 Same environment as v0.3.0 below: Linux x86-64, CPython 3.12.3 pinned venv, Node 22,
 Chromium; Qwen2.5 tokenizer from npm `@lenml/tokenizer-qwen2_5`. **No Ollama, no
 Windows host.** Raw outputs: [`docs/validation/v0.3.1/`](docs/validation/v0.3.1/).
-Every row except 13 and 14 is reproduced by `docs/validation/v0.3.1/run_validation.sh`.
+Rows 1–12 are reproduced by `docs/validation/v0.3.1/run_validation.sh`.
 Summary: [V0.3.1_RELEASE_NOTES.md](V0.3.1_RELEASE_NOTES.md).
 
 | # | Command | Result | Output file |
@@ -22,6 +22,8 @@ Summary: [V0.3.1_RELEASE_NOTES.md](V0.3.1_RELEASE_NOTES.md).
 | 12 | mutation sets v0.2.1 / v0.3 / v0.3.1 | 11/11, 10/10, 11/11 killed (C4 and C10 survived the first v0.3.1 run; tests added) | `mutation_*.txt` |
 | 13 | `scripted_replay.py` (observed qwen behaviour, scripted) | ignore-feedback model contained (0/7, no false benign); feedback-following model 7/7 | `scripted_replay.txt` |
 | 14 | visibility defect impact, v0.3 vs v0.3.1 at 8192 | v0.3: BM-B01, BM-B05 benign with tree records unseen; v0.3.1: none; adversary benign FP 0 in both | `visibility_defect_impact.txt`, `visibility_defect_counts.txt` |
+| 15 | `SOCI_TOKENIZER_JSON=<qwen2.5> pytest tests/test_integrity_v021.py tests/test_windows_backend.py tests/test_v03_requirements.py tests/test_reasoning_contract.py` | 131 passed, 0 skipped | `pytest_real_tokenizer.txt` |
+| 16 | zip extracted → fresh Python 3.12 venv → pytest + acceptance; wheel → fresh venv → unrelated dir → evaluate/acceptance/sources | 354 passed, 5 skipped (tokenizer, playwright); 0.3.1 installs and runs (first attempt used Python 3.11 and was refused; recorded) | `packaging_check.txt` |
 
 **NOT VERIFIED:** v0.3.1 with a real model. `run_ollama_eval.sh` / `.ps1` have not been
 run; see `ollama_before_after.md`. Live Windows reader and RW-01…RW-05, Windows channel

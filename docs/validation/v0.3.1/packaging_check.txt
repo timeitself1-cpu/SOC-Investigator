@@ -1,0 +1,15 @@
+# wheel soc_investigator-0.3.1-py3-none-any.whl in a fresh Python 3.12 venv, run from an unrelated directory
+installed 0.3.1 0.3.1
+  PASS  INC-005   verdict=benign               recall=1.0 tools=8 findings=3
+ALL CRITERIA PASSED
+Telemetry sources on DESKTOP-RW01 (reader: recorded-eventlog; elevated: yes)
+  ✓ Sysmon               active         
+  ✓ Windows Security     active         
+# extracted zip: fresh 3.12 venv, requirements-validated.txt + -e .[dev]
+354 passed, 5 skipped (4 need SOCI_TOKENIZER_JSON, 1 needs playwright), 19 deselected; acceptance ALL CRITERIA PASSED
+
+# First attempt (kept for the record): the fresh venv was created with the container's
+# default python3 (3.11.15). `pip install -e .` and `pip wheel` refused with
+# "requires a different Python: 3.11.15 not in '>=3.12'". pytest still ran because the
+# package was imported from the source tree in the working directory, so that run proved
+# nothing about installation. Repeated above with Python 3.12.3.
