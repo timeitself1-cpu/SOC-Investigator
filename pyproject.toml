@@ -1,6 +1,6 @@
 [project]
 name = "soc-investigator"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local-first AI SOC Investigation Agent — alert to evidence-grounded, auditable investigation."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -27,7 +27,8 @@ build-backend = "setuptools.build_meta"
 packages = ["investigator", "investigator.llm", "investigator.backends", "investigator.evaluation"]
 
 [tool.setuptools.package-data]
-investigator = ["templates/*.html", "static/*.css", "static/*.js"]
+investigator = ["templates/*.html", "static/*.css", "static/*.js", "cases/*/*.json", "cases/*.md",
+                "benchmarks/*/*/*.json", "benchmarks/*/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

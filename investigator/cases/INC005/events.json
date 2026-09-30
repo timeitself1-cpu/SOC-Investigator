@@ -26,6 +26,7 @@
           "processGuid": "{dddd5555-0000-0000-0005-000000000001}",
           "processId": "8100",
           "parentImage": "C:\\Program Files\\Microsoft Configuration Manager\\bin\\x64\\AgentExecutor.exe",
+          "parentProcessGuid": "{dddd5555-0000-0000-0005-0000000000e0}",
           "parentCommandLine": "AgentExecutor.exe -powershell ...",
           "user": "NT AUTHORITY\\SYSTEM"
         }

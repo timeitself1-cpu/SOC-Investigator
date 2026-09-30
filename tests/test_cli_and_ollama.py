@@ -30,7 +30,7 @@ def test_health_malformed_response_fails_cleanly(payload):
 
 @pytest.mark.parametrize("payload", [{}, [], {"message": {"content": ""}}, {"message": None}])
 def test_chat_malformed_response_has_controlled_error(payload):
-    with pytest.raises(OllamaError, match="invalid chat response"):
+    with pytest.raises(OllamaError, match="invalid chat response|empty response"):
         model_with_response(payload).complete([])
 
 

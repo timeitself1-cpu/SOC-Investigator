@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import ipaddress
+import json
 import re
 import threading
 from typing import Any
@@ -41,8 +43,18 @@ INJECTION_PATTERNS = [
 
 OFFICE_IMAGES = {"winword.exe", "excel.exe", "powerpnt.exe", "outlook.exe", "msaccess.exe", "mspub.exe"}
 POWERSHELL_IMAGES = {"powershell.exe", "pwsh.exe", "powershell_ise.exe"}
-# Heuristic list of software-management agents that legitimately launch scripts.
+# Software-management agents that legitimately launch scripts. A name match alone
+# is trivially spoofable (copy any binary to C:\\Users\\Public\\AgentExecutor.exe),
+# so the full parent path must also sit under one of the vendor install
+# directories. Neither check proves the binary is genuine (no signer data in this
+# schema) — the resulting hypothesis still requires analyst verification.
 MANAGEMENT_AGENT_IMAGES = {"agentexecutor.exe", "ccmexec.exe", "intunemanagementextension.exe"}
+MANAGEMENT_AGENT_DIRS = (
+    "c:\\program files\\microsoft configuration manager\\",
+    "c:\\windows\\ccm\\",
+    "c:\\program files (x86)\\microsoft intune management extension\\",
+    "c:\\program files\\microsoft intune management extension\\",
+)
 USER_WRITABLE_MARKERS = ("\\appdata\\", "\\users\\public\\", "\\windows\\temp\\", "\\downloads\\", "\\temp\\")
 _ENCODED_ARG = re.compile(r"(?:^|\s)-(?:e|ec|enc|enco|encod|encode|encoded|encodedc\w*)\s+([A-Za-z0-9+/=]{16,})", re.IGNORECASE)
 
@@ -67,7 +79,21 @@ def looks_like_injection(text: str) -> bool:
 def basename(path: str | None) -> str:
     if not path:
         return ""
-    return re.split(r"[\\/]", path)[-1].lower()
+    return re.split(r"[\\/]", path.strip().strip('"').strip())[-1].lower()
+
+
+def _normalized_path(path: str | None) -> str:
+    return (path or "").strip().strip('"').replace("/", "\\").lower()
+
+
+def management_parent_status(parent_image: str | None) -> str | None:
+    """'trusted_path' | 'unexpected_path' | None (not a management-agent name)."""
+    if basename(parent_image) not in MANAGEMENT_AGENT_IMAGES:
+        return None
+    full = _normalized_path(parent_image)
+    if ".." in full:
+        return "unexpected_path"
+    return "trusted_path" if full.startswith(MANAGEMENT_AGENT_DIRS) else "unexpected_path"
 
 
 def is_public_ip(ip: str | None) -> bool | None:
@@ -110,8 +136,14 @@ def derive_indicators(ev: NormalizedEvent) -> list[str]:
         tags.append("encoded_command")
     if ev.category == "process" and parent in OFFICE_IMAGES:
         tags.append("office_parent")
-    if ev.category == "process" and parent in MANAGEMENT_AGENT_IMAGES:
-        tags.append("management_agent_parent")
+    if ev.category == "process":
+        mgmt = management_parent_status(ev.parent_image)
+        if mgmt == "trusted_path":
+            tags.append("management_agent_parent")
+        elif mgmt == "unexpected_path":
+            # A management-agent name outside its install directory is a
+            # masquerading signal, not administrative context.
+            tags.append("masquerade_suspect")
     if ev.category == "process_access" and basename(ev.target_image) == "lsass.exe":
         tags.append("lsass_target")
     if ev.category == "network":
@@ -180,13 +212,17 @@ def describe_event(ev: NormalizedEvent) -> str:
     return ev.rule_description or f"Event {ev.event_id} from {ev.source}"
 
 
-def _bounded_raw(raw: dict[str, Any]) -> dict[str, Any]:
-    import json
+def raw_digest(raw: dict[str, Any]) -> str:
+    """SHA-256 of the canonical JSON of the record exactly as received."""
+    canonical = json.dumps(raw, default=str, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
+
+def _bounded_raw(raw: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     text = json.dumps(raw, default=str)
     if len(text) <= MAX_RAW_CHARS:
-        return raw
-    return {"_truncated": True, "preview": text[:MAX_RAW_CHARS]}
+        return raw, False
+    return {"_truncated": True, "preview": text[:MAX_RAW_CHARS]}, True
 
 
 _ATTR_FIELDS = (
@@ -205,7 +241,17 @@ class EvidenceStore:
         self.max_items = max_items
         self._items: dict[str, Evidence] = {}
         self._by_ref: dict[tuple[str, str, str], str] = {}
+        # Application-owned role markers. Never derived from telemetry content.
+        self._trigger_ids: set[str] = set()
         self._lock = threading.Lock()
+
+    def mark_trigger(self, evidence_id: str) -> None:
+        with self._lock:
+            if evidence_id in self._items:
+                self._trigger_ids.add(evidence_id)
+
+    def trigger_ids(self) -> set[str]:
+        return set(self._trigger_ids)
 
     def __contains__(self, evidence_id: object) -> bool:
         return evidence_id in self._items
@@ -231,17 +277,23 @@ class EvidenceStore:
             ref_key = (ev.source, ev.host, ev.event_ref)
             existing = self._by_ref.get(ref_key)
             if existing:
-                return self._items[existing]
+                item = self._items[existing]
+                if retrieved_by not in item.retrieved_by_calls:
+                    item.retrieved_by_calls.append(retrieved_by)
+                return item
             if self.full():
                 return None
             evidence_id = f"EV-{len(self._items) + 1:04d}"
             attrs: dict[str, str] = {}
+            truncated_fields: list[str] = []
             for name in _ATTR_FIELDS:
                 val = getattr(ev, name)
                 if val is None:
                     continue
                 limit = MAX_COMMAND_CHARS if name in ("command_line", "parent_command_line", "task_content") else MAX_FIELD_CHARS
                 attrs[name] = sanitize_text(val, limit)
+                if len(str(val)) > limit:
+                    truncated_fields.append(name)
             decoded = decode_encoded_command(ev.command_line) if basename(ev.image) in POWERSHELL_IMAGES else None
             if decoded:
                 attrs["decoded_command"] = decoded
@@ -255,6 +307,7 @@ class EvidenceStore:
                                 (ev.host, ev.source, ev.event_ref, ev.process_guid, ev.parent_process_guid)))
             if injection:
                 indicators = sorted(set(indicators) | {"possible_prompt_injection"})
+            bounded_raw, raw_truncated = _bounded_raw(ev.raw)
             item = Evidence(
                 evidence_id=evidence_id,
                 timestamp=ev.timestamp,
@@ -271,7 +324,11 @@ class EvidenceStore:
                 indicators=indicators,
                 injection_suspected=injection,
                 retrieved_by=retrieved_by,
-                raw=_bounded_raw(ev.raw),
+                retrieved_by_calls=[retrieved_by],
+                raw=bounded_raw,
+                raw_sha256=raw_digest(ev.raw),
+                raw_truncated=raw_truncated,
+                truncated_fields=truncated_fields,
             )
             self._items[evidence_id] = item
             self._by_ref[ref_key] = evidence_id

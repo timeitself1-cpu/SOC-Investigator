@@ -33,6 +33,19 @@ class LoopingModel:
             # produce a minimal valid report when asked
             return LLMResponse(text='{"verdict":"insufficient_evidence","confidence":0.2,"summary":"x",'
                                     '"findings":[],"recommended_actions":[],"limitations":[]}', model=self.name)
+        # Distinct arguments each time, so the step budget (not duplicate
+        # suppression) is what bounds this loop.
+        return LLMResponse(text='{"action":"call_tool","tool":"search_events","arguments":{"window_minutes":%d},'
+                                '"purpose":"loop"}' % self.calls, model=self.name)
+
+
+class RepeatingModel(LoopingModel):
+    """Repeats one identical request forever."""
+
+    def complete(self, messages, *, temperature=None):
+        if "final_report" in messages[-1]["content"]:
+            return super().complete(messages, temperature=temperature)
+        self.calls += 1
         return LLMResponse(text='{"action":"call_tool","tool":"get_host_context","arguments":{},"purpose":"loop"}',
                            model=self.name)
 
@@ -83,6 +96,24 @@ def test_loop_is_bounded(backend):
     # tool calls from the loop cannot exceed max_steps (+ the system seed call)
     loop_calls = [c for c in report.trace.tool_calls if c.initiator == "model"]
     assert len(loop_calls) <= settings.max_steps
+
+
+def test_identical_requests_are_not_rerun_and_stop_the_loop(backend):
+    settings = load_settings(llm="mock", backend="fixture", max_steps=12)
+    agent = InvestigationAgent(backend, RepeatingModel(), settings)
+    calls = []
+    original = backend.get_host_context
+    backend.get_host_context = lambda host: calls.append(host) or original(host)
+    try:
+        report = agent.investigate(backend.get_alert("INC-001"))
+    finally:
+        backend.get_host_context = original
+    assert len(calls) == 1  # backend queried once; repeats answered from the audit record
+    statuses = [c.status for c in report.trace.tool_calls if c.initiator == "model"]
+    assert statuses == ["ok", "duplicate", "duplicate", "duplicate"]
+    assert report.status == "incomplete"
+    assert any("consecutive duplicate" in e for e in report.trace.errors)
+    assert report.coverage.duplicates == 3
 
 
 def test_injected_telemetry_is_flagged_and_not_obeyed(backend):

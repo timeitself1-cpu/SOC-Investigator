@@ -40,7 +40,7 @@ def test_duplicate_requests_are_admitted_once_under_concurrency(service, monkeyp
     started = threading.Event()
     calls = []
 
-    def investigate(alert, activity_hook):
+    def investigate(alert, activity_hook, **kwargs):
         calls.append(alert.alert_id)
         started.set()
         assert release.wait(5)
@@ -62,9 +62,9 @@ def test_capacity_is_released_after_investigation_error(service, monkeypatch):
     release = threading.Event()
     service.settings.max_concurrent_runs = 1
 
-    def fail(alert, activity_hook):
+    def fail(alert, activity_hook, **kwargs):
         assert release.wait(5)
-        raise RuntimeError("backend unavailable")
+        raise RuntimeError("backend unavailable: Authorization: Basic c2VjcmV0")
 
     monkeypatch.setattr(service.agent, "investigate", fail)
     try:
@@ -76,7 +76,10 @@ def test_capacity_is_released_after_investigation_error(service, monkeypatch):
     snap = wait_finished(service, run)
     assert snap["status"] == "error"
     assert not snap["has_report"]
-    assert "backend unavailable" in snap["error"]
+    # The failure is visible and classified; raw exception text (which can carry
+    # backend bodies or credentials) is not propagated to the UI.
+    assert snap["error"].startswith("Investigation failed (internal)")
+    assert "Basic" not in snap["error"] and "backend unavailable" not in snap["error"]
     monkeypatch.setattr(service.agent, "investigate", lambda alert, **kwargs: report_for(alert))
     assert wait_finished(service, service.start("INC-002"))["status"] == "completed"
 
@@ -119,8 +122,9 @@ def test_persistence_uses_no_telemetry_ids_in_filename(service, monkeypatch, tmp
     assert snap["status"] == "completed"
     expected = service.settings.reports_dir / f"{run.run_id}.json"
     assert expected.is_file()
-    assert list(tmp_path.rglob("*.json")) == [expected]
-    assert not list(service.settings.reports_dir.glob("*.tmp"))
+    journal = service.settings.reports_dir / "runs" / f"{run.run_id}.json"
+    assert sorted(tmp_path.rglob("*.json")) == sorted([expected, journal])
+    assert not list(service.settings.reports_dir.rglob("*.part"))
 
 
 def test_disk_failure_keeps_report_and_exposes_warning(service, monkeypatch):
@@ -147,7 +151,8 @@ def test_atomic_write_failure_cleans_temporary_file(service, monkeypatch):
     snap = wait_finished(service, run)
     assert snap["status"] == "completed"
     assert snap["persistence_error"]
-    assert list(service.settings.reports_dir.iterdir()) == []
+    # Neither the report nor the run journal was published, and no temporary file remains.
+    assert [p for p in service.settings.reports_dir.rglob("*") if p.is_file()] == []
 
 
 def test_status_is_published_only_after_persistence_finishes(service, monkeypatch):

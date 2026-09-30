@@ -80,3 +80,22 @@ details:target{outline:2px solid var(--accent);scroll-margin-top:85px}
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:760px){header{flex-wrap:wrap;padding:12px}.wrap{padding:12px}header .mode{margin-left:0}.kv div{flex-wrap:wrap}table{min-width:720px}}
 @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+
+/* --- coverage, facts, filters (v0.2) --- */
+.jump a{margin:0 2px}
+.facts li{margin:3px 0}
+.narrative{white-space:pre-wrap}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px}
+.filters input[type=search],.filters select{background:var(--panel2);color:var(--fg);border:1px solid var(--border);
+  border-radius:6px;padding:4px 8px}
+details.evidence[hidden]{display:none}
+.out-complete{background:rgba(63,185,80,.12);color:var(--ok);border-color:#1f4a26}
+.out-empty{background:var(--panel2);color:var(--muted)}
+.out-partial,.out-duplicate{background:rgba(210,153,34,.12);color:var(--warn);border-color:#5c4a1a}
+.out-truncated,.out-rejected{background:rgba(210,153,34,.16);color:var(--warn);border-color:#5c4a1a}
+.out-failed{background:rgba(248,81,73,.14);color:var(--bad);border-color:#5c2422}
+.run-completed{background:rgba(63,185,80,.12);color:var(--ok)}
+.run-running{background:var(--panel2);color:var(--accent)}
+.run-error,.run-interrupted{background:rgba(248,81,73,.14);color:var(--bad)}
+.run-cancelled{background:rgba(210,153,34,.14);color:var(--warn)}
+h3.small{margin:12px 0 4px;font-size:13px}

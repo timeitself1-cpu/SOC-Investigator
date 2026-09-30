@@ -92,7 +92,10 @@ def test_process_tree_reconstruction(backend):
 def test_tool_errors_are_recorded_not_raised(backend):
     ctx, _ = _ctx(backend)
     call, result = dispatch(ctx, 1, "get_related_events", {"evidence_id": "EV-9999"})
-    assert call.status == "error"
+    # A model reference to unknown evidence is a rejected request (model error),
+    # distinct from a backend collection failure (status "error").
+    assert call.status == "rejected" and call.outcome == "rejected"
+    assert call.error_kind == "invalid_argument"
     assert result is None
     assert "unknown evidence_id" in call.error
 
@@ -160,7 +163,8 @@ def test_conflicting_process_and_evidence_ids_are_rejected(backend):
     ctx, store = _ctx(backend)
     item = store.add(backend.get_event("INC001-0002"), "seed")
     call, result = dispatch(ctx, 1, "get_process_details", {"evidence_id": item.evidence_id, "process_guid": "other"})
-    assert call.status == "error"
+    assert call.status == "rejected" and call.error_kind == "invalid_argument"
+    assert result is None
     assert "conflicts" in call.error
 
 

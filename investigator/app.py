@@ -8,6 +8,8 @@ Endpoints:
   GET  /report/{run_id}       completed report view
   GET  /export/{run_id}.json  JSON export
   GET  /export/{run_id}.md    Markdown export
+  POST /run/{run_id}/cancel   request cooperative cancellation
+  GET  /history               durable run history (survives restarts)
   GET  /healthz               liveness + mode info
 
 The UI is server-rendered HTML + a little vanilla JS. No build tooling.
@@ -26,6 +28,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .config import Settings, load_settings
+from .errors import safe_error
 from .report import report_to_json, report_to_markdown
 from .service import InvestigationService, ServiceBusyError
 
@@ -57,6 +60,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI):
         get_service()
         yield
+        # Graceful shutdown: cancel active runs, wait a bounded grace period,
+        # and record anything still in flight as interrupted.
+        service = app.state.service
+        if service is not None:
+            import anyio
+            await anyio.to_thread.run_sync(service.shutdown)
 
     app = FastAPI(title="SOC Investigation Agent", version="0.1.0", lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
@@ -106,14 +115,35 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request) -> HTMLResponse:
         settings, service = get_settings(), get_service()
-        alerts = service.list_alerts()
+        queue_error = None
+        try:
+            alerts = service.list_alerts()
+        except Exception as exc:  # noqa: BLE001 - render a degraded page, not a 500
+            kind, message = safe_error(exc)
+            alerts, queue_error = [], f"The alert source could not be queried ({kind}): {message}"
         rows = []
         for a in alerts:
             run = service.latest_run_for_alert(a.alert_id)
             rows.append({"alert": a, "run": run})
         return templates.TemplateResponse(request, "queue.html", {
             "rows": rows, "settings": settings, "model_name": service.agent.model.name,
+            "queue_error": queue_error, "skipped_alerts": getattr(service.backend, "skipped_alerts", 0),
+            "recovery_notes": service.recovery_notes,
         })
+
+    @app.get("/history", response_class=HTMLResponse)
+    def history(request: Request) -> HTMLResponse:
+        service = get_service()
+        return templates.TemplateResponse(request, "history.html", {"runs": service.history()})
+
+    @app.post("/run/{run_id}/cancel")
+    def cancel(run_id: str) -> RedirectResponse:
+        service = get_service()
+        if service.get_run(run_id) is None:
+            raise HTTPException(status_code=404, detail="unknown run")
+        if not service.cancel(run_id):
+            raise HTTPException(status_code=409, detail="run is not active")
+        return RedirectResponse(url=f"/run/{run_id}", status_code=303)
 
     @app.post("/investigate/{alert_id}")
     def investigate(alert_id: str) -> RedirectResponse:
@@ -144,26 +174,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/report/{run_id}", response_class=HTMLResponse)
     def report_view(request: Request, run_id: str) -> HTMLResponse:
         run = get_service().get_run(run_id)
-        if run is None or run.report is None:
+        report = run.report if run is not None else None
+        if run is None or report is None:
             raise HTTPException(status_code=404, detail="report not ready")
         return templates.TemplateResponse(request, "report.html", {
-            "run": run, "r": run.report,
+            "run": run, "r": report,
         })
 
     @app.get("/export/{run_id}.json")
     def export_json(run_id: str) -> PlainTextResponse:
         run = get_service().get_run(run_id)
-        if run is None or run.report is None:
+        report = run.report if run is not None else None
+        if run is None or report is None:
             raise HTTPException(status_code=404, detail="report not ready")
-        return PlainTextResponse(report_to_json(run.report), media_type="application/json",
+        return PlainTextResponse(report_to_json(report), media_type="application/json",
                                  headers={"Content-Disposition": f'attachment; filename="{run.run_id}.json"'})
 
     @app.get("/export/{run_id}.md")
     def export_md(run_id: str) -> PlainTextResponse:
         run = get_service().get_run(run_id)
-        if run is None or run.report is None:
+        report = run.report if run is not None else None
+        if run is None or report is None:
             raise HTTPException(status_code=404, detail="report not ready")
-        return PlainTextResponse(report_to_markdown(run.report), media_type="text/markdown",
+        return PlainTextResponse(report_to_markdown(report), media_type="text/markdown",
                                  headers={"Content-Disposition": f'attachment; filename="{run.run_id}.md"'})
 
     return app

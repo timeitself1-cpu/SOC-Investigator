@@ -148,8 +148,14 @@ class Evidence(Strict):
     indicators: list[str] = Field(default_factory=list)  # application-derived tags
     injection_suspected: bool = False
     retrieved_by: str  # tool call id that first retrieved it
+    retrieved_by_calls: list[str] = Field(default_factory=list)  # every call that returned this record
     retrieved_at: datetime = Field(default_factory=utcnow)
     raw: dict[str, Any] = Field(default_factory=dict)
+    # Provenance disclosure: raw is bounded for storage; the hash identifies the
+    # complete record as received so it can be re-fetched and compared.
+    raw_sha256: str | None = None
+    raw_truncated: bool = False
+    truncated_fields: list[str] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -221,6 +227,11 @@ class ToolCall(Strict):
     result_count: int = 0
     truncated: bool = False
     error: str | None = None
+    error_kind: str | None = None  # classified failure (timeout, tls, auth, index_missing, ...)
+    scope: str | None = None  # human-readable description of what was queried
+    gaps: list[str] = Field(default_factory=list)  # known unknowns this call exposed
+    duplicate_of: str | None = None
+    outcome: Literal["complete", "empty", "truncated", "partial", "failed", "rejected", "duplicate"] | None = None
     started_at: datetime = Field(default_factory=utcnow)
     duration_ms: float = 0.0
 
@@ -237,6 +248,19 @@ class LLMExchange(Strict):
     duration_ms: float = 0.0
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
+    # Audit disclosure. Prompts are bounded by the context budget before they
+    # are sent; any clipping of the stored copy is recorded, never silent.
+    prompt_chars: int = 0
+    prompt_sha256: str | None = None
+    response_chars: int = 0
+    response_sha256: str | None = None
+    clipped: bool = False
+    done_reason: str | None = None
+    prompt_budget_chars: int | None = None
+    evidence_shown: int | None = None
+    evidence_omitted: int = 0
+    compaction_level: int = 0
+    context_overflow_suspected: bool = False
 
 
 class ActivityEvent(Strict):
@@ -268,9 +292,76 @@ class ValidationResult(Strict):
     verdict_adjusted_from: Verdict | None = None
 
 
+class CoverageItem(Strict):
+    """One attempted collection step, stated in plain terms."""
+
+    call_id: str
+    tool: str
+    initiator: Literal["model", "system"]
+    scope: str
+    outcome: Literal["complete", "empty", "truncated", "partial", "failed", "rejected", "duplicate"]
+    result_count: int = 0
+    error_kind: str | None = None
+    detail: str | None = None
+
+
+class CollectionCoverage(Strict):
+    """What was queried, what failed or was truncated, and what remains unknown."""
+
+    items: list[CoverageItem] = Field(default_factory=list)
+    queried: int = 0
+    failed: int = 0
+    truncated: int = 0
+    partial: int = 0
+    rejected: int = 0
+    duplicates: int = 0
+    hosts_queried: list[str] = Field(default_factory=list)
+    categories_queried: list[str] = Field(default_factory=list)
+    backend_caveats: list[str] = Field(default_factory=list)
+    unknowns: list[str] = Field(default_factory=list)
+    complete: bool = True
+
+
+class ObservedFact(Strict):
+    """An application-generated statement of what a retrieved record says.
+
+    Facts are derived by code from retrieved telemetry, not from model prose.
+    They state what was recorded, not whether it was malicious.
+    """
+
+    evidence_id: str
+    timestamp: datetime
+    host: str
+    statement: str
+    source_ref: str
+
+
+class Hypothesis(Strict):
+    """A model-proposed interpretation whose structured prerequisites passed.
+
+    Passing prerequisites is not proof of intent, authorization or impact.
+    """
+
+    hypothesis_id: str
+    kind: Literal["claim", "attack_technique"]
+    label: str
+    basis: str
+    finding_ids: list[str] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(min_length=1)
+    status: Literal["prerequisites_met"] = "prerequisites_met"
+
+
+class VerificationStep(Strict):
+    """A concrete check an analyst can perform to confirm or refute something."""
+
+    step: str
+    reason: str
+    related: list[str] = Field(default_factory=list)
+
+
 class InvestigationReport(Strict):
     investigation_id: str
-    status: Literal["completed", "incomplete", "failed"]
+    status: Literal["completed", "incomplete", "failed", "cancelled"]
     alert: Alert
     verdict: Verdict
     confidence: float = Field(ge=0.0, le=1.0)
@@ -289,6 +380,15 @@ class InvestigationReport(Strict):
     started_at: datetime
     completed_at: datetime
     notice: str = "Recommendations only — no response actions were executed."
+    # Separation of what was observed, what is hypothesised, and what to check.
+    observed_facts: list[ObservedFact] = Field(default_factory=list)
+    hypotheses: list[Hypothesis] = Field(default_factory=list)
+    verification_steps: list[VerificationStep] = Field(default_factory=list)
+    model_narrative: str | None = None  # model prose; never semantically verified
+    coverage: CollectionCoverage = Field(default_factory=CollectionCoverage)
+    host_context: list[HostContext] = Field(default_factory=list)  # untrusted asset metadata
+    model_output_repairs: int = 0
+    status_reasons: list[str] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------

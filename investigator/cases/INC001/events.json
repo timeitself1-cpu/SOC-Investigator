@@ -22,7 +22,8 @@
           "processGuid": "{aaaa1111-0000-0000-0001-000000000001}",
           "processId": "5120",
           "parentImage": "C:\\Windows\\explorer.exe",
-          "user": "CORP\\jhopkins"
+          "user": "CORP\\jhopkins",
+          "parentProcessGuid": "{aaaa1111-0000-0000-0001-0000000000e0}"
         }
       }
     }

@@ -13,7 +13,7 @@ from investigator.config import load_settings
 
 @pytest.fixture(scope="session")
 def cases_dir() -> Path:
-    return ROOT / "cases"
+    return ROOT / "investigator" / "cases"
 
 
 @pytest.fixture

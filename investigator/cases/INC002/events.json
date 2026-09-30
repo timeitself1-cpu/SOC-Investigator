@@ -21,6 +21,7 @@
           "commandLine": "cmd.exe /c rundll32 C:\\Windows\\System32\\comsvcs.dll, MiniDump 700 C:\\Users\\Public\\lsass.dmp full",
           "processGuid": "{bbbb2222-0000-0000-0002-000000000001}",
           "processId": "4102",
+          "parentProcessGuid": "{bbbb2222-0000-0000-0002-0000000000e0}",
           "parentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
           "user": "CORP\\svc-backup"
         }

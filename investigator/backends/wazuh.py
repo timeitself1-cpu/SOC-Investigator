@@ -30,6 +30,7 @@ from typing import Any
 import httpx
 
 from ..config import Settings
+from ..errors import ClassifiedError, classify_exception, classify_http_status
 from ..models import Alert, HostContext, NormalizedEvent
 from .base import EventQuery, severity_from_level
 from .normalize import SECURITY_CATEGORIES, SYSMON_CATEGORIES, normalize_wazuh_doc
@@ -57,8 +58,11 @@ class WazuhConfigError(RuntimeError):
     pass
 
 
-class WazuhSearchError(RuntimeError):
+class WazuhSearchError(ClassifiedError):
     """Search results are incomplete, ambiguous, or malformed."""
+
+    def __init__(self, message: str, kind: str = "partial_results") -> None:
+        super().__init__(kind, message)
 
 
 def _event_ref(hit: dict[str, Any]) -> str:
@@ -111,6 +115,8 @@ class WazuhBackend:
                 timeout=settings.wazuh_timeout, transport=transport,
             )
         self._api_token: str | None = None
+        # Alerts dropped from the queue because the record could not be parsed.
+        self.skipped_alerts = 0
 
     def __repr__(self) -> str:  # never leak credentials
         return f"WazuhBackend(indexer={self.s.wazuh_indexer_url!r}, api={self.s.wazuh_api_url!r})"
@@ -122,20 +128,52 @@ class WazuhBackend:
         client = self._clients.get(target)
         if client is None:
             raise WazuhConfigError(f"Wazuh {target} is not configured")
-        resp = client.request(method, path, **kwargs)
-        resp.raise_for_status()
+        try:
+            resp = client.request(method, path, **kwargs)
+        except httpx.HTTPError as exc:
+            # Transport errors (timeouts, TLS, refused) are classified; the raw
+            # message (URLs, library text) is not propagated.
+            raise classify_exception(exc) from None
+        if resp.status_code >= 400:
+            # The body is inspected only for error-type tokens, never copied.
+            raise ClassifiedError(classify_http_status(resp.status_code, resp.text),
+                                  status_code=resp.status_code)
         return resp
 
     def _search(self, index: str, body: dict[str, Any]) -> list[dict[str, Any]]:
+        # A wildcard pattern that matches no index (e.g. archives not enabled)
+        # would otherwise return HTTP 200 with zero shards and zero hits — which
+        # looks exactly like "no activity". Make it an explicit failure.
         resp = self._request("indexer", "POST", f"/{index}/_search", json=body,
-                             params={"allow_partial_search_results": "false"})
-        data = resp.json()
-        if data.get("timed_out") or data.get("_shards", {}).get("failed", 0):
-            raise WazuhSearchError("Wazuh search timed out or failed on one or more shards")
-        hits = data.get("hits", {}).get("hits")
+                             params={"allow_partial_search_results": "false",
+                                     "allow_no_indices": "false", "ignore_unavailable": "false"})
+        try:
+            data = resp.json()
+        except ValueError:
+            raise WazuhSearchError("Wazuh returned a non-JSON search response", "invalid_response") from None
+        if not isinstance(data, dict):
+            raise WazuhSearchError("Wazuh returned an invalid search response", "invalid_response")
+        shards = data.get("_shards") or {}
+        if isinstance(shards, dict) and shards.get("total") == 0:
+            raise WazuhSearchError("The configured index pattern matched no index", "index_missing")
+        if data.get("timed_out") or (isinstance(shards, dict) and shards.get("failed", 0)):
+            raise WazuhSearchError("Wazuh search timed out or failed on one or more shards", "partial_results")
+        hits = (data.get("hits") or {}).get("hits") if isinstance(data.get("hits"), dict) else None
         if not isinstance(hits, list):
-            raise WazuhSearchError("Wazuh returned an invalid search response")
+            raise WazuhSearchError("Wazuh returned an invalid search response", "invalid_response")
         return hits
+
+    @staticmethod
+    def _normalize_hit(hit: dict[str, Any]) -> NormalizedEvent:
+        try:
+            return WazuhBackend._to_event(hit)
+        except ClassifiedError:
+            raise
+        except (ValueError, TypeError, KeyError) as exc:
+            # A record that does not match the expected Windows eventchannel
+            # mapping is a mapping problem, reported without its content.
+            raise WazuhSearchError("A Wazuh record did not match the expected field mapping",
+                                   "invalid_response") from exc
 
     @staticmethod
     def _to_event(hit: dict[str, Any]) -> NormalizedEvent:
@@ -220,10 +258,19 @@ class WazuhBackend:
                 {"range": {"timestamp": {"gte": (now - timedelta(hours=self.s.wazuh_alert_lookback_hours)).isoformat()}}},
             ]}},
         }
-        return [self._hit_to_alert(h) for h in self._search(self.s.wazuh_alerts_index, body)]
+        alerts: list[Alert] = []
+        skipped = 0
+        for hit in self._search(self.s.wazuh_alerts_index, body):
+            try:
+                alerts.append(self._hit_to_alert(hit))
+            except (ClassifiedError, ValueError, TypeError, KeyError):
+                # One malformed alert must not hide every other alert.
+                skipped += 1
+        self.skipped_alerts = skipped
+        return alerts
 
     def _hit_to_alert(self, hit: dict[str, Any]) -> Alert:
-        ev = self._to_event(hit)
+        ev = self._normalize_hit(hit)
         return Alert(
             alert_id=ev.event_ref,
             title=(ev.rule_description or f"Wazuh rule {ev.rule_id}")[:300],
@@ -244,17 +291,41 @@ class WazuhBackend:
 
     def get_event(self, event_ref: str) -> NormalizedEvent | None:
         hits = self._lookup(event_ref, [self.s.wazuh_events_index, self.s.wazuh_alerts_index])
-        return self._to_event(hits[0]) if hits else None
+        return self._normalize_hit(hits[0]) if hits else None
 
     def search_events(self, query: EventQuery) -> list[NormalizedEvent]:
-        return [self._to_event(h) for h in self._search(self.s.wazuh_events_index, self.build_query(query))]
+        return [self._normalize_hit(h) for h in self._search(self.s.wazuh_events_index, self.build_query(query))]
+
+    def coverage_caveats(self) -> list[str]:
+        caveats = []
+        if self.s.wazuh_events_index.strip() == self.s.wazuh_alerts_index.strip():
+            caveats.append("Events are searched in the alerts index: only rule-matched events are searchable; "
+                           "surrounding telemetry that did not trigger a rule is invisible to this investigation.")
+        caveats.append("Wazuh field mappings are assumed to follow the default Windows eventchannel decoder "
+                       "(data.win.system / data.win.eventdata); run `python -m investigator diagnose` to check.")
+        return caveats
+
+    def _agents(self, host: str) -> httpx.Response:
+        """GET /agents with one token refresh: Wazuh API JWTs expire (default 900 s)."""
+        for attempt in (1, 2):
+            token = self._token()
+            try:
+                return self._request("api", "GET", "/agents", params={"name": host},
+                                     headers={"Authorization": f"Bearer {token}"})
+            except ClassifiedError as exc:
+                if exc.kind == "auth" and attempt == 1:
+                    self._api_token = None
+                    continue
+                raise
+        raise ClassifiedError("auth")  # pragma: no cover - loop always returns or raises
 
     def get_host_context(self, host: str) -> HostContext | None:
         if "api" in self._clients:
-            token = self._token()
-            resp = self._request("api", "GET", "/agents", params={"name": host},
-                                 headers={"Authorization": f"Bearer {token}"})
-            items = resp.json().get("data", {}).get("affected_items", [])
+            resp = self._agents(host)
+            try:
+                items = resp.json().get("data", {}).get("affected_items", [])
+            except (ValueError, AttributeError):
+                raise WazuhSearchError("Wazuh API returned an invalid agents response", "invalid_response") from None
             if items:
                 a = items[0]
                 os_info = a.get("os") or {}
@@ -280,5 +351,77 @@ class WazuhBackend:
             assert s.wazuh_api_user and s.wazuh_api_password
             resp = self._request("api", "POST", "/security/user/authenticate",
                                  auth=(s.wazuh_api_user, s.wazuh_api_password.get_secret_value()))
-            self._api_token = resp.json()["data"]["token"]
+            try:
+                token = resp.json()["data"]["token"]
+            except (ValueError, KeyError, TypeError):
+                raise WazuhSearchError("Wazuh API returned an invalid token response", "invalid_response") from None
+            if not isinstance(token, str) or not token:
+                raise WazuhSearchError("Wazuh API returned an empty token", "invalid_response")
+            self._api_token = token
         return self._api_token
+
+    # -- diagnostics (read-only; used by `investigator diagnose`) --------
+    def probe(self, host: str | None = None) -> list[dict[str, Any]]:
+        """Check reachability, auth, index presence, field mapping and archives.
+
+        Every check uses the same allowlisted read-only requests as the agent.
+        Returns [{check, ok, kind, detail}] and never raises.
+        """
+        results: list[dict[str, Any]] = []
+
+        def run(check: str, fn) -> Any:
+            try:
+                detail = fn()
+                results.append({"check": check, "ok": True, "kind": None, "detail": detail})
+                return detail
+            except Exception as exc:  # noqa: BLE001 - reported, not raised
+                c = classify_exception(exc)
+                results.append({"check": check, "ok": False, "kind": c.kind, "detail": c.safe_message})
+                return None
+
+        now = datetime.now(timezone.utc)
+        recent = {"range": {"timestamp": {"gte": (now - timedelta(hours=24)).isoformat()}}}
+
+        def sample(index: str) -> str:
+            hits = self._search(index, {"size": 1, "sort": [{"timestamp": {"order": "desc"}}],
+                                        "query": {"bool": {"filter": [recent]}}})
+            if not hits:
+                return "index reachable; no documents in the last 24h"
+            src = hits[0].get("_source") or {}
+            missing = [f for f in ("timestamp", "agent.name") if self._path(src, f) is None]
+            if missing:
+                raise WazuhSearchError(f"sample document lacks {', '.join(missing)}", "mapping")
+            return "index reachable; sample document has timestamp and agent.name"
+
+        run("alerts index reachable + auth", lambda: sample(self.s.wazuh_alerts_index))
+        if self.s.wazuh_events_index != self.s.wazuh_alerts_index:
+            run("events (archives) index present", lambda: sample(self.s.wazuh_events_index))
+        else:
+            results.append({"check": "events (archives) index present", "ok": False, "kind": "index_missing",
+                            "detail": "events index equals the alerts index; only rule-matched events are searchable"})
+
+        def sysmon() -> str:
+            filters = [recent, {"term": {"data.win.system.providerName": "Microsoft-Windows-Sysmon"}}]
+            if host:
+                filters.append({"term": {"agent.name": host}})
+            hits = self._search(self.s.wazuh_events_index, {"size": 1, "query": {"bool": {"filter": filters}}})
+            if not hits:
+                raise WazuhSearchError("no Sysmon events matched in the last 24h (check Sysmon forwarding, "
+                                       "providerName mapping, or agent.name)", "mapping")
+            ed = ((hits[0].get("_source") or {}).get("data") or {}).get("win", {}).get("eventdata") or {}
+            keys = sorted(k for k in ed if k in {"image", "processGuid", "parentProcessGuid", "commandLine"})
+            return f"Sysmon events present; eventdata keys seen: {', '.join(keys) or 'none of the expected'}"
+
+        run("Sysmon telemetry and field names", sysmon)
+        if "api" in self._clients:
+            run("server API auth", lambda: (self._token(), "token issued")[1])
+        return results
+
+    @staticmethod
+    def _path(d: dict[str, Any], path: str) -> Any:
+        cur: Any = d
+        for part in path.split("."):
+            if not isinstance(cur, dict):
+                return None
+            cur = cur.get(part)
+        return cur

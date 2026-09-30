@@ -6,8 +6,11 @@
 {% endblock %}
 {% block body %}
 <div class="notice">Recommendations only — this tool is read-only and never executes response actions.</div>
+{% if queue_error %}<div class="notice warning" role="alert">{{ queue_error }}</div>{% endif %}
+{% if skipped_alerts %}<div class="notice warning" role="status">{{ skipped_alerts }} alert record(s) could not be parsed and are not listed.</div>{% endif %}
+{% for note in recovery_notes %}<div class="notice warning small" role="status">{{ note }}</div>{% endfor %}
 <div class="card">
-  <h2>Incident Queue</h2>
+  <h2>Incident Queue <a class="small" style="float:right" href="/history">History →</a></h2>
   <table>
     <thead><tr><th>Incident</th><th>Time (UTC)</th><th>Host</th><th>Alert</th><th>Severity</th><th>Status</th><th></th></tr></thead>
     <tbody>
@@ -20,20 +23,25 @@
         <td>{{ a.title }}</td>
         <td><span class="badge sev-{{ a.severity }}">{{ a.severity }}</span></td>
         <td class="small">
-          {% if row.run and row.run.status == "completed" and row.run.report %}
-            <span class="badge v-{{ row.run.report.verdict }}">{{ row.run.report.verdict }}</span>
-            {% if row.run.report.status != "completed" %}<span class="badge sev-medium">{{ row.run.report.status }}</span>{% endif %}
+          {% if row.run and row.run.status == "completed" and row.run.verdict %}
+            <span class="badge v-{{ row.run.verdict }}">{{ row.run.verdict }}</span>
+            {% if row.run.report_status != "completed" %}<span class="badge sev-medium">{{ row.run.report_status }}</span>{% endif %}
           {% elif row.run and row.run.status == "running" %}
             <span class="muted">investigating…</span>
-          {% elif row.run and row.run.status == "error" %}
-            <a href="/run/{{ row.run.run_id }}" class="badge sev-high">failed · details</a>
+          {% elif row.run and row.run.status in ("error", "interrupted") %}
+            <a href="/run/{{ row.run.run_id }}" class="badge sev-high">{{ "failed" if row.run.status == "error" else "interrupted" }} · details</a>
+          {% elif row.run and row.run.status == "cancelled" %}
+            <span class="badge sev-medium">cancelled</span>
           {% else %}
             <span class="muted">{{ a.status }}</span>
           {% endif %}
         </td>
         <td>
-          {% if row.run and row.run.status == "completed" %}
+          {% if row.run and row.run.status in ("completed", "cancelled") %}
             <a class="btn ghost" href="/report/{{ row.run.run_id }}">View report</a>
+            <form method="post" action="/investigate/{{ a.alert_id | urlencode }}" style="display:inline">
+              <button class="btn ghost" type="submit" title="Start a new investigation of this alert">Rerun</button>
+            </form>
           {% elif row.run and row.run.status == "running" %}
             <a class="btn ghost" href="/run/{{ row.run.run_id }}">Watch</a>
           {% else %}

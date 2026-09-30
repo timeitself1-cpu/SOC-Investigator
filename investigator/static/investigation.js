@@ -38,17 +38,21 @@
         feed.appendChild(li);
       }
       since = data.next_index;
-      if (data.status === "completed") {
+      const cancelForm = document.getElementById("cancelform");
+      if (cancelForm && (data.status !== "running" || data.cancel_requested)) cancelForm.hidden = true;
+      if (data.status === "completed" || data.status === "cancelled") {
         document.getElementById("spin").style.display = "none";
         document.getElementById("done").style.display = "block";
-        const note = data.report_status === "completed" ? "Assessment ready for analyst review."
-          : `Assessment ${data.report_status || "incomplete"}; inspect the limitations and audit trace.`;
+        const note = data.status === "cancelled" ? "Investigation cancelled; evidence gathered so far is in the report."
+          : data.report_status === "completed" ? "Assessment ready for analyst review."
+          : `Assessment ${data.report_status || "incomplete"}; see "Collection coverage" for what is missing.`;
         document.getElementById("reportstatus").textContent = note +
           (data.persistence_error ? " Report could not be saved to disk. Export it before closing this session." : "");
         return;
       }
-      if (data.status === "error") {
-        fail(data.error || "Investigation failed.");
+      if (data.status === "error" || data.status === "interrupted") {
+        fail(data.error || (data.status === "interrupted"
+          ? "The server stopped before this investigation finished." : "Investigation failed."));
         return;
       }
     } catch (err) {
