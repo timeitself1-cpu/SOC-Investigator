@@ -19,14 +19,15 @@ import html
 import json
 import re
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from . import attack
-from .evidence import EvidenceStore
+from .evidence import EvidenceStore, host_context_injection, looks_like_injection
 from .models import (
     Alert,
     AttackMapping,
     CollectionCoverage,
+    CollectionRequirement,
     CoverageItem,
     Evidence,
     Finding,
@@ -47,6 +48,7 @@ from .models import (
 CLAIM_VALUES = set(attack.CLAIM_RULES)
 FINAL_REPORT_FAILED = "final_report_failed:"
 CANCELLED = "cancelled:"
+CONTEXT = "context:"  # the model may not have seen the prompt it was sent (overflow)
 GROUNDING_LIMITATION = (
     "Automated validation checks evidence references and structured claim prerequisites only. "
     "Retained model narrative, verdict, confidence and recommendations are assessments requiring analyst review. "
@@ -78,6 +80,12 @@ class ReportInputs:
     backend_caveats: list[str] = field(default_factory=list)
     visibility_gaps: list[str] = field(default_factory=list)
     cancelled: bool = False
+    # Reasons the final assessment prompt did not show the model every retrieved
+    # record in full (omitted, summarized, suspected overflow). Empty = full view.
+    model_visibility_issues: list[str] | None = None
+    # Network activity must cover at least this many minutes on each side of the
+    # alert for benign closure (clamped to the configured window).
+    min_network_window_minutes: int = 15
 
 
 def _same_process(a: Evidence, b: Evidence) -> bool:
@@ -85,15 +93,35 @@ def _same_process(a: Evidence, b: Evidence) -> bool:
                 and a.process_guid.casefold() == b.process_guid.casefold())
 
 
-def _in_tree(e: Evidence, trigger: Evidence) -> bool:
-    """The trigger's own process or a direct child of it (same host)."""
-    if _same_process(e, trigger):
-        return True
-    return bool(e.parent_process_guid and trigger.process_guid and e.host.casefold() == trigger.host.casefold()
-                and e.parent_process_guid.casefold() == trigger.process_guid.casefold())
+def _pkey(host: str, guid: str) -> tuple[str, str]:
+    return host.casefold(), guid.casefold()
 
 
-def benign_blockers(store: EvidenceStore, alert: Alert) -> list[str]:
+def process_tree_keys(items: list[Evidence], roots: list[Evidence]) -> set[tuple[str, str]]:
+    """(host, process_guid) of the root processes and ALL their descendants.
+
+    Built from retrieved records' parent links only (same host). A fixed-point
+    closure over a set: cycles and self-parenting records cannot loop, and the
+    number of passes is bounded by the number of records.
+    """
+    tree = {_pkey(r.host, r.process_guid) for r in roots if r.process_guid}
+    links = [(_pkey(e.host, e.parent_process_guid), _pkey(e.host, e.process_guid))
+             for e in items if e.process_guid and e.parent_process_guid]
+    for _ in range(len(links) + 1):
+        added = {child for parent, child in links if parent in tree and child not in tree}
+        if not added:
+            break
+        tree |= added
+    return tree
+
+
+def _in_tree(e: Evidence, tree: set[tuple[str, str]]) -> bool:
+    """Any record performed by a process in the alerted process tree (the
+    alerted process or any descendant, on the same host)."""
+    return bool(e.process_guid and _pkey(e.host, e.process_guid) in tree)
+
+
+def benign_blockers(store: EvidenceStore, alert: Alert, inputs: "ReportInputs | None" = None) -> list[str]:
     """Reasons a benign verdict cannot be accepted. Empty list means it may stand."""
     reasons: list[str] = []
     triggers = [e for e in (store.get(t) for t in store.trigger_ids()) if e is not None]
@@ -105,14 +133,108 @@ def benign_blockers(store: EvidenceStore, alert: Alert) -> list[str]:
         reasons.append("administrative context was not established for the alerted process itself")
     if attack.malicious_hypothesis_supported(items):
         reasons.append("correlated malicious prerequisites are present in retrieved evidence")
-    tree = {i for e in items for i in e.indicators if any(_in_tree(e, t) for t in triggers)}
+    tree_keys = process_tree_keys(items, triggers)
+    tree = {i for e in items for i in e.indicators if _in_tree(e, tree_keys)}
     host = {i for e in items for i in e.indicators if e.host.casefold() == alert.host.casefold()}
     contradicting = sorted((tree & _TREE_CONTRADICTIONS) | (host & _HOST_CONTRADICTIONS))
     if contradicting:
-        reasons.append(f"contradicting indicators: {', '.join(contradicting)}")
+        reasons.append(f"contradicting indicators in the alerted process tree or host: {', '.join(contradicting)}")
     if any(e.injection_suspected for e in items):
         reasons.append("retrieved telemetry contains instruction-like text that requires analyst review")
+    if inputs is not None and any(host_context_injection(hc) for hc in inputs.host_contexts):
+        reasons.append("asset/host context contains instruction-like text; the asset record cannot be relied on")
+    if any(looks_like_injection(str(v)) for v in (alert.title, alert.user, alert.host) if v):
+        reasons.append("alert fields contain instruction-like text that requires analyst review")
     return reasons
+
+
+# --- collection requirements for benign closure -----------------------------
+
+def _parse_ts(value: object) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+
+
+def evaluate_requirements(trace: InvestigationTrace, store: EvidenceStore, alert: Alert,
+                          inputs: ReportInputs) -> list[CollectionRequirement]:
+    """Check, from resolved tool-call records, that the minimum collection for
+    benign closure succeeded: the alerted process tree, host-wide network
+    activity around the alert, trustworthy host context, and a model view of
+    all retrieved evidence. Never inferred from model prose."""
+    triggers = [e for e in (store.get(t) for t in store.trigger_ids()) if e is not None]
+    trig = triggers[0] if triggers else None
+    anchor = trig.timestamp if trig else alert.timestamp
+    ok = [c for c in trace.tool_calls if c.status == "ok" and c.target]
+    reqs: list[CollectionRequirement] = []
+
+    # 1. Process tree of the alerted process (ancestry + all descendants).
+    tree_calls = [c for c in ok if c.tool == "get_process_tree" and trig and trig.process_guid
+                  and str(c.target.get("process_guid", "")).casefold() == trig.process_guid.casefold()
+                  and str(c.target.get("host", "")).casefold() == trig.host.casefold()]
+    good = [c for c in tree_calls if c.outcome == "complete"
+            or (c.outcome == "partial" and c.partial_reason == "ancestry_outside_window")]
+    if trig is None:
+        reason = "the triggering event was not retrieved, so its process tree cannot be established"
+    elif not trig.process_guid:
+        reason = "the triggering event has no process identity; process ancestry cannot be established"
+    elif good:
+        reason = "process ancestry and descendants of the alerted process were reconstructed"
+    elif tree_calls:
+        reason = ("the process-tree query for the alerted process was "
+                  + ", ".join(sorted({(c.partial_reason or c.outcome or '?').replace('_', ' ') for c in tree_calls}))
+                  + "; relevant processes may be missing")
+    else:
+        reason = "the process tree of the alerted process was never successfully queried"
+    reqs.append(CollectionRequirement(name="process_tree", satisfied=bool(good), reason=reason,
+                                      call_ids=[c.call_id for c in (good or tree_calls)]))
+
+    # 2. Host-wide network/DNS activity covering the alert time.
+    need = timedelta(minutes=inputs.min_network_window_minutes)
+    net_calls = [c for c in ok if c.tool == "get_network_activity"
+                 and str(c.target.get("host", "")).casefold() == alert.host.casefold()]
+    good = []
+    for c in net_calls:
+        start, end = _parse_ts(c.target.get("start")), _parse_ts(c.target.get("end"))
+        if (c.outcome in ("complete", "empty") and not c.target.get("process_guid") and start and end
+                and start <= anchor - need and end >= anchor + need):
+            good.append(c)
+    if good:
+        reason = "host-wide network/DNS activity around the alert was retrieved completely"
+    elif any(c.outcome == "truncated" for c in net_calls):
+        reason = "network activity results were capped; connections may be missing"
+    elif net_calls:
+        reason = (f"network activity was only queried for a single process or for less than "
+                  f"±{inputs.min_network_window_minutes} minutes around the alert")
+    else:
+        reason = "host network activity was never successfully queried"
+    reqs.append(CollectionRequirement(name="network_activity", satisfied=bool(good), reason=reason,
+                                      call_ids=[c.call_id for c in (good or net_calls)]))
+
+    # 3. Host context for the alerted host, free of instruction-like text.
+    hc_calls = [c for c in ok if c.tool == "get_host_context"
+                and str(c.target.get("host", "")).casefold() == alert.host.casefold()]
+    good = [c for c in hc_calls if c.result_count > 0 and not c.injection_suspected]
+    if good:
+        reason = "asset context for the alerted host was retrieved"
+    elif any(c.injection_suspected for c in hc_calls):
+        reason = "asset context contains instruction-like text and cannot be relied on"
+    elif hc_calls:
+        reason = "no asset context exists for the alerted host"
+    else:
+        reason = "asset context for the alerted host was never successfully retrieved"
+    reqs.append(CollectionRequirement(name="host_context", satisfied=bool(good), reason=reason,
+                                      call_ids=[c.call_id for c in (good or hc_calls)]))
+
+    # 4. The assessment was made with every retrieved record in view.
+    issues = inputs.model_visibility_issues
+    if issues is None:
+        issues = ["no model assessment prompt was recorded"]
+    reqs.append(CollectionRequirement(
+        name="model_visibility", satisfied=not issues,
+        reason="the assessment prompt showed every retrieved record in full" if not issues else "; ".join(issues)))
+    return reqs
 
 
 def validate_report(
@@ -198,6 +320,9 @@ def validate_report(
         ))
     attack_mappings.sort(key=lambda m: m.technique_id)
 
+    coverage = build_coverage(trace, store, alert, inputs)
+    requirements = evaluate_requirements(trace, store, alert, inputs)
+
     # Referencing one real event is not enough to justify a strong verdict.
     verdict: Verdict = draft.verdict
     confidence = draft.confidence
@@ -208,9 +333,13 @@ def validate_report(
         confidence = min(confidence, 0.3)
         vr.issues.append("Verdict downgraded to insufficient_evidence: no supported structured claims remained.")
     elif verdict == "benign":
-        blockers = benign_blockers(store, alert)
+        blockers = benign_blockers(store, alert, inputs)
         if "benign_administration" not in supported_claims:
             blockers.insert(0, "no finding established administrative context")
+        # Benign closure must be earned by collection that actually succeeded;
+        # "nothing suspicious was found" means nothing when nothing was looked at.
+        blockers.extend(f"required collection not met ({r.name.replace('_', ' ')}): {r.reason}"
+                        for r in requirements if not r.satisfied)
         if blockers:
             vr.verdict_adjusted_from = verdict
             verdict = "insufficient_evidence"
@@ -225,7 +354,7 @@ def validate_report(
 
     vr.valid = not bool(vr.issues)
 
-    coverage = build_coverage(trace, store, alert, inputs)
+    coverage.requirements = requirements
     status, status_reasons = _status(trace, coverage, inputs)
 
     timeline = _build_timeline(store.all(), all_cited)
@@ -340,7 +469,7 @@ def build_coverage(trace: InvestigationTrace, store: EvidenceStore, alert: Alert
     cov.hosts_queried = sorted(hosts)
     cov.categories_queried = sorted(categories)
     cov.complete = not (cov.failed or cov.truncated or inputs.visibility_gaps or budget_errors
-                        or any(e.startswith(("seed:", "decide:", "collection:")) for e in trace.errors))
+                        or any(e.startswith(("seed:", "decide:", "collection:", CONTEXT)) for e in trace.errors))
     return cov
 
 
@@ -524,6 +653,10 @@ def report_to_markdown(report: InvestigationReport) -> str:
     for item in c.items:
         extra = f" — {md(item.error_kind or '')} {md(item.detail or '')}".rstrip() if item.outcome in ("failed", "rejected") else ""
         L.append(f"  - {item.call_id} {md(item.tool)} [{item.outcome}] {md(item.scope)} ({item.result_count}){extra}")
+    if c.requirements:
+        L.append("- Required for benign closure:")
+        L.extend(f"  - {'met' if q.satisfied else 'NOT met'}: {md(q.name.replace('_', ' '))} — {md(q.reason)}"
+                 for q in c.requirements)
     if c.backend_caveats:
         L.append("- Backend caveats:")
         L.extend(f"  - {md(x)}" for x in c.backend_caveats)

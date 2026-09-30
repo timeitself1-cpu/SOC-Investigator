@@ -208,7 +208,7 @@ class WazuhBackend:
             must.append({"match_phrase": {"full_log": q.keyword}})
         return {
             "size": q.limit,
-            "sort": [{"timestamp": {"order": "asc"}}],
+            "sort": [{"timestamp": {"order": q.order}}],
             "query": {"bool": {"filter": filters, "must": must}},
         }
 

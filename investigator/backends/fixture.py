@@ -90,7 +90,8 @@ class FixtureBackend:
 
     def search_events(self, query: EventQuery) -> list[NormalizedEvent]:
         out: list[NormalizedEvent] = []
-        for ev in sorted(self._events.values(), key=lambda e: (e.timestamp, e.event_ref)):
+        for ev in sorted(self._events.values(), key=lambda e: (e.timestamp, e.event_ref),
+                         reverse=query.order == "desc"):
             if not (query.start <= ev.timestamp <= query.end):
                 continue
             if query.host and ev.host.lower() != query.host.lower():

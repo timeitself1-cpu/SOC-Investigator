@@ -77,7 +77,27 @@ Severity uses the prior review's scale: impact on a trustworthy real-world inves
 | F10 | Low | **Validation hygiene.** The 228 count needs Playwright, which is not in `.[dev]`. `test_browser_ui.py` rewrites tracked screenshots on every run. The repro scripts' arguments are undocumented. | — | Reporting |
 | F11 | Low | **Shutdown race (by inspection only; not reproduced).** `shutdown()` reads `run.status` outside the lock. A run that finishes in that window can be re-labelled `interrupted` even though its report was saved. | `service.py` `shutdown` | New (R13) |
 
-## 4. Remaining priorities
+## 3a. Status after v0.2.1
+
+v0.2.1 addresses F1–F7, F9–F11 ([CHANGELOG.md](CHANGELOG.md),
+[V0.2.1_RELEASE_NOTES.md](V0.2.1_RELEASE_NOTES.md)). Each finding's probe was
+re-run on the fixed code (`docs/validation/v0.2.1/followup_probes_after.txt`).
+
+| # | Status in v0.2.1 | Regression test |
+| --- | --- | --- |
+| F1 | **Fixed**: four explicit collection requirements gate benign | `test_A_*`, `test_each_collection_requirement_*` |
+| F2 | **Fixed**: bounded descendant walk + cycle-safe tree closure | `test_B_*`, `test_unrelated_*`, `test_cyclic_*` |
+| F3 | **Fixed**: blob compaction, ≤ 2.0 chars/token, overflow → incomplete; worst real-tokenizer prompt 10,249 tokens (was 22,163) | `test_D_*`, `test_real_tokenizer_*` |
+| F4 | **Fixed**: exact bypass reproduced and blocked | `test_E_*`, `test_instruction_like_text_in_any_asset_field_*` |
+| F5 | **Fixed**: time-centered retrieval; BM-X07/X08 recall 1.0 | `test_F_*`, `test_select_centered_*` |
+| F6 | **Fixed**: dedicated tests; each fails under its mutant | `test_status_gate_alone_*`, `test_dotdot_*` |
+| F7 | **Fixed**: cancel during assessment → `cancelled` | `test_cancellation_accepted_during_final_report_*` |
+| F8 | Open (fixture/Wazuh case semantics) | — |
+| F9 | **Fixed**: baseline comparison + integrity metrics; legacy headline labelled | `test_benchmark_reports_trivial_baseline_*` |
+| F10 | **Fixed** (screenshots); Playwright still an optional extra install | — |
+| F11 | **Fixed** by code change (lock); not reproduced deterministically | — |
+
+## 4. Remaining priorities (as written before v0.2.1)
 
 | Pri | Item | Addresses |
 | --- | --- | --- |

@@ -204,7 +204,7 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
     from .evaluation.benchmark import format_benchmark, run_benchmark
 
     settings = _settings_from_args(args)
-    result = run_benchmark(settings, suite_dir=args.suite)
+    result = run_benchmark(settings, suite_dir=args.suite, adversary=args.adversary)
     if args.json:
         print(json.dumps(result, indent=2, default=str))
     else:
@@ -212,8 +212,13 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:
             json.dump(result, fh, indent=2, default=str)
-    # A benchmark measures; it only "fails" when the harness itself could not run.
-    return 1 if result["metrics"]["operational"]["harness_errors"] else 0
+    # A benchmark measures; it "fails" when the harness itself could not run, or
+    # when an adversarial model obtained benign closure of a non-benign case.
+    if result["metrics"]["operational"]["harness_errors"]:
+        return 1
+    if args.adversary and result["metrics"]["integrity"]["benign_false_positive"]:
+        return 2
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -253,6 +258,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--suite", help="benchmark suite directory (default: packaged independent suite)")
     sp.add_argument("--json", action="store_true")
     sp.add_argument("--out", help="also write the JSON result to this file")
+    sp.add_argument("--adversary", choices=["benign-after-investigation", "benign-immediately"],
+                    help="replace the model with an evaluation-only benign proposer to test the verdict gates")
     sp.set_defaults(func=cmd_benchmark)
     return p
 

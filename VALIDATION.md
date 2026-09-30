@@ -1,4 +1,32 @@
-# Validation — v0.2.0 (this pass, 2026-09-30)
+# Validation — v0.2.1 (Investigation Integrity Fix, 2026-09-30)
+
+Executed in this pass on Linux x86-64, CPython 3.12.3 (`.venv`, pinned
+`requirements-validated.txt` + `pip install -e '.[dev]'` + `playwright` for the
+browser tests + `tokenizers` for the optional real-tokenizer tests), Node v22.22.2,
+Chromium 1194. Raw outputs are in [`docs/validation/v0.2.1/`](docs/validation/v0.2.1/);
+the summary table is in [V0.2.1_RELEASE_NOTES.md](V0.2.1_RELEASE_NOTES.md).
+
+| # | Command | Result | Output file |
+| --- | --- | --- | --- |
+| 1 | `python -m pytest -q` ×5 | 279 passed, 4 skipped, 15 deselected — every run | `pytest_5x.txt` |
+| 1b | `SOCI_TOKENIZER_JSON=<Qwen2.5 tokenizer.json> python -m pytest -q tests/test_integrity_v021.py` | 55 passed | `pytest_5x.txt` |
+| 2 | `node --test tests/test_activity_dom.cjs` | 6 passed | `node_dom_tests.txt` |
+| 3 | `python -m investigator --llm mock --backend fixture evaluate [--json]` | 5/5 passed | `evaluate_demo.txt/.json` |
+| 4 | `python -m investigator --llm mock benchmark [--adversary …] --out …` | see release notes; benign FP 0 in all three runs | `benchmark_*.txt/.json` |
+| 5 | `python docs/validation/v0.2.1/final_gate.py . <tokenizer.json>` | 9/9 | `final_gate_output.txt` |
+| 5b | `python docs/validation/followup/probe_{benign,gate,hostctx,window,cancel,tokens}.py .` | every follow-up finding reversed | `followup_probes_after.txt`, `tokens_after.txt` |
+| 6 | `PY=… docs/validation/v0.2.1/mutate_v021.sh . <scratch>` | 11/11 dedicated tests fail under their mutant | `mutation_output.txt` |
+| 6b | `PY=… docs/validation/followup/mutate.sh . <scratch>` | R1–R18 set: killed except 2 known equivalent mutants | `mutation_r1_r18_rerun.txt` |
+| 7–9 | `pip wheel --no-deps`; fresh venv; `investigator list/evaluate/benchmark` from an unrelated dir | 0.2.1 installed and working | `packaging_restart.txt` |
+| 10 | installed `investigator serve` → 2 investigations → SIGTERM → new process | both runs restored, report/export 200 | `packaging_restart.txt` |
+| — | `python -m pytest -m integration tests/integration -rs` | 15 collected, 15 skipped (no Ollama, no Wazuh) | `pytest_integration_unconfigured.txt` |
+
+**Ollama: NOT VERIFIED** (not installed or reachable here). **Wazuh: NOT VERIFIED**
+(no cluster). Not re-run on Windows in this pass.
+
+---
+
+# Historical: validation — v0.2.0 (2026-09-30)
 
 Everything in this section was **executed in this pass** and the exact outputs are
 saved in `docs/validation/`. Sections further below are historical records from

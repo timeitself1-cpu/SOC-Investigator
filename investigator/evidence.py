@@ -76,6 +76,11 @@ def looks_like_injection(text: str) -> bool:
     return any(p.search(text) for p in INJECTION_PATTERNS)
 
 
+def host_context_injection(hc) -> bool:
+    """Instruction-like text anywhere in untrusted asset metadata (HostContext)."""
+    return any(looks_like_injection(str(v)) for v in hc.model_dump().values() if v)
+
+
 def basename(path: str | None) -> str:
     if not path:
         return ""

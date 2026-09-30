@@ -81,3 +81,14 @@ Controls are covered by unit, contract (mock-transport) and real-browser tests.
 Live Wazuh mappings/auth/TLS and real Ollama behaviour have **not** been verified;
 opt-in integration tests are provided in `tests/integration/`. See REVIEW.md and
 VALIDATION.md.
+
+## v0.2.1 additions
+
+* Asset/host context, alert title/user/host are screened for instruction-like
+  text like telemetry; a hit is shown to the model as a flag and blocks benign.
+* Encoded or high-entropy content cannot be used to inflate the prompt past the
+  model context: it is summarized in prompts (full value retained in evidence), and a
+  suspected overflow makes the investigation incomplete rather than silently
+  truncated.
+* A benign verdict requires successful, application-verified collection; the model
+  cannot close an alert by skipping investigation.

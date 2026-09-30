@@ -8,7 +8,7 @@ methods and returning `NormalizedEvent`s.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Protocol, runtime_checkable
+from typing import Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -27,6 +27,9 @@ class EventQuery(BaseModel):
     parent_process_guid: str | None = None
     keyword: str | None = None
     limit: int = Field(default=25, ge=1, le=51)  # tools request limit+1 to detect truncation
+    # "asc" returns the earliest matches first; "desc" the latest first. Tools use
+    # both to select events on each side of an anchor time (time-centered retrieval).
+    order: Literal["asc", "desc"] = "asc"
 
     @model_validator(mode="after")
     def validate_window(self) -> "EventQuery":

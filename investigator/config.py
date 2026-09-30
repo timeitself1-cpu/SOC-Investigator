@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field, SecretStr, field_validator
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = PACKAGE_DIR.parent
@@ -91,9 +91,11 @@ class Settings(BaseModel):
     ollama_seed: int = 42
     # Output bound; the prompt budget reserves this many tokens for the answer.
     ollama_num_predict: int = Field(default=2048, ge=256, le=16384)
-    # Conservative characters-per-token used to keep prompts inside num_ctx.
-    # JSON-heavy prompts tokenize densely; 3.0 under-fills rather than overflows.
-    prompt_chars_per_token: float = Field(default=3.0, ge=1.5, le=6.0)
+    # Conservative characters-per-token used to keep prompts inside num_ctx when
+    # no tokenizer is available. Measured with the Qwen2.5 tokenizer, encoded /
+    # hex telemetry costs 1.7-2.5 chars per token, so values above 2.0 are
+    # clamped to 2.0 (an older .env with 3.0 keeps working, safely).
+    prompt_chars_per_token: float = Field(default=2.0, ge=1.0, le=2.0)
     # Send the response JSON schema as Ollama's `format` (Ollama >= 0.5).
     ollama_structured_output: bool = True
 
@@ -111,6 +113,14 @@ class Settings(BaseModel):
     wazuh_min_alert_level: int = Field(default=10, ge=0, le=16)
     wazuh_alert_lookback_hours: int = Field(default=24, ge=1, le=168)
     wazuh_timeout: float = Field(default=30.0, gt=0, le=300)
+
+    @field_validator("prompt_chars_per_token", mode="before")
+    @classmethod
+    def _cap_chars_per_token(cls, value: object) -> object:
+        try:
+            return min(float(value), 2.0)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return value
 
     def safe_dict(self) -> dict[str, object]:
         """Settings suitable for display/logging — secrets redacted."""

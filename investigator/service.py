@@ -308,7 +308,8 @@ class InvestigationService:
         if run is None or run.status != "running":
             return False
         run.cancel_event.set()
-        run.add_activity(ActivityEvent(kind="warning", message="Cancellation requested; stopping after the current step"))
+        run.add_activity(ActivityEvent(kind="warning", message="Cancellation requested; the run stops after the request in progress "
+                                                 "and ends as cancelled"))
         return True
 
     def shutdown(self, grace_seconds: float | None = None) -> list[str]:
@@ -324,11 +325,15 @@ class InvestigationService:
         for run in active:
             if run.thread is not None:
                 run.thread.join(max(0.0, deadline - time.monotonic()))
-            if run.status == "running":
-                with run._lock:
+            # Check and flip under the run's lock: a run that finishes in this
+            # window must not be re-labelled interrupted after its report was saved.
+            with run._lock:
+                still_running = run.status == "running"
+                if still_running:
                     run.status = "interrupted"
                     run.error = "The server shut down before this investigation finished."
                     run.finished_at = datetime.now(timezone.utc)
+            if still_running:
                 self._write_journal(run)
                 interrupted.append(run.run_id)
         return interrupted

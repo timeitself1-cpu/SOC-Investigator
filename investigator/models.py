@@ -234,6 +234,12 @@ class ToolCall(Strict):
     outcome: Literal["complete", "empty", "truncated", "partial", "failed", "rejected", "duplicate"] | None = None
     started_at: datetime = Field(default_factory=utcnow)
     duration_ms: float = 0.0
+    # Application-resolved scope (host, process_guid, window) after defaults and
+    # clamping. Collection requirements are checked against this, never against
+    # the model's arguments or prose.
+    target: dict[str, Any] | None = None
+    partial_reason: Literal["ancestry_outside_window", "target_not_found"] | None = None
+    injection_suspected: bool = False  # instruction-like text in a non-evidence result (host context)
 
 
 class LLMExchange(Strict):
@@ -261,6 +267,12 @@ class LLMExchange(Strict):
     evidence_omitted: int = 0
     compaction_level: int = 0
     context_overflow_suspected: bool = False
+    # Conservative pre-flight estimate (see compaction.estimate_tokens) and the
+    # token room the prompt was allowed (num_ctx - num_predict - overhead).
+    estimated_prompt_tokens: int | None = None
+    prompt_token_limit: int | None = None
+    blobs_compacted: int = 0       # encoded/high-entropy runs replaced by a bounded description
+    evidence_summarized: int = 0   # items shown as one-line summaries without attributes
 
 
 class ActivityEvent(Strict):
@@ -305,6 +317,18 @@ class CoverageItem(Strict):
     detail: str | None = None
 
 
+class CollectionRequirement(Strict):
+    """A collection step that must have succeeded before benign closure is admissible.
+
+    Evaluated by application code from the resolved tool-call records.
+    """
+
+    name: Literal["process_tree", "network_activity", "host_context", "model_visibility"]
+    satisfied: bool
+    reason: str
+    call_ids: list[str] = Field(default_factory=list)
+
+
 class CollectionCoverage(Strict):
     """What was queried, what failed or was truncated, and what remains unknown."""
 
@@ -320,6 +344,7 @@ class CollectionCoverage(Strict):
     backend_caveats: list[str] = Field(default_factory=list)
     unknowns: list[str] = Field(default_factory=list)
     complete: bool = True
+    requirements: list[CollectionRequirement] = Field(default_factory=list)
 
 
 class ObservedFact(Strict):

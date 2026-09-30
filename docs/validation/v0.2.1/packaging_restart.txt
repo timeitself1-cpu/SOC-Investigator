@@ -1,0 +1,26 @@
+# pip wheel --no-deps -w dist .
+soc_investigator-0.2.1-py3-none-any.whl
+150 files; compaction.py: True ; benchmark cases: 22
+# fresh venv, pinned deps, install wheel
+Name: soc-investigator
+Version: 0.2.1
+ERROR: Pipe to stdout was broken
+# from unrelated dir /tmp/claude-0/-home-user-SOC-Investigator/f1031a31-b09f-5938-8da7-5c57754a5c08/scratchpad/away21 (XDG_DATA_HOME=/tmp/claude-0/-home-user-SOC-Investigator/f1031a31-b09f-5938-8da7-5c57754a5c08/scratchpad/xdg21)
+INC-001    high      FIN-WKS-014      PowerShell with encoded & hidden window arguments
+INC-002    critical  HR-WKS-002       Possible LSASS memory access (credential dumping)
+Evaluation: 5/5 passed  (pass_rate=1.0, mean_recall=1.0, invalid_refs=0, forbidden_claims=0)
+Cases: 22 (malicious 9, benign 7, ambiguous 6)
+benchmark rc=0
+installed version 0.2.1 /tmp/claude-0/-home-user-SOC-Investigator/f1031a31-b09f-5938-8da7-5c57754a5c08/scratchpad/wv21/lib/python3.12/site-packages/investigator/__init__.py
+# process 1 pid=10858: {"status":"ok","llm":"mock","backend":"fixture","model":"mock-analyst","max_steps":12}
+run-45215a98a31e4eae929866ca8ecce51b INC-005 benign completed [('process_tree', True), ('network_activity', True), ('host_context', True), ('model_visibility', True)]
+run-fdbfdcdaadd74d1ebd9247d0fe2549c2 INC-001 likely_malicious completed [('process_tree', True), ('network_activity', True), ('host_context', True), ('model_visibility', True)]
+foreign Origin POST: 403  foreign Host: 400
+[1]+  Terminated              nohup $S/wv21/bin/investigator serve > $S/srv21a.log 2>&1
+process 1 exited after SIGTERM
+# process 2 pid=10891 (new process; logs show 1 start)
+run-45215a98a31e4eae929866ca8ecce51b: in /history=1 report=200 md=200 api=recovered True completed completed
+run-fdbfdcdaadd74d1ebd9247d0fe2549c2: in /history=1 report=200 md=200 api=recovered True completed completed
+[1]+  Terminated              nohup $S/wv21/bin/investigator serve > $S/srv21b.log 2>&1
+process 2 exited after SIGTERM
+v0.2.0 report loads under v0.2.1 schema: INV-41c0cb46ac likely_malicious requirements: []

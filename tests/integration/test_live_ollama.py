@@ -47,7 +47,7 @@ def test_timeout_is_classified(ollama_settings):
 def test_small_context_budget_is_respected_and_accounted(ollama_settings):
     """With a deliberately small num_ctx the harness must compact prompts itself;
     Ollama's reported prompt tokens must not hit the context ceiling."""
-    s = ollama_settings.model_copy(update={"ollama_num_ctx": 4096, "ollama_num_predict": 768, "max_steps": 3})
+    s = ollama_settings.model_copy(update={"ollama_num_ctx": 8192, "ollama_num_predict": 1024, "max_steps": 3})
     agent, backend = build_agent(s)
     report = agent.investigate(backend.get_alert("INC-004"))
     for x in report.trace.llm_exchanges:

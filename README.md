@@ -262,7 +262,7 @@ python -m investigator --llm mock benchmark                 # deterministic pipe
 python -m investigator --llm ollama benchmark --out bench.json   # your local model
 ```
 
-18 cases (malicious / benign / ambiguous) designed around failure modes the demo
+22 cases (malicious / benign / ambiguous; 4 added in v0.2.1) designed around failure modes the demo
 fixtures never exercised: masquerading management agents, prompt injection,
 cross-host and cross-process coincidences, reordered records, missing trigger
 records, legitimate admin tools and noise-driven truncation. Ground truth was
@@ -270,8 +270,14 @@ committed before the system was run on it; see
 `investigator/benchmarks/independent/DESIGN.md`. Metrics are reported separately:
 false positives/negatives at two thresholds, benign-cleared rate, forbidden verdicts,
 retained vs. proposed-then-rejected claims, evidence recall (retrieved and cited),
-and operational failures. The mock-model results measure the pipeline and guards,
-not language-model judgement.
+and operational failures. The output compares the agent with a trivial
+always-`suspicious` classifier (which scores 21/22 "acceptable verdicts", so that
+number alone shows nothing) and reports benign TP/FP, escalation TP/FN,
+insufficient-evidence outcomes, coverage requirements met, context-overflow and
+incomplete reports. `--adversary benign-after-investigation|benign-immediately`
+swaps in an evaluation-only model that always proposes benign, to measure the
+verdict gates (exit code 2 if it closes any non-benign case). The mock-model results
+measure the pipeline and guards, not language-model judgement.
 
 ---
 
@@ -306,13 +312,23 @@ Read-only is enforced **architecturally**, not by prompting. See
 - Telemetry is treated as **untrusted data**: it is sanitized, screened for
   prompt-injection, clearly delimited in prompts, and never followed as instructions.
 - Prompts are kept inside the model context budget by recorded compaction (never
-  silent server-side truncation); each model exchange records prompt/response
-  SHA-256, sizes, omitted-evidence counts and any audit clipping.
+  silent server-side truncation). Long base64/hex/high-entropy runs are replaced in
+  prompts by bounded descriptions (type, length, SHA-256 prefix, head/tail); the
+  evidence store keeps the full value. Token use is estimated at ≤ 2 characters per
+  token; a suspected overflow marks the investigation incomplete. Each model
+  exchange records prompt/response SHA-256, sizes, estimated tokens, omitted and
+  summarized evidence counts and any audit clipping.
 - Backend and model failures are classified (`timeout`, `tls`, `auth`, `permission`,
   `index_missing`, `mapping`, …) and never propagate raw response text.
-- A benign verdict requires administrative context on the alerted process itself
-  (management agent **by install path**, not name), complete collection, and no
-  contradicting or instruction-like telemetry.
+- A benign verdict must be **earned** (v0.2.1). Application code checks four
+  collection requirements from the resolved tool-call records — the alerted
+  process tree (ancestry and all descendants), host-wide network/DNS activity
+  covering ±15 min of the alert, trustworthy asset context, and an assessment
+  prompt that showed every retrieved record in full — plus administrative context
+  on the alerted process itself (management agent **by install path**, not name),
+  no contradicting indicators anywhere in the process tree or host, and no
+  instruction-like telemetry, alert fields or asset metadata. Any failure yields
+  `insufficient_evidence`, never a guess.
 - Run history is journaled to disk; runs interrupted by a restart are recorded as such.
   Telemetry and model output can contain sensitive data; protect `reports/` and exports.
 
@@ -325,11 +341,14 @@ Read-only is enforced **architecturally**, not by prompting. See
 - Fixtures are representative but small; they are not a threat-detection benchmark.
 - The **Wazuh backend and the Ollama client are not live-verified** (see VALIDATION.md);
   opt-in live tests and `diagnose` are provided for your lab.
-- The prompt budget assumes ~3 characters per token; the live Ollama test measures
-  the real ratio for your model. JSON-schema `format` needs Ollama ≥ 0.5 (set
-  `SOCI_OLLAMA_STRUCTURED_OUTPUT=false` to fall back to `format=json`).
+- The prompt budget assumes at most 2 characters per token (measured 2.45-3.2 for
+  compacted prompts with the Qwen2.5 tokenizer). Use `SOCI_OLLAMA_NUM_CTX` ≥ 8192;
+  smaller contexts cannot hold a useful prompt at that ratio. JSON-schema `format`
+  needs Ollama ≥ 0.5 (set `SOCI_OLLAMA_STRUCTURED_OUTPUT=false` to fall back to
+  `format=json`).
 - Cancellation is cooperative: a model or backend request already in flight finishes
-  (bounded by its own timeout) before the run stops.
+  (bounded by its own timeout); the run then ends as `cancelled`, including when the
+  request was the final assessment.
 - Confidence is model-reported and uncalibrated.
 - Findings are only as good as the telemetry retrieved; absence of evidence is not
   evidence of absence, and the agent says so in each report's limitations.
@@ -341,7 +360,6 @@ Read-only is enforced **architecturally**, not by prompting. See
 - Measure the benchmark with real local models; grow the independent suite with
   third-party-authored cases.
 - Additional backends (Elastic/OpenSearch-generic, Splunk) behind the same protocol.
-- Richer process-tree reconstruction (full descendant graph, not just direct children).
 - Per-tenant asset/criticality enrichment and suppression lists.
 - Optional signed, append-only audit log export.
 

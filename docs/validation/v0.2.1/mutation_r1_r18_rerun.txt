@@ -1,0 +1,26 @@
+R1  drop '..' traversal check => 1 failed, 120 passed, 15 deselected, 1 warning in 5.27s
+R1  accept any install dir (name only) => 1 failed, 37 passed, 15 deselected, 1 warning in 2.30s
+R1  masquerade not a tree contradiction => 277 passed, 4 skipped, 15 deselected, 1 warning in 14.51s
+R1b admin context anywhere on host => 1 failed, 210 passed, 4 skipped, 15 deselected, 1 warning in 9.97s
+R1  benign ignores injection flag => 1 failed, 151 passed, 4 skipped, 15 deselected, 1 warning in 6.89s
+R2  no compaction (budget ignored) => 1 failed, 135 passed, 15 deselected, 1 warning in 5.25s
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+AssertionError: pattern not found in /tmp/claude-0/-home-user-SOC-Investigator/f1031a31-b09f-5938-8da7-5c57754a5c08/scratchpad/mut4/investigator/agent.py: 'if final_exchange is not None and final_exchange.evidence_omitted:'
+R2  omitted evidence not disclosed: MUTATION NOT APPLIED
+R3  audit clips at 6000 again => 1 failed, 215 passed, 4 skipped, 15 deselected, 1 warning in 11.98s
+R4  host context dropped from prompt => 1 failed, 150 passed, 4 skipped, 15 deselected, 1 warning in 7.64s
+R5  missing parent => truncated again => 1 failed, 15 deselected, 1 warning in 1.56s
+R6  shards.total==0 not an error => 1 failed, 217 passed, 4 skipped, 15 deselected, 1 warning in 11.51s
+R7  no token refresh on 401 => 1 failed, 219 passed, 4 skipped, 15 deselected, 1 warning in 12.07s
+R8  raw exception text in tool error => 1 failed, 221 passed, 4 skipped, 15 deselected, 1 warning in 11.24s
+R9  malformed alert breaks queue => 1 failed, 220 passed, 4 skipped, 15 deselected, 1 warning in 11.46s
+R10 duplicate detection off => 1 failed, 4 passed, 15 deselected, 1 warning in 1.62s
+R10 unproductive-stop off => 1 failed, 4 passed, 15 deselected, 1 warning in 1.71s
+R11 trigger marker from telemetry => 1 failed, 98 passed, 15 deselected, 1 warning in 4.76s
+R12 markdown '=' not escaped => 277 passed, 4 skipped, 15 deselected, 1 warning in 12.93s
+R16 done_reason=length accepted => 1 failed, 185 passed, 4 skipped, 15 deselected, 1 warning in 11.80s
+R17 rejected => incomplete again => 1 failed, 187 passed, 4 skipped, 15 deselected, 1 warning in 11.37s
+R18 publish before journal => 1 failed, 190 passed, 4 skipped, 15 deselected, 1 warning in 10.07s
+Gate benign allowed when incomplete => 1 failed, 119 passed, 15 deselected, 1 warning in 4.70s
+R2  omitted evidence not disclosed (pattern moved in v0.2.1; applied to 'if final_exchange.evidence_omitted:') => 2 failed, 275 passed, 4 skipped, 15 deselected, 1 warning in 13.43s

@@ -21,7 +21,11 @@ playwright = pytest.importorskip("playwright.sync_api")
 from investigator.app import create_app  # noqa: E402
 from investigator.config import load_settings  # noqa: E402
 
-SHOTS = Path(__file__).resolve().parent.parent / "docs" / "screenshots"
+# Tracked screenshots are only rewritten on request (SOCI_UPDATE_SCREENSHOTS=1);
+# otherwise a test run must not modify committed files.
+SHOTS = (Path(__file__).resolve().parent.parent / "docs" / "screenshots"
+         if os.environ.get("SOCI_UPDATE_SCREENSHOTS") == "1"
+         else Path(os.environ.get("TMPDIR", "/tmp")) / "soci-browser-shots")
 
 
 def _chromium_path() -> str | None:

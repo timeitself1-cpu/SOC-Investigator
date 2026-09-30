@@ -189,3 +189,19 @@ safe message. Response bodies are inspected only for error-type tokens (e.g.
 `evaluation/evaluator.py` scores the five demo fixtures. `evaluation/benchmark.py`
 runs the independent suite with per-case isolated backends and reports detection,
 claims, evidence and operational metrics separately.
+
+## v0.2.1: earned benign, descendants, context safety
+
+* `report.evaluate_requirements` derives four collection requirements
+  (`process_tree`, `network_activity`, `host_context`, `model_visibility`) from each
+  `ToolCall.target` (the application-resolved host / process / window) and the final
+  exchange's visibility metadata. Unmet requirements withhold `benign`; they are
+  shown under "Required for benign closure" in the report and exports.
+* `tools.get_process_tree` walks descendants breadth-first (bounded);
+  `report.process_tree_keys` computes the alerted tree from retrieved parent links
+  (fixed point, cycle-safe, same host) for the benign contradiction check.
+* `compaction.py` rewrites prompt strings only (evidence and raw records are never
+  modified) and provides the conservative token estimate used for the budget and
+  the pre-flight overflow check.
+* `tools._centered_search` issues one descending query before and one ascending
+  query at/after the anchor (`EventQuery.order`) and balances the result.

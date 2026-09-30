@@ -1,6 +1,6 @@
 [project]
 name = "soc-investigator"
-version = "0.2.0"
+version = "0.2.1"
 description = "Local-first AI SOC Investigation Agent — alert to evidence-grounded, auditable investigation."
 readme = "README.md"
 requires-python = ">=3.12"

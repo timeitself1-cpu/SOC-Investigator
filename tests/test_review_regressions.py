@@ -205,7 +205,7 @@ def test_r3_state_is_compacted_to_budget_and_keeps_trigger():
 
 def test_r3_prompts_sent_to_model_never_exceed_budget_and_omission_is_disclosed():
     be = _big_backend(60)
-    s = settings(ollama_num_ctx=4096, ollama_num_predict=512, max_evidence=150)
+    s = settings(ollama_num_ctx=8192, ollama_num_predict=1024, max_evidence=150)
     agent = InvestigationAgent(be, MockInvestigatorModel(), s)
     report = agent.investigate(be.alert)
     budget = agent.prompt_budget_chars()

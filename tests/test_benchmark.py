@@ -25,7 +25,7 @@ def result():
 
 def test_suite_is_packaged_and_complete():
     cases = sorted(p.name for p in SUITE.iterdir() if (p / "truth.json").is_file())
-    assert len(cases) == 18 and DEFAULT_SUITE == SUITE
+    assert len(cases) == 22 and DEFAULT_SUITE == SUITE
     labels = {json.loads((SUITE / c / "truth.json").read_text())["label"] for c in cases}
     assert labels == {"malicious", "benign", "ambiguous"}
     assert (SUITE / "DESIGN.md").is_file()
@@ -85,4 +85,4 @@ def test_benchmark_cli_exit_code_reflects_harness_only(tmp_path, capsys):
     from investigator.main import main
     out = tmp_path / "b.json"
     assert main(["--llm", "mock", "benchmark", "--out", str(out)]) == 0
-    assert json.loads(out.read_text())["metrics"]["cases"] == 18
+    assert json.loads(out.read_text())["metrics"]["cases"] == 22

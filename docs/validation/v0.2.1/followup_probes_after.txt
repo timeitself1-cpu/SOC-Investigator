@@ -1,0 +1,22 @@
+### probe_benign.py
+P1 model finishes immediately (no tree, no network query) and drafts benign
+  -> verdict=insufficient_evidence conf=0.30 status=completed valid=False evidence=1 indicators=['encoded_command', 'management_agent_parent', 'powershell']
+  unknowns=['Network/DNS activity was not queried.', 'Process ancestry of the alerted process was not reconstructed.', 'Asset/role context for the host was not retrieved.']
+  issues=['Benign verdict withheld: required collection not met (process tree): the process tree of the alerted process was never successfully queried; required collection not met (network activity): host network activity was never successfully queried; required collection not met (host context): asset context for the alerted host was never successfully retrieved.']
+P2 model reconstructs the tree and queries host network; grandchild beacons to a public IP
+  -> verdict=insufficient_evidence conf=0.30 status=completed valid=False evidence=4 indicators=['encoded_command', 'external_destination', 'management_agent_parent', 'powershell']
+  unknowns=['Process-creation record for the parent of powershell.exe (C:\\Program Files\\Microsoft Configuration Manager\\bin\\x64\\AgentExecutor.exe) is not in the queried telemetry window; earlier ancestry is unknown.', 'No asset/role context is available for WS-9.']
+  issues=['Benign verdict withheld: contradicting indicators in the alerted process tree or host: external_destination; required collection not met (host context): no asset context exists for the alerted host.']
+P3 mock analyst on the same telemetry -> suspicious 0.65 completed calls: ['get_event', 'get_host_context', 'search_events', 'get_process_tree', 'get_process_details', 'get_network_activity', 'get_related_events'] evidence: 4 grandchild beacon retrieved: True
+### probe_gate.py
+benign draft + failed network query -> insufficient_evidence incomplete 1 failed
+'..' path -> unexpected_path
+### probe_hostctx.py
+injection text in host context -> insufficient_evidence completed valid False | gap recorded: True | any evidence flagged: False
+### probe_window.py
+get_related_events ±15min, 40 earlier noise events: truncated retrieved 25 | latest retrieved: 11:00:05 | trigger at 11:00:00 | post-trigger C2 connection retrieved: True
+wazuh sort: "sort": [{"timestamp": {"order": q.order}}],
+ 
+### probe_cancel.py
+cancel accepted during final-report call: True
+-> run status: cancelled | report status: cancelled | verdict: insufficient_evidence | cancel_requested: True

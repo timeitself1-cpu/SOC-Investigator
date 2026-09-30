@@ -110,6 +110,10 @@
     · hosts: <span class="mono">{{ c.hosts_queried|join(", ") or "none" }}</span>
     · categories: {{ c.categories_queried|join(", ") or "none" }}
   </div>
+  {% if c.requirements %}
+  <h3 class="small">Required for benign closure</h3>
+  <ul class="small">{% for q in c.requirements %}<li>{{ "✓" if q.satisfied else "✗" }} {{ q.name|replace("_", " ") }} — {{ q.reason }}</li>{% endfor %}</ul>
+  {% endif %}
   {% if c.unknowns %}
   <h3 class="small">Known unknowns</h3>
   <ul class="small">{% for u in c.unknowns %}<li>{{ u }}</li>{% endfor %}</ul>

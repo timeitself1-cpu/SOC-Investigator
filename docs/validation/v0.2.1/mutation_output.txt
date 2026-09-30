@@ -1,0 +1,35 @@
+== Previously untested guards (REVIEW_FOLLOWUP F6) ==
+M1 remove 'benign withheld when collection incomplete' status gate
+    dedicated [tests/test_integrity_v021.py::test_status_gate_alone_withholds_benign_when_any_collection_failed] => 1 failed in 0.38s
+    full suite => 1 failed, 276 passed, 4 skipped, 15 deselected, 1 warning in 12.54s
+M2 remove '..' traversal check in management_parent_status
+    dedicated [tests/test_integrity_v021.py::test_dotdot_management_agent_path_is_a_masquerade] => 1 failed in 0.38s
+    full suite => 2 failed, 275 passed, 4 skipped, 15 deselected, 1 warning in 13.46s
+== New v0.2.1 guards ==
+M3 benign ignores collection requirements
+    dedicated [tests/test_integrity_v021.py::test_A_immediate_benign_without_investigation_is_rejected] => 1 failed in 0.40s
+    full suite => 8 failed, 269 passed, 4 skipped, 15 deselected, 1 warning in 14.27s
+M4 descendant closure limited to the trigger (no descendants)
+    dedicated [tests/test_integrity_v021.py::test_B_public_connection_by_any_descendant_blocks_benign] => 3 failed in 0.52s
+    full suite => 5 failed, 272 passed, 4 skipped, 15 deselected, 1 warning in 13.27s
+M5 host-context injection does not affect the requirement
+    dedicated [tests/test_integrity_v021.py::test_E_exact_followup_bypass_host_context_injection_blocks_benign] => 1 failed in 0.41s
+    full suite => 1 failed, 276 passed, 4 skipped, 15 deselected, 1 warning in 12.62s
+M6 server-reported overflow ignored
+    dedicated [tests/test_integrity_v021.py::test_D_server_reported_context_overflow_marks_incomplete_and_blocks_benign] => 1 failed in 0.40s
+    full suite => 1 failed, 276 passed, 4 skipped, 15 deselected, 1 warning in 12.43s
+M7 blob compaction disabled
+    dedicated [tests/test_integrity_v021.py::test_D_encoded_floods_stay_within_the_conservative_token_limit] => 4 failed in 1.58s
+    full suite => 8 failed, 269 passed, 4 skipped, 15 deselected, 1 warning in 13.62s
+M8 retrieval reverts to oldest-first
+    dedicated [tests/test_integrity_v021.py::test_F_post_alert_connection_survives_pre_alert_noise] => 4 failed in 0.48s
+    full suite => 5 failed, 272 passed, 4 skipped, 15 deselected, 1 warning in 13.38s
+M9 cancellation during assessment ignored
+    dedicated [tests/test_integrity_v021.py::test_cancellation_accepted_during_final_report_ends_cancelled] => 1 failed in 0.46s
+    full suite => 1 failed, 276 passed, 4 skipped, 15 deselected, 1 warning in 14.35s
+M10 chars/token cap removed (3.0 accepted)
+    dedicated [tests/test_integrity_v021.py::test_chars_per_token_is_capped_at_two] => 1 failed in 0.40s
+    full suite => 1 failed, 276 passed, 4 skipped, 15 deselected, 1 warning in 12.94s
+M11 summarized evidence not treated as a visibility issue
+    dedicated [tests/test_integrity_v021.py::test_D_evidence_shown_only_as_summaries_blocks_benign_without_omission] => 1 failed in 0.41s
+    full suite => 1 failed, 276 passed, 4 skipped, 15 deselected, 1 warning in 14.42s
