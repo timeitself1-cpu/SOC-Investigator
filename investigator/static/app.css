@@ -99,3 +99,6 @@ details.evidence[hidden]{display:none}
 .run-error,.run-interrupted{background:rgba(248,81,73,.14);color:var(--bad)}
 .run-cancelled{background:rgba(210,153,34,.14);color:var(--warn)}
 h3.small{margin:12px 0 4px;font-size:13px}
+.badge{white-space:nowrap}
+.facts li,.kv span,.timeline li,details.evidence summary,td{overflow-wrap:anywhere;word-break:break-word}
+td.mono{white-space:nowrap;overflow-wrap:normal;word-break:normal}

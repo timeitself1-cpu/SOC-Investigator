@@ -49,3 +49,20 @@ test('expired run ends polling and displays a recoverable error', async () => {
   assert.equal(nodes.spin.style.display, 'none');
   assert.match(nodes.errmsg.textContent, /no longer available/);
 });
+
+test('cancelled run shows completion note and hides the cancel control', async () => {
+  const nodes = await render({ activity: [], next_index: 0, status: 'cancelled', report_status: 'cancelled' });
+  assert.equal(nodes.done.style.display, 'block');
+  assert.match(nodes.reportstatus.textContent, /cancelled/);
+});
+
+test('interrupted run (server restarted mid-run) is shown as a recoverable failure', async () => {
+  const nodes = await render({ activity: [], next_index: 0, status: 'interrupted', error: null });
+  assert.equal(nodes.failed.style.display, 'block');
+  assert.match(nodes.errmsg.textContent, /stopped before this investigation finished/);
+});
+
+test('incomplete assessment points the analyst at collection coverage', async () => {
+  const nodes = await render({ activity: [], next_index: 0, status: 'completed', report_status: 'incomplete' });
+  assert.match(nodes.reportstatus.textContent, /Collection coverage/);
+});

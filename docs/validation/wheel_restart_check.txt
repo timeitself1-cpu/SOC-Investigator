@@ -1,0 +1,9 @@
+run=run-bf6b2768a9cc4dc4b4e9e1912ca9b2cf
+before restart: completed completed
+server 1 exited (SIGTERM)
+journal files: 3
+history mentions run: 1  restored tags: 4
+report after restart: 200
+cross-origin POST: 403
+foreign Host header: 400
+server 2 exited
